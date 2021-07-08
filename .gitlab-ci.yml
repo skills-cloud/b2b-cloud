@@ -1,0 +1,53 @@
+stages:
+  - build
+  - deploy
+  - stop
+
+variables:
+  GIT_DEPTH: "1"
+  PROJECT_PREFIX: api
+
+  
+build_branch: &build-branch
+  stage: build
+  allow_failure: false
+  script:
+    - export TAG=$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+    - cd docker
+    - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-review.yml build
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-review.yml push
+  only:
+    - test
+    - release
+  tags:
+    - test
+
+
+deploy_branch: &deploy
+  stage: deploy
+  script:
+    - cd docker
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-review.yml pull || exit 1
+    - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-review.yml up -d
+  only:
+    - test
+  tags:
+    - test
+
+
+stop_branch:
+  stage: stop
+  script:
+    - cd docker
+    - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-review.yml down
+    - rm -rf /work/data/${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG}/
+    - docker system prune -f
+  when: manual
+  only:
+    - branches
+  except:
+    - release
+  tags:
+    - review

@@ -1,0 +1,14 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block blockbots %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/select2-adminlte.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/admin.css' %}">
+    <script src="{% static 'admin/jquery.min.js' %}"></script>
+    <script src="{% static 'admin/select2.full.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'django_select2/django_select2.js' %}"></script>
+    <script src="{% static 'admin/admin.js' %}"></script>
+{% endblock %}
+
