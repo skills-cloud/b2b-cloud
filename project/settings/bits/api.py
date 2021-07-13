@@ -3,7 +3,7 @@ REST_FRAMEWORK = {
         'api.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'api.permissions.AllowAny',
+        'api.permissions.IsAuthenticated',
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',

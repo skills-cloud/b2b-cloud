@@ -1,6 +1,12 @@
 $(function () {
-    $('select').select2({
-        theme: "dark-adminlte"
-    });
-    // $('.filter-select2').select2();
+    // $('select').select2({});
 });
+
+
+(function (_$) {
+    _$(document).on('formset:added', function (event, $row, formsetName) {
+    });
+
+    _$(document).on('formset:removed', function (event, $row, formsetName) {
+    });
+})(django.jQuery);

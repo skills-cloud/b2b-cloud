@@ -17,15 +17,17 @@ LOGGING = {
         }
     },
     'handlers': {
-        'console': {
-            'level': 'DEBUG',
+        'console_colored': {
             'class': 'colorlog.StreamHandler',
             'formatter': 'colored',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         '': {
-            'handlers': ['console'],
+            'handlers': ['console_colored'],
             'level': 'DEBUG',
             'propagate': False,
         },

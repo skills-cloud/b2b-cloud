@@ -33,6 +33,7 @@ INSTALLED_APPS = (
             'django_json_widget',
             'django_filters',
             'django_pickling',
+            'admin_auto_filters',
             'rest_framework',
             'drf_yasg',
             'cacheops',
@@ -40,6 +41,8 @@ INSTALLED_APPS = (
             'rangefilter',
             # 'corsheaders',
             'mptt',
+            'adminsortable2',
+            'reversion',
         ]
         + ADVANCED_APPS
         + PROJECT_APPS
@@ -54,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'reversion.middleware.RevisionMiddleware',
     'project.contrib.middleware.TimezoneMiddleware',
 ]
 

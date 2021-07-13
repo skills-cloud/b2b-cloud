@@ -227,12 +227,34 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-admin-autocomplete-filter"
+version = "0.7"
+description = "A simple Django app to render list filters in django admin using autocomplete widget"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+django = ">=2.0"
+
+[[package]]
 name = "django-admin-rangefilter"
 version = "0.8.1"
 description = "django-admin-rangefilter app, add the filter by a custom date range on the admin UI."
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "django-admin-sortable2"
+version = "1.0"
+description = "Generic drag-and-drop sorting for the List, the Stacked- and the Tabular-Inlines Views in the Django Admin"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Django = ">=1.8,<3.3"
 
 [[package]]
 name = "django-appconf"
@@ -400,6 +422,17 @@ python-versions = "*"
 
 [package.dependencies]
 redis = ">=2.4.10"
+
+[[package]]
+name = "django-reversion"
+version = "4.0.0"
+description = "An extension to the Django web framework that provides version control for model instances."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+django = ">=2.0"
 
 [[package]]
 name = "django-select2"
@@ -848,7 +881,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "d87ae507f756662e3d0c4486bb3ff9e4e5a0f5864b58d51966e333a643ce98de"
+content-hash = "ec1eb549fe1a9e0701160e02c0ba908fa6ed7e63b23fa30b64a6945317a7205c"
 
 [metadata.files]
 aiotask-context = [
@@ -922,9 +955,17 @@ django = [
     {file = "Django-3.2.5-py3-none-any.whl", hash = "sha256:c58b5f19c5ae0afe6d75cbdd7df561e6eb929339985dbbda2565e1cabb19a62e"},
     {file = "Django-3.2.5.tar.gz", hash = "sha256:3da05fea54fdec2315b54a563d5b59f3b4e2b1e69c3a5841dda35019c01855cd"},
 ]
+django-admin-autocomplete-filter = [
+    {file = "django-admin-autocomplete-filter-0.7.tar.gz", hash = "sha256:20246758625f0aabab26c54e0972c0db5fd4742ff9eb89621cb460d4f2021c82"},
+    {file = "django_admin_autocomplete_filter-0.7-py3-none-any.whl", hash = "sha256:430034ba93e8ee7ef601dc67a5885b4fec39642939da12933841d415cfc3a758"},
+]
 django-admin-rangefilter = [
     {file = "django-admin-rangefilter-0.8.1.tar.gz", hash = "sha256:fa838d955a95e60cc3d0ebc3cbdfa4527b1a0a78664c0bb180403ff4d722c835"},
     {file = "django_admin_rangefilter-0.8.1-py2.py3-none-any.whl", hash = "sha256:2770dca58960ee6aa9f56b031aa427876b7d7eb904f8908b7aefbb934df0f2f7"},
+]
+django-admin-sortable2 = [
+    {file = "django-admin-sortable2-1.0.tar.gz", hash = "sha256:e62624f5c8ea66d8564205abf2e4a46d862ee62f87103571004623b51d0e4ced"},
+    {file = "django_admin_sortable2-1.0-py3-none-any.whl", hash = "sha256:0a90bc3210d215fdb0696705c0f2705f8417d6f07d47cc24de71ee57061508e9"},
 ]
 django-appconf = [
     {file = "django-appconf-1.0.4.tar.gz", hash = "sha256:be58deb54a43d77d2e1621fe59f787681376d3cd0b8bd8e4758ef6c3a6453380"},
@@ -982,6 +1023,10 @@ django-redis = [
 django-redis-sessions = [
     {file = "django-redis-sessions-0.6.2.tar.gz", hash = "sha256:ba33ecca198f28ddc32d9f03742dc8dfc34c1857b789c75ea8425d6d7d7376be"},
     {file = "django_redis_sessions-0.6.2-py3-none-any.whl", hash = "sha256:13b645a4fad4352c111057e44d0987a3163116b0a2f8b141c7d8abe0cab446c9"},
+]
+django-reversion = [
+    {file = "django-reversion-4.0.0.tar.gz", hash = "sha256:ad6d714b4b9b824e22b88d47201cc0f74b5c4294c8d4e1f8d7ac7c3631ef3188"},
+    {file = "django_reversion-4.0.0-py3-none-any.whl", hash = "sha256:f059c654e38c0dd8dccd7f0990aa2f6d9ad22dab55c5e095f9596aeda8079dcd"},
 ]
 django-select2 = [
     {file = "django-select2-7.7.1.tar.gz", hash = "sha256:dd091342e99436818b3fa98783ae6c24fb2a0cbc37ebd3faa0aef68422b6e416"},

@@ -1,408 +1,507 @@
 [
-    {
-        "model": "dictionary.country",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T14:47:17.978Z",
-            "updated_at": "2021-07-08T14:47:17.978Z",
-            "name": "Россия"
-        }
-    },
-    {
-        "model": "dictionary.country",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T14:47:22.627Z",
-            "updated_at": "2021-07-08T14:47:22.627Z",
-            "name": "Украина"
-        }
-    },
-    {
-        "model": "dictionary.country",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T14:47:39.503Z",
-            "updated_at": "2021-07-08T14:47:39.503Z",
-            "name": "Беларусь"
-        }
-    },
-    {
-        "model": "dictionary.city",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T14:48:59.560Z",
-            "updated_at": "2021-07-08T14:48:59.560Z",
-            "name": "Москва",
-            "country": 1
-        }
-    },
-    {
-        "model": "dictionary.city",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T14:51:43.680Z",
-            "updated_at": "2021-07-08T14:51:43.680Z",
-            "name": "Санкт-Петербург",
-            "country": 1
-        }
-    },
-    {
-        "model": "dictionary.city",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T14:51:52.816Z",
-            "updated_at": "2021-07-08T14:51:52.816Z",
-            "name": "Киев",
-            "country": 2
-        }
-    },
-    {
-        "model": "dictionary.city",
-        "pk": 4,
-        "fields": {
-            "created_at": "2021-07-08T14:52:01.434Z",
-            "updated_at": "2021-07-08T14:52:01.434Z",
-            "name": "Минск",
-            "country": 3
-        }
-    },
-    {
-        "model": "dictionary.citizenship",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T14:55:15.825Z",
-            "updated_at": "2021-07-08T14:55:15.825Z",
-            "name": "Россия"
-        }
-    },
-    {
-        "model": "dictionary.citizenship",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T14:55:21.931Z",
-            "updated_at": "2021-07-08T14:55:21.931Z",
-            "name": "Украина"
-        }
-    },
-    {
-        "model": "dictionary.contacttype",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T15:02:13.940Z",
-            "updated_at": "2021-07-08T15:02:13.941Z",
-            "name": "Телефон"
-        }
-    },
-    {
-        "model": "dictionary.contacttype",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T15:02:28.853Z",
-            "updated_at": "2021-07-08T15:02:28.853Z",
-            "name": "E-mail"
-        }
-    },
-    {
-        "model": "dictionary.contacttype",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T15:02:40.119Z",
-            "updated_at": "2021-07-08T15:02:40.119Z",
-            "name": "Skype"
-        }
-    },
-    {
-        "model": "dictionary.contacttype",
-        "pk": 4,
-        "fields": {
-            "created_at": "2021-07-08T15:02:49.974Z",
-            "updated_at": "2021-07-08T15:02:49.974Z",
-            "name": "Facebook"
-        }
-    },
-    {
-        "model": "dictionary.contacttype",
-        "pk": 5,
-        "fields": {
-            "created_at": "2021-07-08T15:03:04.921Z",
-            "updated_at": "2021-07-08T15:03:04.921Z",
-            "name": "GitHub"
-        }
-    },
-    {
-        "model": "dictionary.educationplace",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T15:05:03.199Z",
-            "updated_at": "2021-07-08T15:05:03.199Z",
-            "name": "МГУ",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationplace",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T15:05:27.317Z",
-            "updated_at": "2021-07-08T15:05:27.317Z",
-            "name": "Московская академия образования Натальи Нестеровой",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationplace",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T15:05:34.244Z",
-            "updated_at": "2021-07-08T15:05:34.244Z",
-            "name": "МИРЭА",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationspecialty",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T15:06:48.838Z",
-            "updated_at": "2021-07-08T15:06:48.838Z",
-            "name": "Авиастроение",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationspecialty",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T15:06:58.629Z",
-            "updated_at": "2021-07-08T15:06:58.629Z",
-            "name": "Агрономия",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationspecialty",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T15:07:11.383Z",
-            "updated_at": "2021-07-08T15:07:11.383Z",
-            "name": "Актерское искусство",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationspecialty",
-        "pk": 4,
-        "fields": {
-            "created_at": "2021-07-08T15:07:18.906Z",
-            "updated_at": "2021-07-08T15:07:18.906Z",
-            "name": "Музыковедение",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationspecialty",
-        "pk": 5,
-        "fields": {
-            "created_at": "2021-07-08T15:07:26.416Z",
-            "updated_at": "2021-07-08T15:07:26.416Z",
-            "name": "Ядерные реакторы и материалы",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationgraduate",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T15:08:05.146Z",
-            "updated_at": "2021-07-08T15:08:05.146Z",
-            "name": "Бакалавр",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationgraduate",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T15:08:12.120Z",
-            "updated_at": "2021-07-08T15:08:12.120Z",
-            "name": "Магистр",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationgraduate",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T15:08:17.943Z",
-            "updated_at": "2021-07-08T15:08:17.943Z",
-            "name": "Кандидат наук",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.educationgraduate",
-        "pk": 4,
-        "fields": {
-            "created_at": "2021-07-08T15:08:27.473Z",
-            "updated_at": "2021-07-08T15:08:27.473Z",
-            "name": "Доктор наук",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.position",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T15:31:45.065Z",
-            "updated_at": "2021-07-08T15:31:45.065Z",
-            "name": "Senior PHP developer",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.position",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T15:32:02.901Z",
-            "updated_at": "2021-07-08T15:32:02.901Z",
-            "name": "Senior Kobol developer",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.position",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T15:32:20.538Z",
-            "updated_at": "2021-07-08T15:32:20.538Z",
-            "name": "Senior R developer",
-            "description": ""
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T15:34:56.865Z",
-            "updated_at": "2021-07-08T15:35:32.566Z",
-            "name": "JavaScript",
-            "parent": 3,
-            "lft": 6,
-            "rght": 11,
-            "tree_id": 3,
-            "mptt_level": 1
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T15:35:03.188Z",
-            "updated_at": "2021-07-08T15:35:24.895Z",
-            "name": "Python",
-            "parent": 3,
-            "lft": 12,
-            "rght": 17,
-            "tree_id": 3,
-            "mptt_level": 1
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T15:35:14.902Z",
-            "updated_at": "2021-07-08T15:35:14.902Z",
-            "name": "Языки программирования",
-            "parent": null,
-            "lft": 1,
-            "rght": 18,
-            "tree_id": 3,
-            "mptt_level": 0
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 4,
-        "fields": {
-            "created_at": "2021-07-08T15:38:53.666Z",
-            "updated_at": "2021-07-08T15:38:53.667Z",
-            "name": "Python 2",
-            "parent": 2,
-            "lft": 13,
-            "rght": 14,
-            "tree_id": 3,
-            "mptt_level": 2
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 5,
-        "fields": {
-            "created_at": "2021-07-08T15:39:03.446Z",
-            "updated_at": "2021-07-08T15:39:03.446Z",
-            "name": "Python 3",
-            "parent": 2,
-            "lft": 15,
-            "rght": 16,
-            "tree_id": 3,
-            "mptt_level": 2
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 6,
-        "fields": {
-            "created_at": "2021-07-08T15:39:32.182Z",
-            "updated_at": "2021-07-08T15:39:32.182Z",
-            "name": "Node JS",
-            "parent": 1,
-            "lft": 7,
-            "rght": 8,
-            "tree_id": 3,
-            "mptt_level": 2
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 7,
-        "fields": {
-            "created_at": "2021-07-08T15:39:41.761Z",
-            "updated_at": "2021-07-08T15:39:41.761Z",
-            "name": "React JS",
-            "parent": 1,
-            "lft": 9,
-            "rght": 10,
-            "tree_id": 3,
-            "mptt_level": 2
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 8,
-        "fields": {
-            "created_at": "2021-07-08T15:39:49.283Z",
-            "updated_at": "2021-07-08T15:39:49.283Z",
-            "name": "CSS",
-            "parent": 3,
-            "lft": 2,
-            "rght": 3,
-            "tree_id": 3,
-            "mptt_level": 1
-        }
-    },
-    {
-        "model": "dictionary.competence",
-        "pk": 9,
-        "fields": {
-            "created_at": "2021-07-08T15:40:02.664Z",
-            "updated_at": "2021-07-08T15:40:02.664Z",
-            "name": "HTML",
-            "parent": 3,
-            "lft": 4,
-            "rght": 5,
-            "tree_id": 3,
-            "mptt_level": 1
-        }
+{
+    "model": "dictionary.typeofemployment",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-11T10:52:45.885Z",
+        "updated_at": "2021-07-11T10:52:45.885Z",
+        "name": "Офис / полная",
+        "sorting": 1
     }
+},
+{
+    "model": "dictionary.typeofemployment",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-11T10:52:54.067Z",
+        "updated_at": "2021-07-11T10:52:54.067Z",
+        "name": "Офис / частичная",
+        "sorting": 2
+    }
+},
+{
+    "model": "dictionary.typeofemployment",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-11T10:53:04.214Z",
+        "updated_at": "2021-07-11T10:53:04.214Z",
+        "name": "Удалёнка / полная",
+        "sorting": 3
+    }
+},
+{
+    "model": "dictionary.typeofemployment",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-11T10:53:16.491Z",
+        "updated_at": "2021-07-11T10:53:16.491Z",
+        "name": "Удалёнка / частичная",
+        "sorting": 4
+    }
+},
+{
+    "model": "dictionary.typeofemployment",
+    "pk": 5,
+    "fields": {
+        "created_at": "2021-07-11T10:53:33.134Z",
+        "updated_at": "2021-07-11T10:53:46.707Z",
+        "name": "Удалёнка + офис / полная",
+        "sorting": 5
+    }
+},
+{
+    "model": "dictionary.typeofemployment",
+    "pk": 6,
+    "fields": {
+        "created_at": "2021-07-11T10:53:58.663Z",
+        "updated_at": "2021-07-11T10:54:04.540Z",
+        "name": "Удалёнка + офис / частичная",
+        "sorting": 6
+    }
+},
+{
+    "model": "dictionary.country",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T14:47:17.978Z",
+        "updated_at": "2021-07-08T14:47:17.978Z",
+        "name": "Россия",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.country",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T14:47:22.627Z",
+        "updated_at": "2021-07-08T14:47:22.627Z",
+        "name": "Украина",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.country",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T14:47:39.503Z",
+        "updated_at": "2021-07-08T14:47:39.503Z",
+        "name": "Беларусь",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.country",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-11T13:18:57.123Z",
+        "updated_at": "2021-07-11T13:18:57.123Z",
+        "name": "Испания",
+        "sorting": 1
+    }
+},
+{
+    "model": "dictionary.city",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T14:48:59.560Z",
+        "updated_at": "2021-07-08T14:48:59.560Z",
+        "name": "Москва",
+        "sorting": 0,
+        "country": 1
+    }
+},
+{
+    "model": "dictionary.city",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T14:51:43.680Z",
+        "updated_at": "2021-07-08T14:51:43.680Z",
+        "name": "Санкт-Петербург",
+        "sorting": 0,
+        "country": 1
+    }
+},
+{
+    "model": "dictionary.city",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T14:51:52.816Z",
+        "updated_at": "2021-07-08T14:51:52.816Z",
+        "name": "Киев",
+        "sorting": 0,
+        "country": 2
+    }
+},
+{
+    "model": "dictionary.city",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-08T14:52:01.434Z",
+        "updated_at": "2021-07-08T14:52:01.434Z",
+        "name": "Минск",
+        "sorting": 0,
+        "country": 3
+    }
+},
+{
+    "model": "dictionary.citizenship",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T14:55:15.825Z",
+        "updated_at": "2021-07-08T14:55:15.825Z",
+        "name": "Россия",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.citizenship",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T14:55:21.931Z",
+        "updated_at": "2021-07-08T14:55:21.931Z",
+        "name": "Украина",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.contacttype",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T15:02:13.940Z",
+        "updated_at": "2021-07-08T15:02:13.941Z",
+        "name": "Телефон",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.contacttype",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T15:02:28.853Z",
+        "updated_at": "2021-07-08T15:02:28.853Z",
+        "name": "E-mail",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.contacttype",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T15:02:40.119Z",
+        "updated_at": "2021-07-08T15:02:40.119Z",
+        "name": "Skype",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.contacttype",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-08T15:02:49.974Z",
+        "updated_at": "2021-07-08T15:02:49.974Z",
+        "name": "Facebook",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.contacttype",
+    "pk": 5,
+    "fields": {
+        "created_at": "2021-07-08T15:03:04.921Z",
+        "updated_at": "2021-07-08T15:03:04.921Z",
+        "name": "GitHub",
+        "sorting": 0
+    }
+},
+{
+    "model": "dictionary.educationplace",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T15:05:03.199Z",
+        "updated_at": "2021-07-08T15:05:03.199Z",
+        "name": "МГУ",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationplace",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T15:05:27.317Z",
+        "updated_at": "2021-07-08T15:05:27.317Z",
+        "name": "Московская академия образования Натальи Нестеровой",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationplace",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T15:05:34.244Z",
+        "updated_at": "2021-07-08T15:05:34.244Z",
+        "name": "МИРЭА",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationspecialty",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T15:06:48.838Z",
+        "updated_at": "2021-07-08T15:06:48.838Z",
+        "name": "Авиастроение",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationspecialty",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T15:06:58.629Z",
+        "updated_at": "2021-07-08T15:06:58.629Z",
+        "name": "Агрономия",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationspecialty",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T15:07:11.383Z",
+        "updated_at": "2021-07-08T15:07:11.383Z",
+        "name": "Актерское искусство",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationspecialty",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-08T15:07:18.906Z",
+        "updated_at": "2021-07-08T15:07:18.906Z",
+        "name": "Музыковедение",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationspecialty",
+    "pk": 5,
+    "fields": {
+        "created_at": "2021-07-08T15:07:26.416Z",
+        "updated_at": "2021-07-08T15:07:26.416Z",
+        "name": "Ядерные реакторы и материалы",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationgraduate",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T15:08:05.146Z",
+        "updated_at": "2021-07-08T15:08:05.146Z",
+        "name": "Бакалавр",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationgraduate",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T15:08:12.120Z",
+        "updated_at": "2021-07-08T15:08:12.120Z",
+        "name": "Магистр",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationgraduate",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T15:08:17.943Z",
+        "updated_at": "2021-07-08T15:08:17.943Z",
+        "name": "Кандидат наук",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.educationgraduate",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-08T15:08:27.473Z",
+        "updated_at": "2021-07-08T15:08:27.473Z",
+        "name": "Доктор наук",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.position",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T15:31:45.065Z",
+        "updated_at": "2021-07-08T15:31:45.065Z",
+        "name": "Senior PHP developer",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.position",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T15:32:02.901Z",
+        "updated_at": "2021-07-08T15:32:02.901Z",
+        "name": "Senior Kobol developer",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.position",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T15:32:20.538Z",
+        "updated_at": "2021-07-08T15:32:20.538Z",
+        "name": "Senior R developer",
+        "sorting": 0,
+        "description": ""
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T15:34:56.865Z",
+        "updated_at": "2021-07-08T15:35:32.566Z",
+        "name": "JavaScript",
+        "parent": 3,
+        "lft": 6,
+        "rght": 11,
+        "tree_id": 3,
+        "mptt_level": 1
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T15:35:03.188Z",
+        "updated_at": "2021-07-08T15:35:24.895Z",
+        "name": "Python",
+        "parent": 3,
+        "lft": 12,
+        "rght": 17,
+        "tree_id": 3,
+        "mptt_level": 1
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T15:35:14.902Z",
+        "updated_at": "2021-07-08T15:35:14.902Z",
+        "name": "Языки программирования",
+        "parent": null,
+        "lft": 1,
+        "rght": 18,
+        "tree_id": 3,
+        "mptt_level": 0
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-08T15:38:53.666Z",
+        "updated_at": "2021-07-08T15:38:53.667Z",
+        "name": "Python 2",
+        "parent": 2,
+        "lft": 13,
+        "rght": 14,
+        "tree_id": 3,
+        "mptt_level": 2
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 5,
+    "fields": {
+        "created_at": "2021-07-08T15:39:03.446Z",
+        "updated_at": "2021-07-08T15:39:03.446Z",
+        "name": "Python 3",
+        "parent": 2,
+        "lft": 15,
+        "rght": 16,
+        "tree_id": 3,
+        "mptt_level": 2
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 6,
+    "fields": {
+        "created_at": "2021-07-08T15:39:32.182Z",
+        "updated_at": "2021-07-08T15:39:32.182Z",
+        "name": "Node JS",
+        "parent": 1,
+        "lft": 7,
+        "rght": 8,
+        "tree_id": 3,
+        "mptt_level": 2
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 7,
+    "fields": {
+        "created_at": "2021-07-08T15:39:41.761Z",
+        "updated_at": "2021-07-08T15:39:41.761Z",
+        "name": "React JS",
+        "parent": 1,
+        "lft": 9,
+        "rght": 10,
+        "tree_id": 3,
+        "mptt_level": 2
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 8,
+    "fields": {
+        "created_at": "2021-07-08T15:39:49.283Z",
+        "updated_at": "2021-07-08T15:39:49.283Z",
+        "name": "CSS",
+        "parent": 3,
+        "lft": 2,
+        "rght": 3,
+        "tree_id": 3,
+        "mptt_level": 1
+    }
+},
+{
+    "model": "dictionary.competence",
+    "pk": 9,
+    "fields": {
+        "created_at": "2021-07-08T15:40:02.664Z",
+        "updated_at": "2021-07-08T15:40:02.664Z",
+        "name": "HTML",
+        "parent": 3,
+        "lft": 4,
+        "rght": 5,
+        "tree_id": 3,
+        "mptt_level": 1
+    }
+}
 ]

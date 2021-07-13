@@ -1,20 +1,20 @@
 [
-    {
-        "model": "acc.user",
-        "pk": 1,
-        "fields": {
-            "password": "pbkdf2_sha256$260000$oZUYxG5P10DZfGyMCi6wCz$IuWY7COFqmXO4DxxwD2OsPFYlUctFJZxdyZmTSU/o7I=",
-            "last_login": "2021-07-08T14:43:24.658Z",
-            "is_superuser": true,
-            "is_staff": true,
-            "is_active": true,
-            "date_joined": "2021-07-08T14:43:19.360Z",
-            "email": "atlantij@gmail.com",
-            "first_name": "",
-            "last_name": "",
-            "photo": "",
-            "groups": [],
-            "user_permissions": []
-        }
+{
+    "model": "acc.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$oZUYxG5P10DZfGyMCi6wCz$IuWY7COFqmXO4DxxwD2OsPFYlUctFJZxdyZmTSU/o7I=",
+        "last_login": "2021-07-08T14:43:24Z",
+        "is_superuser": true,
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2021-07-08T14:43:19Z",
+        "email": "atlantij@gmail.com",
+        "first_name": "Алексей",
+        "last_name": "Баранов",
+        "photo": "",
+        "groups": [],
+        "user_permissions": []
     }
+}
 ]

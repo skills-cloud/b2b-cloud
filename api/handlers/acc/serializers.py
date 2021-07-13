@@ -15,9 +15,6 @@ __all__ = [
 
 
 class UserSerializer(ModelSerializer):
-    is_host = serializers.BooleanField(read_only=True)
-    host_id = serializers.IntegerField(read_only=True, allow_null=True)
-
     class Meta:
         model = User
         exclude = [

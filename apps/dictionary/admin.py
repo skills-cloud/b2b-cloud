@@ -1,13 +1,20 @@
 from django.contrib import admin
 from mptt.admin import DraggableMPTTAdmin
+from adminsortable2.admin import SortableAdminMixin
 
 from dictionary import models as dictionary_models
 
 
-class DictionaryBaseAdmin(admin.ModelAdmin):
+class DictionaryBaseAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = ['id', 'name']
+    list_editable = ['name']
     search_fields = ['name']
     readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(dictionary_models.TypeOfEmployment)
+class TypeOfEmploymentAdmin(DictionaryBaseAdmin):
+    pass
 
 
 @admin.register(dictionary_models.Country)
@@ -19,6 +26,7 @@ class CountryAdmin(DictionaryBaseAdmin):
 class CityAdmin(DictionaryBaseAdmin):
     list_display = DictionaryBaseAdmin.list_display + ['country']
     list_filter = ['country']
+    autocomplete_fields = ['country']
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('country')
@@ -56,7 +64,7 @@ class PositionAdmin(DictionaryBaseAdmin):
 
 @admin.register(dictionary_models.Competence)
 class CompetenceAdmin(DraggableMPTTAdmin):
+    search_fields = ['name']
     mptt_level_indent = 10
-
     list_display = ['tree_actions', 'indented_title']
     list_display_links = ['indented_title']

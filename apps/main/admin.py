@@ -9,11 +9,7 @@ class MainBaseAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
 
 
-@admin.register(main_models.Customer)
-class CustomerAdmin(MainBaseAdmin):
+@admin.register(main_models.Organization)
+class OrganizationAdmin(MainBaseAdmin):
     pass
 
-
-@admin.register(main_models.Project)
-class ProjectAdmin(MainBaseAdmin):
-    pass

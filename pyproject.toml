@@ -78,6 +78,9 @@ drf-ujson2 = "==1.6.1"
 django-mptt = "^0.12.0"
 djangorestframework-recursive = "^0.1.2"
 django-guardian = "^2.4.0"
+django-admin-sortable2 = "^1.0"
+django-reversion = "^4.0.0"
+django-admin-autocomplete-filter = "^0.7"
 
 [tool.poetry.dev-dependencies]
 

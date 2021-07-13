@@ -1,5 +1,6 @@
 from django.db.models import F
-from django_filters import MultipleChoiceFilter
+from django_filters.fields import ModelMultipleChoiceField
+from django_filters import MultipleChoiceFilter, ModelMultipleChoiceFilter
 from django_filters.widgets import CSVWidget
 from rest_framework.filters import OrderingFilter
 
@@ -44,6 +45,14 @@ class OrderingFilterNullsFirst(OrderingFilter):
         return queryset
 
 
-class MultipleChoiceCommaSeparatedFilter(MultipleChoiceFilter):
+class CSVWidgetFilterMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(widget=CSVWidget, *args, **kwargs)
+
+
+class MultipleChoiceCommaSeparatedFilter(CSVWidgetFilterMixin, MultipleChoiceFilter):
+    pass
+
+
+class ModelMultipleChoiceCommaSeparatedFilter(CSVWidgetFilterMixin, ModelMultipleChoiceFilter):
+    pass

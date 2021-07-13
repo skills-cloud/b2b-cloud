@@ -3,7 +3,6 @@ from multiprocessing import cpu_count
 
 DEBUG = False
 
-BASE_URL = 'https://dev.tet-a-tet.club'
 
 ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ['*']

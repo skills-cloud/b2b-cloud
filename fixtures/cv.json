@@ -1,0 +1,193 @@
+[
+{
+    "model": "cv.cv",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-11T11:35:45.139Z",
+        "updated_at": "2021-07-13T12:17:28.215Z",
+        "user": 1,
+        "last_name": "Баранов",
+        "first_name": "Алексей",
+        "middle_name": "Александрович",
+        "photo": "",
+        "gender": "М",
+        "birth_date": "1981-08-26",
+        "country": 1,
+        "city": 1,
+        "citizenship": 1,
+        "is_with_disabilities": false,
+        "is_resource_owner": false,
+        "is_verified": false,
+        "competencies": [
+            8,
+            9,
+            2,
+            4,
+            5
+        ]
+    }
+},
+{
+    "model": "cv.cv",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-11T14:18:28.577Z",
+        "updated_at": "2021-07-13T12:44:17.894Z",
+        "user": null,
+        "last_name": "Васин",
+        "first_name": "Вася",
+        "middle_name": null,
+        "photo": "",
+        "gender": null,
+        "birth_date": "2001-07-11",
+        "country": 3,
+        "city": 4,
+        "citizenship": 1,
+        "is_with_disabilities": false,
+        "is_resource_owner": false,
+        "is_verified": false,
+        "competencies": [
+            1,
+            7
+        ]
+    }
+},
+{
+    "model": "cv.cv",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-13T12:40:09.181Z",
+        "updated_at": "2021-07-13T12:43:56.060Z",
+        "user": null,
+        "last_name": "Бржажек",
+        "first_name": "Кшиштоф",
+        "middle_name": "Кржижекович",
+        "photo": "",
+        "gender": "М",
+        "birth_date": "1991-09-12",
+        "country": 1,
+        "city": 1,
+        "citizenship": 2,
+        "is_with_disabilities": false,
+        "is_resource_owner": false,
+        "is_verified": false,
+        "competencies": []
+    }
+},
+{
+    "model": "cv.cvcontact",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-11T14:05:38.662Z",
+        "updated_at": "2021-07-11T14:05:38.662Z",
+        "cv": 1,
+        "contact_type": 2,
+        "value": "atlantij@gmail.com",
+        "is_primary": true,
+        "comment": ""
+    }
+},
+{
+    "model": "cv.cvcontact",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-11T14:06:12.728Z",
+        "updated_at": "2021-07-11T14:06:12.728Z",
+        "cv": 1,
+        "contact_type": 1,
+        "value": "+79262069959",
+        "is_primary": true,
+        "comment": ""
+    }
+},
+{
+    "model": "cv.cvcontact",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-13T12:09:52.474Z",
+        "updated_at": "2021-07-13T12:09:52.474Z",
+        "cv": 2,
+        "contact_type": 2,
+        "value": "vasya@vasiliy.com",
+        "is_primary": true,
+        "comment": ""
+    }
+},
+{
+    "model": "cv.cvcontact",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-13T12:09:52.505Z",
+        "updated_at": "2021-07-13T12:09:52.505Z",
+        "cv": 2,
+        "contact_type": 1,
+        "value": "02",
+        "is_primary": true,
+        "comment": ""
+    }
+},
+{
+    "model": "cv.cvcontact",
+    "pk": 5,
+    "fields": {
+        "created_at": "2021-07-13T12:16:05.223Z",
+        "updated_at": "2021-07-13T12:17:28.239Z",
+        "cv": 1,
+        "contact_type": 2,
+        "value": "baranov@digitalmigital.ru",
+        "is_primary": false,
+        "comment": ""
+    }
+},
+{
+    "model": "cv.cvtimeslot",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-11T14:11:26.058Z",
+        "updated_at": "2021-07-11T14:11:26.058Z",
+        "cv": 1,
+        "date_from": "2021-07-11",
+        "date_to": "2021-07-31",
+        "country": 1,
+        "city": 1,
+        "type_of_employment": 5,
+        "price": 50.0,
+        "is_work_permit_required": false,
+        "description": ""
+    }
+},
+{
+    "model": "cv.cvtimeslot",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-13T12:10:24.083Z",
+        "updated_at": "2021-07-13T12:10:24.083Z",
+        "cv": 2,
+        "date_from": "2021-07-01",
+        "date_to": "2021-08-13",
+        "country": 2,
+        "city": 3,
+        "type_of_employment": 6,
+        "price": 250.0,
+        "is_work_permit_required": false,
+        "description": ""
+    }
+},
+{
+    "model": "cv.cvtimeslot",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-13T12:57:48.380Z",
+        "updated_at": "2021-07-13T12:57:48.380Z",
+        "cv": 1,
+        "date_from": "2022-07-13",
+        "date_to": "2022-08-13",
+        "country": null,
+        "city": null,
+        "type_of_employment": 1,
+        "price": 1000.0,
+        "is_work_permit_required": false,
+        "description": null
+    }
+}
+]

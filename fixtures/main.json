@@ -1,32 +1,32 @@
 [
-    {
-        "model": "main.customer",
-        "pk": 1,
-        "fields": {
-            "created_at": "2021-07-08T14:54:35.061Z",
-            "updated_at": "2021-07-08T14:54:35.061Z",
-            "name": "Google",
-            "description": ""
-        }
-    },
-    {
-        "model": "main.customer",
-        "pk": 2,
-        "fields": {
-            "created_at": "2021-07-08T14:54:44.087Z",
-            "updated_at": "2021-07-08T14:54:44.087Z",
-            "name": "Yandex",
-            "description": ""
-        }
-    },
-    {
-        "model": "main.customer",
-        "pk": 3,
-        "fields": {
-            "created_at": "2021-07-08T14:55:50.181Z",
-            "updated_at": "2021-07-08T14:55:50.181Z",
-            "name": "Сноб",
-            "description": ""
-        }
+{
+    "model": "main.organization",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-08T14:54:35.061Z",
+        "updated_at": "2021-07-08T14:54:35.061Z",
+        "name": "Google",
+        "description": ""
     }
+},
+{
+    "model": "main.organization",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-07-08T14:54:44.087Z",
+        "updated_at": "2021-07-08T14:54:44.087Z",
+        "name": "Yandex",
+        "description": ""
+    }
+},
+{
+    "model": "main.organization",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-08T14:55:50.181Z",
+        "updated_at": "2021-07-08T14:55:50.181Z",
+        "name": "Сноб",
+        "description": ""
+    }
+}
 ]
