@@ -36,11 +36,10 @@ services:
     image: postgres:13.2
     restart: always
     environment:
-      - PYTHONUNBUFFERED=1
-      - POSTGRES_DB=t2t
+      - POSTGRES_DB=cloud
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=not1pass
       - POSTGRES_HOST_AUTH_METHOD=trust
-      - PGUSER=postgres
     volumes:
       - /work/data/${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG}/postgres:/var/lib/postgresql/data
 
