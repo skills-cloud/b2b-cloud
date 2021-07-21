@@ -29,7 +29,7 @@ RUN \
         libwebp-dev \
         libwebp6
 RUN pip install -U pip setuptools poetry
-COPY poetry.lock pyproject.toml $WORKDIR
+COPY poetry.lock pyproject.toml $WORKDIR/
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-interaction --no-ansi
 ADD . ${WORKDIR}
