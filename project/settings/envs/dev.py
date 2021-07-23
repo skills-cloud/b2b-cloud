@@ -4,6 +4,7 @@ DEBUG = True
 
 CACHEOPS_ENABLED = False
 
+BASE_URL = 'http://local.b2bcloud:10021'
 
 ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ['*']
