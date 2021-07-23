@@ -57,7 +57,7 @@
     "pk": 3,
     "fields": {
         "created_at": "2021-07-13T12:40:09.181Z",
-        "updated_at": "2021-07-13T12:43:56.060Z",
+        "updated_at": "2021-07-23T10:40:26.251Z",
         "user": null,
         "last_name": "Бржажек",
         "first_name": "Кшиштоф",
@@ -140,6 +140,32 @@
     }
 },
 {
+    "model": "cv.cvcontact",
+    "pk": 7,
+    "fields": {
+        "created_at": "2021-07-23T09:51:57.867Z",
+        "updated_at": "2021-07-23T09:51:57.867Z",
+        "cv": 3,
+        "contact_type": 2,
+        "value": "kshishtof@kremlin.org",
+        "is_primary": true,
+        "comment": ""
+    }
+},
+{
+    "model": "cv.cvcontact",
+    "pk": 8,
+    "fields": {
+        "created_at": "2021-07-23T09:53:03.283Z",
+        "updated_at": "2021-07-23T09:53:03.283Z",
+        "cv": 3,
+        "contact_type": 4,
+        "value": "/kakshik",
+        "is_primary": false,
+        "comment": ""
+    }
+},
+{
     "model": "cv.cvtimeslot",
     "pk": 1,
     "fields": {
@@ -188,6 +214,47 @@
         "price": 1000.0,
         "is_work_permit_required": false,
         "description": null
+    }
+},
+{
+    "model": "cv.cvtimeslot",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-23T09:53:03.291Z",
+        "updated_at": "2021-07-23T09:53:03.291Z",
+        "cv": 3,
+        "date_from": "2021-06-23",
+        "date_to": "2021-08-23",
+        "country": null,
+        "city": null,
+        "type_of_employment": null,
+        "price": 2500.0,
+        "is_work_permit_required": true,
+        "description": ""
+    }
+},
+{
+    "model": "cv.cvposition",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-07-23T09:51:02.081Z",
+        "updated_at": "2021-07-23T09:51:02.082Z",
+        "cv": 3,
+        "position": 2,
+        "competencies": [
+            8,
+            9
+        ]
+    }
+},
+{
+    "model": "cv.cvpositionfile",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-07-23T10:40:26.504Z",
+        "updated_at": "2021-07-23T10:40:26.504Z",
+        "cv_position": 1,
+        "file": "cv/000/000/3/position/19073cd12eeecec71c33d1eadfbd4b3e14459fc688b492e89608d39dd54a90e2.docx"
     }
 }
 ]

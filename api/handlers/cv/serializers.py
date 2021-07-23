@@ -18,7 +18,12 @@ class CvLinkedObjectBaseSerializer(ModelSerializer):
     )
 
     class Meta:
-        fields = ['cv_id']
+        fields = ['cv_id', 'id']
+
+
+########################################################################################################################
+# CvContact
+########################################################################################################################
 
 
 class CvContactSerializer(CvLinkedObjectBaseSerializer):
@@ -29,7 +34,7 @@ class CvContactSerializer(CvLinkedObjectBaseSerializer):
     class Meta:
         model = cv_models.CvContact
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'id', 'contact_type_id', 'value', 'is_primary', 'comment',
+            'contact_type_id', 'value', 'is_primary', 'comment',
         ]
 
 
@@ -42,6 +47,11 @@ class CvContactReadSerializer(CvContactSerializer):
     class Meta(CvContactSerializer.Meta):
         model = cv_models.CvContact
         fields = CvContactSerializer.Meta.fields + ['contact_type']
+
+
+########################################################################################################################
+# CvTimeSlot
+########################################################################################################################
 
 
 class CvTimeSlotSerializer(CvLinkedObjectBaseSerializer):
@@ -58,8 +68,8 @@ class CvTimeSlotSerializer(CvLinkedObjectBaseSerializer):
     class Meta:
         model = cv_models.CvTimeSlot
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'id', 'date_from', 'date_to', 'price', 'is_work_permit_required', 'description',
-            'country_id', 'city_id',  'type_of_employment_id',
+            'date_from', 'date_to', 'price', 'is_work_permit_required', 'description',
+            'country_id', 'city_id', 'type_of_employment_id',
         ]
 
 
@@ -70,8 +80,40 @@ class CvTimeSlotReadSerializer(CvTimeSlotSerializer):
 
     class Meta(CvTimeSlotSerializer.Meta):
         fields = CvTimeSlotSerializer.Meta.fields + [
-            'country',  'city', 'type_of_employment'
+            'country', 'city', 'type_of_employment'
         ]
+
+
+########################################################################################################################
+# CvPosition
+########################################################################################################################
+
+
+class CvPositionSerializer(CvLinkedObjectBaseSerializer):
+    position_id = serializers.PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Position.objects
+    )
+    competencies_ids = serializers.PrimaryKeyRelatedIdField(source='competencies', read_only=True, many=True)
+
+    class Meta:
+        model = cv_models.CvPosition
+        fields = CvLinkedObjectBaseSerializer.Meta.fields + [
+            'position_id', 'competencies_ids'
+        ]
+
+
+class CvPositionReadSerializer(CvPositionSerializer):
+    position = dictionary_serializers.CountrySerializer(read_only=True, allow_null=True)
+
+    class Meta(CvPositionSerializer.Meta):
+        fields = CvPositionSerializer.Meta.fields + [
+            'position'
+        ]
+
+
+########################################################################################################################
+# CV
+########################################################################################################################
 
 
 class CvDetailSerializer(ModelSerializer):

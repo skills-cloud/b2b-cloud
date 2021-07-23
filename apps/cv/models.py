@@ -1,9 +1,31 @@
+import datetime
+import hashlib
+import random
+from pathlib import Path
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 import reversion
 
-from acc.models import User
 from project.contrib.db.models import DatesModelBase
+from acc.models import User
+
+
+def cv_linked_object_upload_to_immutable(instance, filename, cv_instance: 'CV'):
+    return (
+            Path(cv_instance.UPLOAD_TO)
+            / cv_instance.id_verbose[:3]
+            / cv_instance.id_verbose[3:6]
+            / cv_instance.id_verbose[6:]
+            / instance.UPLOAD_TO
+            / (
+                    hashlib.sha256((str(datetime.datetime.now()) + str(random.random())).encode()).hexdigest()
+                    + Path(filename).suffix
+            )
+    )
+
+
+def cv_position_file_upload_to(instance, filename):
+    return cv_linked_object_upload_to_immutable(instance, filename, instance.cv_position.cv)
 
 
 @reversion.register()
@@ -11,6 +33,8 @@ class CV(DatesModelBase):
     class Gender(models.TextChoices):
         MALE = 'М', _('Мужской')
         FEMALE = 'F', _('Женский')
+
+    UPLOAD_TO = 'cv'
 
     user = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='cv_list',
@@ -54,11 +78,15 @@ class CV(DatesModelBase):
     objects = Manager()
 
     def __str__(self):
-        return f'%s < {self.id} >' % ' '.join(
+        return f'%s < {self.id_verbose} >' % ' '.join(
             getattr(self, k)
             for k in ['last_name', 'first_name', 'middle_name']
             if getattr(self, k)
         ).strip()
+
+    @property
+    def id_verbose(self) -> str:
+        return str(self.id).zfill(7)
 
 
 class CvLinkedObjectQuerySet(models.QuerySet):
@@ -144,17 +172,25 @@ class CvPosition(DatesModelBase):
 
     objects = CvLinkedObjectManager()
 
+    def __str__(self):
+        return f'< {self.id} >'
+
 
 @reversion.register()
 class CvPositionFile(DatesModelBase):
+    UPLOAD_TO = 'position'
+
     cv_position = models.ForeignKey(
         'cv.CvPosition', on_delete=models.CASCADE, related_name='files', verbose_name=_('роль'))
-    file = models.FileField(verbose_name=_('файл'))
+    file = models.FileField(upload_to=cv_position_file_upload_to, verbose_name=_('файл'))
 
     class Meta:
         ordering = ['id']
         verbose_name = _('файл роли')
         verbose_name_plural = _('файлы роли')
+
+    def __str__(self):
+        return f'< {self.cv_position} / {self.id} >'
 
 
 @reversion.register()

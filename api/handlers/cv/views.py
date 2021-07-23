@@ -134,13 +134,22 @@ class CvLinkedObjectFilter(filters.FilterSet):
     cv_id = filters.ModelChoiceFilter(queryset=cv_models.CV.objects)
 
 
-class CvContactViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
+class CvLinkedObjectFilterBackend(filters.DjangoFilterBackend):
+    def get_filterset_class(self, view, queryset=None):
+        if filterset_class := getattr(view, 'Filter', None):
+            return filterset_class
+        return super().get_filterset_class(view, queryset)
+
+
+class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
+    http_method_names = cv_viewsets_http_method_names
+    filter_backends = [CvLinkedObjectFilterBackend, OrderingFilterNullsLast, SearchFilter]
+
+
+class CvContactViewSet(CvLinkedObjectViewSet):
     class Filter(CvLinkedObjectFilter):
         contact_type_id = filters.ModelChoiceFilter(queryset=dictionary_models.ContactType.objects)
 
-    http_method_names = cv_viewsets_http_method_names
-    filterset_class = Filter
-    filter_backends = [filters.DjangoFilterBackend, SearchFilter]
     search_fields = ['value']
     queryset = cv_models.CvContact.objects
 
@@ -164,20 +173,45 @@ class CvContactViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class CvTimeSlotViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
+class CvTimeSlotViewSet(CvLinkedObjectViewSet):
     class Filter(CvLinkedObjectFilter):
         country_id = filters.ModelChoiceFilter(queryset=dictionary_models.Country.objects)
         city_id = filters.ModelChoiceFilter(queryset=dictionary_models.City.objects)
         type_of_employment_id = filters.ModelChoiceFilter(queryset=dictionary_models.TypeOfEmployment.objects)
 
-    http_method_names = cv_viewsets_http_method_names
-    filterset_class = Filter
-    filter_backends = [filters.DjangoFilterBackend, SearchFilter]
     queryset = cv_models.CvTimeSlot.objects
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related(
             'country', 'city', 'type_of_employment',
+        )
+
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return cv_serializers.CvTimeSlotReadSerializer
+        return cv_serializers.CvTimeSlotSerializer
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            openapi.Parameter('country_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            openapi.Parameter('city_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            openapi.Parameter('type_of_employment_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class CvPositionViewSet(CvLinkedObjectViewSet):
+    class Filter(CvLinkedObjectFilter):
+        position_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Position.objects)
+
+    queryset = cv_models.CvPosition.objects
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related(
+            'position', 'competencies',
         )
 
     def get_serializer_class(self):

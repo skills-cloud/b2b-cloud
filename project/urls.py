@@ -10,6 +10,7 @@ urlpatterns = []
 app_urlpatterns = [
     path('admin/', admin.site.urls),
     path("autocomplete/", include('django_select2.urls')),
+    path('nested_admin/', include('nested_admin.urls')),
 ]
 
 if settings.DEBUG:
