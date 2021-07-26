@@ -1,11 +1,12 @@
 import itertools
 from typing import List
 
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins, status
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as filters, DateFromToRangeFilter
 from rest_framework.filters import SearchFilter
 from django_filters import rest_framework as filters
 from rest_framework.permissions import SAFE_METHODS
@@ -17,9 +18,11 @@ from cv import models as cv_models
 from api.filters import (
     OrderingFilterNullsLast,
     ModelMultipleChoiceCommaSeparatedFilter,
+    DateRangeWidget,
 )
 from api.views_mixins import ViewSetFilteredByUserMixin
 from api.handlers.cv import serializers as cv_serializers
+from project.contrib.db import get_sql_from_queryset
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
 cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
@@ -78,7 +81,8 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
-                description='`ANY`', required=False
+                description='`ANY`',
+                required=False
             ),
             openapi.Parameter(
                 'city_id',
@@ -133,7 +137,6 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-
 class CvLinkedObjectFilter(filters.FilterSet):
     cv_id = filters.ModelChoiceFilter(queryset=cv_models.CV.objects)
 
@@ -161,7 +164,9 @@ class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return []
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related(self.get_queryset_prefetch_related())
+        return super().get_queryset().prefetch_related(
+            *self.get_queryset_prefetch_related()
+        )
 
 
 class CvContactViewSet(CvLinkedObjectViewSet):
@@ -194,10 +199,28 @@ class CvContactViewSet(CvLinkedObjectViewSet):
 
 class CvTimeSlotViewSet(CvLinkedObjectViewSet):
     class Filter(CvLinkedObjectFilter):
+        class DateRangeFilterField(DateFromToRangeFilter):
+            def __init__(self, *args, **kwargs):
+                super().__init__(widget=DateRangeWidget, *args, **kwargs)
+
+            def filter(self, qs, value):
+                condition = Q()
+                if value.start is not None and value.stop is not None:
+                    condition = Q(
+                        Q(date_from__range=[value.start, value.stop])
+                        | Q(date_to__range=[value.start, value.stop])
+                    )
+                elif value.start is not None:
+                    condition = Q(date_from__gte=value.start)
+                elif value.stop is not None:
+                    condition = Q(date_to__lte=value.stop)
+                return qs.filter(condition)
+
         country_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Country.objects)
         city_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.City.objects)
         type_of_employment_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=dictionary_models.TypeOfEmployment.objects)
+        date_range = DateRangeFilterField()
 
     queryset = cv_models.CvTimeSlot.objects
     serializer_class = cv_serializers.CvTimeSlotSerializer
@@ -228,6 +251,20 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+            openapi.Parameter(
+                'date_range_from',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE,
+                required=False
+            ),
+            openapi.Parameter(
+                'date_range_to',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE,
                 required=False
             ),
         ]

@@ -131,7 +131,7 @@ class CvDetailSerializer(ModelSerializer):
     class Meta:
         model = cv_models.CV
         fields = [
-            'first_name', 'middle_name', 'last_name', 'photo', 'gender', 'birth_date', 'is_with_disabilities',
+            'id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender', 'birth_date', 'is_with_disabilities',
             'is_resource_owner', 'user_id', 'country_id', 'city_id', 'citizenship_id',
         ]
 
