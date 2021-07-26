@@ -175,15 +175,16 @@ class CvTimeSlotViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
 
             def filter(self, qs, value):
                 condition = Q()
-                if value.start is not None and value.stop is not None:
-                    condition = Q(
-                        Q(date_from__range=[value.start, value.stop])
-                        | Q(date_to__range=[value.start, value.stop])
-                    )
-                elif value.start is not None:
-                    condition = Q(date_from__gte=value.start)
-                elif value.stop is not None:
-                    condition = Q(date_to__lte=value.stop)
+                if value is not None:
+                    if value.start is not None and value.stop is not None:
+                        condition = Q(
+                            Q(date_from__range=[value.start, value.stop])
+                            | Q(date_to__range=[value.start, value.stop])
+                        )
+                    elif value.start is not None:
+                        condition = Q(date_from__gte=value.start)
+                    elif value.stop is not None:
+                        condition = Q(date_to__lte=value.stop)
                 return qs.filter(condition)
 
         country_id = filters.ModelChoiceFilter(queryset=dictionary_models.Country.objects)
