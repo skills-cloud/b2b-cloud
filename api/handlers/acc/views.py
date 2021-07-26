@@ -38,6 +38,7 @@ openapi_response_guest = partial(openapi.Response, "If the user isn't logged in"
 
 class LoginView(generics.GenericAPIView):
     serializer_class = acc_serializers.LoginSerializer
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         responses={
@@ -137,6 +138,7 @@ class WhoAmISetPhotoView(WhoAmIView):
 
 class SetTimezone(generics.GenericAPIView):
     serializer_class = acc_serializers.SetTimeZoneSerializer
+
     @swagger_auto_schema(
         responses={
             status.HTTP_204_NO_CONTENT: openapi.Response(''),
