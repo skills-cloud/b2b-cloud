@@ -1,10 +1,11 @@
 import itertools
 
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins, status
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as filters, DateFromToRangeFilter
 from rest_framework.filters import SearchFilter
 from django_filters import rest_framework as filters
 from rest_framework.permissions import SAFE_METHODS
@@ -16,9 +17,11 @@ from cv import models as cv_models
 from api.filters import (
     OrderingFilterNullsLast,
     ModelMultipleChoiceCommaSeparatedFilter,
+    DateRangeWidget,
 )
 from api.views_mixins import ViewSetFilteredByUserMixin
 from api.handlers.cv import serializers as cv_serializers
+from project.contrib.db import get_sql_from_queryset
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -166,13 +169,31 @@ class CvContactViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
 
 class CvTimeSlotViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     class Filter(CvLinkedObjectFilter):
+        class DateRangeFilterField(DateFromToRangeFilter):
+            def __init__(self, *args, **kwargs):
+                super().__init__(widget=DateRangeWidget, *args, **kwargs)
+
+            def filter(self, qs, value):
+                condition = Q()
+                if value.start is not None and value.stop is not None:
+                    condition = Q(
+                        Q(date_from__range=[value.start, value.stop])
+                        | Q(date_to__range=[value.start, value.stop])
+                    )
+                elif value.start is not None:
+                    condition = Q(date_from__gte=value.start)
+                elif value.stop is not None:
+                    condition = Q(date_to__lte=value.stop)
+                return qs.filter(condition)
+
         country_id = filters.ModelChoiceFilter(queryset=dictionary_models.Country.objects)
         city_id = filters.ModelChoiceFilter(queryset=dictionary_models.City.objects)
         type_of_employment_id = filters.ModelChoiceFilter(queryset=dictionary_models.TypeOfEmployment.objects)
+        date_range = DateRangeFilterField()
 
     http_method_names = cv_viewsets_http_method_names
     filterset_class = Filter
-    filter_backends = [filters.DjangoFilterBackend, SearchFilter]
+    filter_backends = [filters.DjangoFilterBackend]
     queryset = cv_models.CvTimeSlot.objects
 
     def get_queryset(self):
@@ -191,6 +212,14 @@ class CvTimeSlotViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
             openapi.Parameter('country_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
             openapi.Parameter('city_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
             openapi.Parameter('type_of_employment_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            openapi.Parameter(
+                'date_range_from', openapi.IN_QUERY, type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE,
+                required=False
+            ),
+            openapi.Parameter(
+                'date_range_to', openapi.IN_QUERY, type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE,
+                required=False
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
