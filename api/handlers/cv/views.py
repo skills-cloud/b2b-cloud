@@ -1,4 +1,5 @@
 import itertools
+from typing import List
 
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
@@ -21,6 +22,7 @@ from api.views_mixins import ViewSetFilteredByUserMixin
 from api.handlers.cv import serializers as cv_serializers
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
+cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
 
 
 class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
@@ -76,7 +78,8 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
-                description='`ANY`', required=False),
+                description='`ANY`', required=False
+            ),
             openapi.Parameter(
                 'city_id',
                 openapi.IN_QUERY,
@@ -130,6 +133,7 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
+
 class CvLinkedObjectFilter(filters.FilterSet):
     cv_id = filters.ModelChoiceFilter(queryset=cv_models.CV.objects)
 
@@ -145,28 +149,43 @@ class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     http_method_names = cv_viewsets_http_method_names
     filter_backends = [CvLinkedObjectFilterBackend, OrderingFilterNullsLast, SearchFilter]
 
-
-class CvContactViewSet(CvLinkedObjectViewSet):
-    class Filter(CvLinkedObjectFilter):
-        contact_type_id = filters.ModelChoiceFilter(queryset=dictionary_models.ContactType.objects)
-
-    search_fields = ['value']
-    queryset = cv_models.CvContact.objects
-
-    def get_queryset(self):
-        return super().get_queryset().prefetch_related(
-            'contact_type',
-        )
+    serializer_class = None
+    serializer_read_class = None
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
-            return cv_serializers.CvContactReadSerializer
-        return cv_serializers.CvContactSerializer
+            return self.serializer_read_class
+        return self.serializer_class
+
+    def get_queryset_prefetch_related(self) -> List:
+        return []
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related(self.get_queryset_prefetch_related())
+
+
+class CvContactViewSet(CvLinkedObjectViewSet):
+    class Filter(CvLinkedObjectFilter):
+        contact_type_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.ContactType.objects)
+
+    search_fields = ['value']
+    queryset = cv_models.CvContact.objects
+    serializer_class = cv_serializers.CvContactSerializer
+    serializer_read_class = cv_serializers.CvContactReadSerializer
+
+    def get_queryset_prefetch_related(self):
+        return ['contact_type']
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
-            openapi.Parameter('contact_type_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            cv_linked_filter_cv_field,
+            openapi.Parameter(
+                'contact_type_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -175,28 +194,42 @@ class CvContactViewSet(CvLinkedObjectViewSet):
 
 class CvTimeSlotViewSet(CvLinkedObjectViewSet):
     class Filter(CvLinkedObjectFilter):
-        country_id = filters.ModelChoiceFilter(queryset=dictionary_models.Country.objects)
-        city_id = filters.ModelChoiceFilter(queryset=dictionary_models.City.objects)
-        type_of_employment_id = filters.ModelChoiceFilter(queryset=dictionary_models.TypeOfEmployment.objects)
+        country_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Country.objects)
+        city_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.City.objects)
+        type_of_employment_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=dictionary_models.TypeOfEmployment.objects)
 
     queryset = cv_models.CvTimeSlot.objects
+    serializer_class = cv_serializers.CvTimeSlotSerializer
+    serializer_read_class = cv_serializers.CvTimeSlotReadSerializer
 
-    def get_queryset(self):
-        return super().get_queryset().prefetch_related(
-            'country', 'city', 'type_of_employment',
-        )
-
-    def get_serializer_class(self):
-        if self.request.method in SAFE_METHODS:
-            return cv_serializers.CvTimeSlotReadSerializer
-        return cv_serializers.CvTimeSlotSerializer
+    def get_queryset_prefetch_related(self):
+        return ['country', 'city', 'type_of_employment']
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
-            openapi.Parameter('country_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
-            openapi.Parameter('city_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
-            openapi.Parameter('type_of_employment_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            cv_linked_filter_cv_field,
+            openapi.Parameter(
+                'country_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+            openapi.Parameter(
+                'city_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+            openapi.Parameter(
+                'type_of_employment_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -208,23 +241,22 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
         position_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Position.objects)
 
     queryset = cv_models.CvPosition.objects
+    serializer_class = cv_serializers.CvPositionSerializer
+    serializer_read_class = cv_serializers.CvPositionReadSerializer
 
-    def get_queryset(self):
-        return super().get_queryset().prefetch_related(
-            'position', 'competencies',
-        )
-
-    def get_serializer_class(self):
-        if self.request.method in SAFE_METHODS:
-            return cv_serializers.CvTimeSlotReadSerializer
-        return cv_serializers.CvTimeSlotSerializer
+    def get_queryset_prefetch_related(self):
+        return ['position', 'competencies']
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
-            openapi.Parameter('country_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
-            openapi.Parameter('city_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
-            openapi.Parameter('type_of_employment_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False),
+            cv_linked_filter_cv_field,
+            openapi.Parameter(
+                'position_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
