@@ -167,6 +167,9 @@ class CvPosition(DatesModelBase):
 
     class Meta:
         ordering = ['id']
+        unique_together = [
+            ['cv', 'position']
+        ]
         verbose_name = _('должность / роль')
         verbose_name_plural = _('должности / роли')
 

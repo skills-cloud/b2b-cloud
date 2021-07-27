@@ -93,7 +93,12 @@ class CvPositionSerializer(CvLinkedObjectBaseSerializer):
     position_id = serializers.PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Position.objects
     )
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(source='competencies', read_only=True, many=True)
+    competencies_ids = serializers.PrimaryKeyRelatedIdField(
+        source='competencies',
+        queryset=dictionary_models.Competence.objects,
+        required=False,
+        many=True
+    )
 
     class Meta:
         model = cv_models.CvPosition
