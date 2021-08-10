@@ -404,7 +404,7 @@ class CvCareerViewSet(CvLinkedObjectViewSet):
     @transaction.atomic
     def delete_file(self, request, pk, file_id, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvPositionFile.objects, pk=file_id).delete()
+        get_object_or_404(queryset=cv_models.CvCareerFile.objects, pk=file_id).delete()
         return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
 
 

@@ -12,7 +12,7 @@ CELERY_WORKER_CONCURRENCY = cpu_count()
 
 EMAIL_HOST = os.getenv('EMAIL_HOST', '192.168.0.1')
 EMAIL_PORT = os.getenv('EMAIL_PORT', 25)
-EMAIL_USER = os.getenv('EMAIL_USER', 'info@tet-a-tet.com')
+EMAIL_USER = os.getenv('EMAIL_USER', 'info@b2bcloud.com')
 EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = EMAIL_USER
 CELERY_EMAIL_CHUNK_SIZE = 1
