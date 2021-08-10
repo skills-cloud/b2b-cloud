@@ -379,6 +379,17 @@
     }
 },
 {
+    "model": "dictionary.position",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-07-26T18:59:23.220Z",
+        "updated_at": "2021-07-26T18:59:23.220Z",
+        "name": "Senior Potato",
+        "sorting": 1,
+        "description": ""
+    }
+},
+{
     "model": "dictionary.competence",
     "pk": 1,
     "fields": {

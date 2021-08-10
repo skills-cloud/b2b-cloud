@@ -1,15 +1,19 @@
 import itertools
 from typing import List
 
+from django.db import transaction
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import viewsets, mixins, status
-from django_filters import rest_framework as filters, DateFromToRangeFilter
+from rest_framework import viewsets, status
+from django_filters import DateFromToRangeFilter
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from django_filters import rest_framework as filters
+from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.response import Response
 
 from dictionary import models as dictionary_models
 from main import models as main_models
@@ -20,6 +24,7 @@ from api.filters import (
     ModelMultipleChoiceCommaSeparatedFilter,
     DateRangeWidget,
 )
+from api.serializers import StatusSerializer
 from api.views_mixins import ViewSetFilteredByUserMixin
 from api.handlers.cv import serializers as cv_serializers
 from project.contrib.db import get_sql_from_queryset
@@ -59,9 +64,8 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
             'competencies',
             'contacts', 'contacts__contact_type',
             'time_slots', 'time_slots__country', 'time_slots__city', 'time_slots__type_of_employment',
-            'positions', 'positions__files',
-            'career', 'career__files',
-            'projects',
+            'positions', 'positions__position', 'positions__files',
+            'career', 'career__files', 'career__organization', 'career__projects', 'career__position',
             'education',
             'certificates',
             'files',
@@ -135,6 +139,20 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvSetPhotoSerializer,
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvSetPhotoSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='set-photo', parser_classes=[MultiPartParser])
+    @transaction.atomic
+    def set_photo(self, request, pk, *args, **kwargs):
+        serializer = cv_serializers.CvSetPhotoSerializer(instance=self.get_object(), data=request.data)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CvLinkedObjectFilter(filters.FilterSet):
@@ -295,6 +313,164 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
                 required=False
             ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvPositionFileSerializer,
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvPositionFileReadSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='upload-file', parser_classes=[MultiPartParser])
+    @transaction.atomic
+    def upload_file(self, request, pk, *args, **kwargs):
+        request_serializer = cv_serializers.CvPositionFileSerializer(data=request.data)
+        request_serializer.is_valid()
+        instance = request_serializer.save(cv_position_id=self.get_object().id)
+        response_serializer = cv_serializers.CvPositionFileReadSerializer(instance=instance)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_204_NO_CONTENT: StatusSerializer()
+        },
+    )
+    @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
+    @transaction.atomic
+    def delete_file(self, request, pk, file_id, *args, **kwargs):
+        self.get_object()
+        get_object_or_404(queryset=cv_models.CvPositionFile.objects, pk=file_id).delete()
+        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+
+
+class CvCareerViewSet(CvLinkedObjectViewSet):
+    class Filter(CvLinkedObjectFilter):
+        position_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Position.objects)
+        organization_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=main_models.Organization.objects)
+
+    queryset = cv_models.CvCareer.objects
+    serializer_class = cv_serializers.CvCareerSerializer
+    serializer_read_class = cv_serializers.CvCareerReadSerializer
+
+    def get_queryset_prefetch_related(self):
+        return ['organization', 'position', 'competencies', 'projects']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            cv_linked_filter_cv_field,
+            openapi.Parameter(
+                'position_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+            openapi.Parameter(
+                'organization_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvCareerFileSerializer,
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvCareerFileReadSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='upload-file', parser_classes=[MultiPartParser])
+    @transaction.atomic
+    def upload_file(self, request, pk, *args, **kwargs):
+        request_serializer = cv_serializers.CvCareerFileSerializer(data=request.data)
+        request_serializer.is_valid()
+        instance = request_serializer.save(cv_career_id=self.get_object().id)
+        response_serializer = cv_serializers.CvCareerFileReadSerializer(instance=instance)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_204_NO_CONTENT: StatusSerializer()
+        },
+    )
+    @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
+    @transaction.atomic
+    def delete_file(self, request, pk, file_id, *args, **kwargs):
+        self.get_object()
+        get_object_or_404(queryset=cv_models.CvPositionFile.objects, pk=file_id).delete()
+        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+
+
+class CvEducationViewSet(CvLinkedObjectViewSet):
+    class Filter(CvLinkedObjectFilter):
+        class DateRangeFilterField(DateFromToRangeFilter):
+            def __init__(self, *args, **kwargs):
+                super().__init__(widget=DateRangeWidget, *args, **kwargs)
+
+            def filter(self, qs, value):
+                condition = Q()
+                if value is not None:
+                    if value.start is not None and value.stop is not None:
+                        condition = Q(
+                            Q(date_from__range=[value.start, value.stop])
+                            | Q(date_to__range=[value.start, value.stop])
+                        )
+                    elif value.start is not None:
+                        condition = Q(date_from__gte=value.start)
+                    elif value.stop is not None:
+                        condition = Q(date_to__lte=value.stop)
+                return qs.filter(condition)
+
+        date_range = DateRangeFilterField()
+
+    queryset = cv_models.CvEducation.objects
+    serializer_class = cv_serializers.CvEducationSerializer
+    serializer_read_class = cv_serializers.CvEducationReadSerializer
+
+    def get_queryset_prefetch_related(self):
+        return ['education_place', 'education_place', 'education_place']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            cv_linked_filter_cv_field,
+            openapi.Parameter(
+                'date_range_from',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE,
+                required=False
+            ),
+            openapi.Parameter(
+                'date_range_to',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE,
+                required=False
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class CvCertificateViewSet(CvLinkedObjectViewSet):
+    queryset = cv_models.CvCertificate.objects
+    serializer_class = cv_serializers.CvCertificateSerializer
+    serializer_read_class = cv_serializers.CvEducationReadSerializer
+
+    def get_queryset_prefetch_related(self):
+        return ['education_place', 'education_place', 'education_place']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            cv_linked_filter_cv_field,
         ]
     )
     def list(self, request, *args, **kwargs):

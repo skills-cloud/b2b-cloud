@@ -9,6 +9,7 @@ class Router(routers.DefaultRouter):
 
 router = Router()
 router.register('organization', views.OrganizationViewSet)
+router.register('organization-project', views.OrganizationProjectViewSet)
 
 urlpatterns = []
 urlpatterns += router.urls

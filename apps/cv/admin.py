@@ -41,10 +41,32 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         autocomplete_fields = ['position', 'competencies']
         extra = 0
 
+    class CvCareerInline(nested_admin.NestedTabularInline):
+        class CvCareerFileInline(nested_admin.NestedTabularInline):
+            model = cv_models.CvCareerFile
+            extra = 0
+        inlines = [CvCareerFileInline]
+        model = cv_models.CvCareer
+        autocomplete_fields = ['organization', 'position', 'competencies', 'projects']
+        extra = 0
+
+    class CvEducactionInline(nested_admin.NestedTabularInline):
+        model = cv_models.CvEducation
+        autocomplete_fields = ['education_place', 'education_speciality', 'education_graduate', 'competencies']
+        extra = 0
+
+    class CvCertificatenInline(nested_admin.NestedTabularInline):
+        model = cv_models.CvCertificate
+        autocomplete_fields = ['education_place', 'education_speciality', 'education_graduate', 'competencies']
+        extra = 0
+
     inlines = [
         CvContactInline,
         CvTimeSlotInline,
         CvPositionInline,
+        CvCareerInline,
+        CvEducactionInline,
+        CvCertificatenInline,
     ]
     list_select_related = True
     list_display = ['id', 'last_name', 'first_name', 'middle_name', 'user', 'created_at', 'updated_at']

@@ -28,5 +28,49 @@
         "name": "Сноб",
         "description": ""
     }
+},
+{
+    "model": "main.organizationproject",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-08-10T09:38:41.849Z",
+        "updated_at": "2021-08-10T09:38:41.849Z",
+        "organization": 2,
+        "name": "yandex ЕДА",
+        "description": ""
+    }
+},
+{
+    "model": "main.organizationproject",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-08-10T09:39:04.812Z",
+        "updated_at": "2021-08-10T09:39:04.812Z",
+        "organization": 1,
+        "name": "analytics",
+        "description": ""
+    }
+},
+{
+    "model": "main.organizationproject",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-08-10T09:39:25.713Z",
+        "updated_at": "2021-08-10T09:39:25.713Z",
+        "organization": 3,
+        "name": "Спец. проект :: ДОМ",
+        "description": ""
+    }
+},
+{
+    "model": "main.organizationproject",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-08-10T09:41:38.973Z",
+        "updated_at": "2021-08-10T09:41:38.973Z",
+        "organization": 3,
+        "name": "v2",
+        "description": ""
+    }
 }
 ]
