@@ -3,7 +3,9 @@ from rest_framework import serializers
 
 from api.fields import PrimaryKeyRelatedIdField
 
-__all__ = ['ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer']
+__all__ = [
+    'ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer',
+]
 
 
 class StatusSerializer(serializers.Serializer):

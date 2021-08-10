@@ -1,19 +1,9 @@
-import os
-import hashlib
-import datetime
-import random
-from typing import Optional
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group as GroupBase
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
-
-def upload_to(instance, filename):
-    filename = filename.lower()
-    hd = hashlib.sha256((str(datetime.datetime.now()) + str(random.random())).encode()).hexdigest()
-    return os.path.join(instance.UPLOAD_TO, hd[:2], hd[2:4], '%s%s' % (hd, os.path.splitext(filename)[1]))
+from project.contrib.db.upload_to import upload_to
 
 
 class CustomUserManager(BaseUserManager):

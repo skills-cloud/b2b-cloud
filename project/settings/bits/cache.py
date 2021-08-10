@@ -28,7 +28,8 @@ CACHEOPS_DEFAULTS = {
 CACHEOPS = {
     'auth.*': {'ops': 'all'},
     'acc.*': {'ops': 'all'},
+    'cv.*': {'ops': 'all'},
+    'dictionary.*': {'ops': 'all'},
     'main.*': {'ops': 'all'},
     'sorl.thumbnail.*': {'ops': 'all'},
-    'main.ZoomRequest': None,
 }

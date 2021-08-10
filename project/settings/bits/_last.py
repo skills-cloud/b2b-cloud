@@ -43,6 +43,7 @@ INSTALLED_APPS = (
             'mptt',
             'adminsortable2',
             'reversion',
+            'nested_admin',
         ]
         + ADVANCED_APPS
         + PROJECT_APPS

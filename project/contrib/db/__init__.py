@@ -1,6 +1,5 @@
 import codecs
 import logging
-from typing import Iterable
 
 import sqlparse
 import importlib.util

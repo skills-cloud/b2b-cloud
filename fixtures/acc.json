@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
         "password": "pbkdf2_sha256$260000$oZUYxG5P10DZfGyMCi6wCz$IuWY7COFqmXO4DxxwD2OsPFYlUctFJZxdyZmTSU/o7I=",
-        "last_login": "2021-07-08T14:43:24Z",
+        "last_login": "2021-08-10T07:17:45.991Z",
         "is_superuser": true,
         "is_staff": true,
         "is_active": true,
@@ -12,6 +12,24 @@
         "email": "atlantij@gmail.com",
         "first_name": "Алексей",
         "last_name": "Баранов",
+        "photo": "",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "acc.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$LcAbRO1ifmd7LD382djIIL$ngdslHC2yXTN1nCzGswHP4gcWScH9qsDPODtQpYb5os=",
+        "last_login": null,
+        "is_superuser": true,
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2021-07-23T10:27:33Z",
+        "email": "test-test@b2bcloud.com",
+        "first_name": "TEST",
+        "last_name": "ADMIN",
         "photo": "",
         "groups": [],
         "user_permissions": []
