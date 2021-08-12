@@ -8,7 +8,7 @@ from api.serializers import ModelSerializer
 
 class DictionaryBaseSerializer(ModelSerializer):
     class Meta:
-        exclude = ['created_at', 'updated_at']
+        exclude = ['created_at', 'updated_at', 'sorting']
 
 
 class CountrySerializer(DictionaryBaseSerializer):
@@ -60,7 +60,9 @@ class PositionSerializer(DictionaryBaseSerializer):
 
 class CompetenceSerializer(DictionaryBaseSerializer):
     class Meta(DictionaryBaseSerializer.Meta):
-        model = dictionary_models.Position
+        model = dictionary_models.Competence
+        fields = ['id', 'parent_id', 'name']
+        exclude = None
 
 
 class CompetenceTreeSerializer(DictionaryBaseSerializer):

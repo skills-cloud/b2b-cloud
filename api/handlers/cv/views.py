@@ -154,6 +154,33 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvFileSerializer,
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvFileReadSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='upload-file', parser_classes=[MultiPartParser])
+    @transaction.atomic
+    def upload_file(self, request, pk, *args, **kwargs):
+        request_serializer = cv_serializers.CvFileSerializer(data=request.data)
+        request_serializer.is_valid()
+        instance = request_serializer.save(cv_id=self.get_object().id)
+        response_serializer = cv_serializers.CvFileReadSerializer(instance=instance)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_204_NO_CONTENT: StatusSerializer()
+        },
+    )
+    @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
+    @transaction.atomic
+    def delete_file(self, request, pk, file_id, *args, **kwargs):
+        self.get_object()
+        get_object_or_404(queryset=cv_models.CvFile.objects, pk=file_id).delete()
+        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+
 
 class CvLinkedObjectFilter(filters.FilterSet):
     cv_id = filters.ModelChoiceFilter(queryset=cv_models.CV.objects)
@@ -163,7 +190,7 @@ class CvLinkedObjectFilterBackend(filters.DjangoFilterBackend):
     def get_filterset_class(self, view, queryset=None):
         if filterset_class := getattr(view, 'Filter', None):
             return filterset_class
-        return super().get_filterset_class(view, queryset)
+        return super().get_filterset_class(view, queryset) or CvLinkedObjectFilter
 
 
 class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
@@ -185,6 +212,23 @@ class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return super().get_queryset().prefetch_related(
             *self.get_queryset_prefetch_related()
         )
+
+
+class CvCompetenceViewSet(CvLinkedObjectViewSet):
+    queryset = cv_models.CvCompetence.objects
+    serializer_class = cv_serializers.CvCompetenceSerializer
+    serializer_read_class = cv_serializers.CvCompetenceReadSerializer
+
+    def get_queryset_prefetch_related(self):
+        return ['competence']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            cv_linked_filter_cv_field,
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CvContactViewSet(CvLinkedObjectViewSet):
@@ -463,7 +507,7 @@ class CvEducationViewSet(CvLinkedObjectViewSet):
 class CvCertificateViewSet(CvLinkedObjectViewSet):
     queryset = cv_models.CvCertificate.objects
     serializer_class = cv_serializers.CvCertificateSerializer
-    serializer_read_class = cv_serializers.CvEducationReadSerializer
+    serializer_read_class = cv_serializers.CvCertificateReadSerializer
 
     def get_queryset_prefetch_related(self):
         return ['education_place', 'education_place', 'education_place']

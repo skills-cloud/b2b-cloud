@@ -34,6 +34,30 @@ class CvLinkedObjectBaseSerializer(ModelSerializer):
 
 
 ########################################################################################################################
+# CvCompetence
+########################################################################################################################
+
+
+class CvCompetenceSerializer(CvLinkedObjectBaseSerializer):
+    competence_id = serializers.PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Competence.objects
+    )
+
+    class Meta:
+        model = cv_models.CvCompetence
+        fields = CvLinkedObjectBaseSerializer.Meta.fields + [
+            'competence_id', 'years',
+        ]
+
+
+class CvCompetenceReadSerializer(CvCompetenceSerializer):
+    competence = dictionary_serializers.CompetenceSerializer(read_only=True)
+
+    class Meta(CvCompetenceSerializer.Meta):
+        fields = CvCompetenceSerializer.Meta.fields + ['competence']
+
+
+########################################################################################################################
 # CvContact
 ########################################################################################################################
 
@@ -54,7 +78,6 @@ class CvContactReadSerializer(CvContactSerializer):
     contact_type = dictionary_serializers.ContactTypeSerializer(read_only=True)
 
     class Meta(CvContactSerializer.Meta):
-        model = cv_models.CvContact
         fields = CvContactSerializer.Meta.fields + ['contact_type']
 
 
@@ -267,10 +290,26 @@ class CvCertificateReadSerializer(CvCertificateSerializer):
     education_speciality = dictionary_serializers.EducationSpecialtySerializer(read_only=True, allow_null=True)
     education_graduate = dictionary_serializers.EducationGraduateSerializer(read_only=True, allow_null=True)
 
-    class Meta(CvEducationSerializer.Meta):
+    class Meta(CvCertificateSerializer.Meta):
         fields = CvCertificateSerializer.Meta.fields + [
             'education_place', 'education_speciality', 'education_graduate'
         ]
+
+
+########################################################################################################################
+# CvFile
+########################################################################################################################
+
+
+class CvFileSerializer(FileModelBaseSerializer):
+    class Meta:
+        model = cv_models.CvFile
+        fields = FileModelBaseSerializer.Meta.fields + ['cv_id']
+
+
+class CvFileReadSerializer(CvFileSerializer):
+    class Meta(CvFileSerializer.Meta):
+        fields = CvFileSerializer.Meta.fields + ['file_name', 'file_ext', 'file_size']
 
 
 ########################################################################################################################
@@ -308,21 +347,30 @@ class CvDetailReadSerializer(CvDetailSerializer):
     country = dictionary_serializers.CountrySerializer(read_only=True, allow_null=True)
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
     citizenship = dictionary_serializers.CitizenshipSerializer(read_only=True, allow_null=True)
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(source='competencies', read_only=True, many=True)
+    # competencies_ids = serializers.PrimaryKeyRelatedIdField(source='competencies', read_only=True, many=True)
 
     contacts = CvContactReadSerializer(many=True, read_only=True)
-    time_slots = CvTimeSlotSerializer(many=True, read_only=True)
+    time_slots = CvTimeSlotReadSerializer(many=True, read_only=True)
+    positions = CvPositionReadSerializer(many=True, read_only=True)
+    career = CvCareerReadSerializer(many=True, read_only=True)
+    education = CvEducationReadSerializer(many=True, read_only=True)
+    certificates = CvCertificateReadSerializer(many=True, read_only=True)
+    competencies = CvCompetenceReadSerializer(many=True, read_only=True)
 
     class Meta(CvDetailSerializer.Meta):
         fields = CvDetailSerializer.Meta.fields + [
-            'user', 'country', 'city', 'citizenship', 'competencies_ids', 'contacts', 'time_slots'
+            'user', 'country', 'city', 'citizenship',
+            'competencies',
+            'contacts', 'time_slots', 'positions', 'career', 'education', 'certificates',
         ]
 
 
-class CvListSerializer(CvDetailSerializer):
-    class Meta(CvDetailSerializer.Meta):
+class CvListSerializer(CvDetailReadSerializer):
+    class Meta(CvDetailReadSerializer.Meta):
         fields = [
             k
-            for k in CvDetailSerializer.Meta.fields
-            if k not in ['contacts', 'time_slots']
+            for k in CvDetailReadSerializer.Meta.fields
+            if k not in [
+                # 'contacts', 'time_slots', 'positions', 'career', 'education', 'certificates'
+            ]
         ]

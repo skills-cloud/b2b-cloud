@@ -108,3 +108,10 @@ class Competence(MPTTModel, DictionaryModelBase):
     class MPTTMeta:
         level_attr = 'mptt_level'
         order_insertion_by = ['name']
+
+
+class IndustrySector(DictionaryModelBase):
+    class Meta:
+        ordering = ['sorting', 'name']
+        verbose_name = _('отрасль')
+        verbose_name_plural = _('отрасли')

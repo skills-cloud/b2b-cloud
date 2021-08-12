@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from django.db.models import Model
 
 if TYPE_CHECKING:
-    from main.models import CV, CvPositionFile, CvCareerFile
+    from main.models import CV, CvPositionFile, CvCareerFile, CvFile
 
 
 def cv_upload_to_prefix(instance: 'CV') -> Path:
@@ -48,6 +48,10 @@ def cv_linked_object_upload_to_immutable(instance: Model, filename, cv_instance:
                     + Path(filename).suffix
             )
     )
+
+
+def cv_file_file_upload_to(instance: 'CvFile', filename: str) -> Path:
+    return cv_linked_object_upload_to_immutable(instance, filename, instance.cv)
 
 
 def cv_position_file_upload_to(instance: 'CvPositionFile', filename: str) -> Path:

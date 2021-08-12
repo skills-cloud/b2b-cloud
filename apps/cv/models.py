@@ -1,8 +1,8 @@
+import reversion
+from typing import Optional
 from pathlib import Path
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-import reversion
-from typing import Optional
 
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
@@ -34,7 +34,7 @@ class FileModelAbstract(DatesModelBase):
 @reversion.register(follow=['contacts', 'positions', 'career', 'education', 'certificates', 'files'])
 class CV(DatesModelBase):
     class Gender(models.TextChoices):
-        MALE = 'М', _('Мужской')
+        MALE = 'M', _('Мужской')
         FEMALE = 'F', _('Женский')
 
     UPLOAD_TO = 'cv'
@@ -61,7 +61,6 @@ class CV(DatesModelBase):
         'dictionary.Citizenship', on_delete=models.RESTRICT, null=True, blank=True,
         verbose_name=_('гражданство')
     )
-    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
     is_with_disabilities = models.BooleanField(default=False, verbose_name=_('ограниченные возможности'))
     is_resource_owner = models.BooleanField(default=False, verbose_name=_('владелец ресурса'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
@@ -91,6 +90,34 @@ class CV(DatesModelBase):
     def id_verbose(self) -> str:
         return str(self.id).zfill(7)
 
+    @property
+    def competence_count(self) -> int:
+        return len(self.competencies.all())
+
+    @property
+    def contact_count(self) -> int:
+        return len(self.contacts.all())
+
+    @property
+    def time_slot_count(self) -> int:
+        return len(self.time_slots.all())
+
+    @property
+    def position_count(self) -> int:
+        return len(self.positions.all())
+
+    @property
+    def career_count(self) -> int:
+        return len(self.career.all())
+
+    @property
+    def education_count(self) -> int:
+        return len(self.education.all())
+
+    @property
+    def file_count(self) -> int:
+        return len(self.files.all())
+
 
 class CvLinkedObjectQuerySet(models.QuerySet):
     def filter_by_user(self, user: User):
@@ -100,6 +127,26 @@ class CvLinkedObjectQuerySet(models.QuerySet):
 class CvLinkedObjectManager(models.Manager.from_queryset(CvLinkedObjectQuerySet)):
     def get_queryset(self):
         return super().get_queryset().prefetch_related('cv')
+
+
+@reversion.register(follow=['cv'])
+class CvCompetence(DatesModelBase):
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='competencies', verbose_name=_('анкета'))
+    competence = models.ForeignKey('dictionary.Competence', on_delete=models.RESTRICT, verbose_name=_('компетенция'))
+    years = models.FloatField(null=True, blank=True, verbose_name=_('опыт лет'), help_text='float')
+
+    class Meta:
+        ordering = ['-years', 'id']
+        unique_together = [
+            ['cv', 'competence']
+        ]
+        verbose_name = _('компетенция')
+        verbose_name_plural = _('компетенции')
+
+    objects = CvLinkedObjectManager()
+
+    def __str__(self):
+        return f'< {self.cv_id} / {self.id} >'
 
 
 @reversion.register(follow=['cv'])
@@ -309,8 +356,10 @@ class CvCertificate(DatesModelBase):
 
 @reversion.register(follow=['cv'])
 class CvFile(FileModelAbstract):
+    UPLOAD_TO = 'file'
+
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='files', verbose_name=_('анкета'))
-    file = models.FileField(upload_to=upload_to.cv_career_file_upload_to, verbose_name=_('файл'))
+    file = models.FileField(upload_to=upload_to.cv_file_file_upload_to, verbose_name=_('файл'))
 
     class Meta:
         ordering = ['id']
