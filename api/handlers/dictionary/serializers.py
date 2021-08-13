@@ -11,14 +11,14 @@ class DictionaryBaseSerializer(ModelSerializer):
         exclude = ['created_at', 'updated_at', 'sorting']
 
 
-class CountrySerializer(DictionaryBaseSerializer):
-    class Meta(DictionaryBaseSerializer.Meta):
-        model = dictionary_models.Country
-
-
 class TypeOfEmploymentSerializer(DictionaryBaseSerializer):
     class Meta(DictionaryBaseSerializer.Meta):
         model = dictionary_models.TypeOfEmployment
+
+
+class CountrySerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.Country
 
 
 class CitySerializer(DictionaryBaseSerializer):
@@ -63,6 +63,10 @@ class CompetenceSerializer(DictionaryBaseSerializer):
         model = dictionary_models.Competence
         fields = ['id', 'parent_id', 'name']
         exclude = None
+
+
+class CompetenceInlineSerializer(CompetenceSerializer):
+    pass
 
 
 class CompetenceTreeSerializer(DictionaryBaseSerializer):

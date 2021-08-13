@@ -257,6 +257,14 @@ class CvContactViewSet(CvLinkedObjectViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class CvTimeSlotViewSet(CvLinkedObjectViewSet):
@@ -448,7 +456,7 @@ class CvCareerViewSet(CvLinkedObjectViewSet):
     @transaction.atomic
     def delete_file(self, request, pk, file_id, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvPositionFile.objects, pk=file_id).delete()
+        get_object_or_404(queryset=cv_models.CvCareerFile.objects, pk=file_id).delete()
         return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
 
 

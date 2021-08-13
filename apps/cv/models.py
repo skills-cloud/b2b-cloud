@@ -174,7 +174,7 @@ class CvContact(DatesModelBase):
         return f'{self.contact_type_id} :: {self.value} < {self.cv_id} / {self.id} >'
 
 
-@reversion.register()
+@reversion.register(follow=['cv'])
 class CvTimeSlot(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='time_slots', verbose_name=_('анкета'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))

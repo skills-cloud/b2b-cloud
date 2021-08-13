@@ -348,6 +348,8 @@ class CvDetailReadSerializer(CvDetailSerializer):
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
     citizenship = dictionary_serializers.CitizenshipSerializer(read_only=True, allow_null=True)
     # competencies_ids = serializers.PrimaryKeyRelatedIdField(source='competencies', read_only=True, many=True)
+    # competencies = dictionary_serializers.CompetenceInlineSerializer(many=True, read_only=True)
+
 
     contacts = CvContactReadSerializer(many=True, read_only=True)
     time_slots = CvTimeSlotReadSerializer(many=True, read_only=True)
