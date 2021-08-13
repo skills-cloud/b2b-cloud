@@ -34,7 +34,7 @@ class FileModelAbstract(DatesModelBase):
 @reversion.register(follow=['contacts', 'positions', 'career', 'education', 'certificates', 'files'])
 class CV(DatesModelBase):
     class Gender(models.TextChoices):
-        MALE = 'М', _('Мужской')
+        MALE = 'M', _('Мужской')
         FEMALE = 'F', _('Женский')
 
     UPLOAD_TO = 'cv'
@@ -127,7 +127,7 @@ class CvContact(DatesModelBase):
         return f'{self.contact_type_id} :: {self.value} < {self.cv_id} / {self.id} >'
 
 
-@reversion.register()
+@reversion.register(follow=['cv'])
 class CvTimeSlot(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='time_slots', verbose_name=_('анкета'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))

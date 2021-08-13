@@ -31,8 +31,8 @@ def custom_exception_handler(exc, context):
         response.data['details'] = exc.args[0]
         response.status = status.HTTP_400_BAD_REQUEST
     elif isinstance(exc, Exception):
-        if settings.DEBUG:
-            raise exc
+        # if settings.DEBUG:
+        #     raise exc
         response.data['details'] = str(details)
         response.status_code = status.HTTP_400_BAD_REQUEST
     return response

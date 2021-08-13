@@ -11,14 +11,14 @@ class DictionaryBaseSerializer(ModelSerializer):
         exclude = ['created_at', 'updated_at']
 
 
-class CountrySerializer(DictionaryBaseSerializer):
-    class Meta(DictionaryBaseSerializer.Meta):
-        model = dictionary_models.Country
-
-
 class TypeOfEmploymentSerializer(DictionaryBaseSerializer):
     class Meta(DictionaryBaseSerializer.Meta):
         model = dictionary_models.TypeOfEmployment
+
+
+class CountrySerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.Country
 
 
 class CitySerializer(DictionaryBaseSerializer):
@@ -60,7 +60,13 @@ class PositionSerializer(DictionaryBaseSerializer):
 
 class CompetenceSerializer(DictionaryBaseSerializer):
     class Meta(DictionaryBaseSerializer.Meta):
-        model = dictionary_models.Position
+        model = dictionary_models.Competence
+
+
+class CompetenceInlineSerializer(CompetenceSerializer):
+    class Meta(CompetenceSerializer.Meta):
+        fields = ['id', 'name']
+        exclude = None
 
 
 class CompetenceTreeSerializer(DictionaryBaseSerializer):
