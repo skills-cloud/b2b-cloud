@@ -309,13 +309,14 @@ class CvDetailReadSerializer(CvDetailSerializer):
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
     citizenship = dictionary_serializers.CitizenshipSerializer(read_only=True, allow_null=True)
     competencies_ids = serializers.PrimaryKeyRelatedIdField(source='competencies', read_only=True, many=True)
+    competencies = dictionary_serializers.CompetenceInlineSerializer(many=True, read_only=True)
 
     contacts = CvContactReadSerializer(many=True, read_only=True)
     time_slots = CvTimeSlotSerializer(many=True, read_only=True)
 
     class Meta(CvDetailSerializer.Meta):
         fields = CvDetailSerializer.Meta.fields + [
-            'user', 'country', 'city', 'citizenship', 'competencies_ids', 'contacts', 'time_slots'
+            'user', 'country', 'city', 'citizenship', 'competencies_ids', 'competencies', 'contacts', 'time_slots'
         ]
 
 

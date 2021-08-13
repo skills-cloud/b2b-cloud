@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 from os import environ
-from split_settings.tools import include
+from split_settings.tools import include, optional
 
 sys.path.append('apps')
 
@@ -24,6 +24,7 @@ _base_settings = (
     'bits/email.py',
     'bits/api.py',
     'bits/log.py',
+    optional('settings_local.py'),
     'bits/_last.py',
 )
 
