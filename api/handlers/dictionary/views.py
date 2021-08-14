@@ -83,6 +83,16 @@ class PositionViewSet(DictionaryBaseViewSet):
     serializer_class = dictionary_serializers.PositionSerializer
 
 
+class IndustrySectorViewSet(DictionaryBaseViewSet):
+    queryset = dictionary_models.IndustrySector.objects
+    serializer_class = dictionary_serializers.IndustrySectorSerializer
+
+
+class PhysicalLimitationViewSet(DictionaryBaseViewSet):
+    queryset = dictionary_models.PhysicalLimitation.objects
+    serializer_class = dictionary_serializers.PhysicalLimitationSerializer
+
+
 class CompetenceViewSet(DictionaryBaseViewSet):
     queryset = dictionary_models.Competence.objects
     serializer_class = dictionary_serializers.CompetenceSerializer

@@ -390,6 +390,36 @@
     }
 },
 {
+    "model": "dictionary.physicallimitation",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-08-14T13:12:45.413Z",
+        "updated_at": "2021-08-14T13:12:45.413Z",
+        "name": "Слабый слух",
+        "sorting": 1
+    }
+},
+{
+    "model": "dictionary.physicallimitation",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-08-14T13:12:53.143Z",
+        "updated_at": "2021-08-14T13:12:53.143Z",
+        "name": "Слабое зрение",
+        "sorting": 2
+    }
+},
+{
+    "model": "dictionary.physicallimitation",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-08-14T13:13:05.499Z",
+        "updated_at": "2021-08-14T13:13:05.500Z",
+        "name": "Ограниченная подвижность",
+        "sorting": 3
+    }
+},
+{
     "model": "dictionary.competence",
     "pk": 1,
     "fields": {
@@ -513,6 +543,36 @@
         "rght": 5,
         "tree_id": 3,
         "mptt_level": 1
+    }
+},
+{
+    "model": "dictionary.industrysector",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-08-14T14:56:17.189Z",
+        "updated_at": "2021-08-14T14:56:17.189Z",
+        "name": "IT",
+        "sorting": 1
+    }
+},
+{
+    "model": "dictionary.industrysector",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-08-14T14:56:30.012Z",
+        "updated_at": "2021-08-14T14:56:30.012Z",
+        "name": "Улуги населению",
+        "sorting": 2
+    }
+},
+{
+    "model": "dictionary.industrysector",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-08-14T14:56:39.654Z",
+        "updated_at": "2021-08-14T14:56:39.654Z",
+        "name": "Океанология и океанография",
+        "sorting": 3
     }
 }
 ]

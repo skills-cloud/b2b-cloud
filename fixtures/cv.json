@@ -10,12 +10,14 @@
         "first_name": "Алексей",
         "middle_name": "Александрович",
         "photo": "cv/000/000/1/photo/54bc1e56ca34f965d1a5c7888f698d8b75d8ca15e98d1549af80d46dd1c0d2c9.jpg",
-        "gender": "М",
+        "gender": "M",
         "birth_date": "1981-08-26",
         "country": 1,
         "city": 1,
         "citizenship": 1,
-        "is_with_disabilities": false,
+        "days_to_contact": null,
+        "time_to_contact_from": null,
+        "time_to_contact_to": null,
         "is_resource_owner": false,
         "is_verified": false,
         "competencies": [
@@ -24,7 +26,8 @@
             2,
             4,
             5
-        ]
+        ],
+        "physical_limitations": []
     }
 },
 {
@@ -38,18 +41,21 @@
         "first_name": "Вася",
         "middle_name": null,
         "photo": "",
-        "gender": null,
+        "gender": "M",
         "birth_date": "2001-07-11",
         "country": 3,
         "city": 4,
         "citizenship": 1,
-        "is_with_disabilities": false,
+        "days_to_contact": null,
+        "time_to_contact_from": null,
+        "time_to_contact_to": null,
         "is_resource_owner": false,
         "is_verified": false,
         "competencies": [
             1,
             7
-        ]
+        ],
+        "physical_limitations": []
     }
 },
 {
@@ -63,15 +69,18 @@
         "first_name": "Кшиштоф",
         "middle_name": "Кржижекович",
         "photo": "",
-        "gender": "М",
+        "gender": "M",
         "birth_date": "1991-09-12",
         "country": 1,
         "city": 1,
         "citizenship": 2,
-        "is_with_disabilities": false,
+        "days_to_contact": null,
+        "time_to_contact_from": null,
+        "time_to_contact_to": null,
         "is_resource_owner": false,
         "is_verified": false,
-        "competencies": []
+        "competencies": [],
+        "physical_limitations": []
     }
 },
 {
@@ -79,65 +88,60 @@
     "pk": 6,
     "fields": {
         "created_at": "2021-08-10T10:04:51.041Z",
-        "updated_at": "2021-08-10T10:39:04.730Z",
+        "updated_at": "2021-08-14T13:14:48.323Z",
         "user": null,
         "last_name": "Рыжков",
         "first_name": "Василий",
         "middle_name": null,
         "photo": "",
-        "gender": "М",
+        "gender": "M",
         "birth_date": "2021-08-10",
         "country": null,
         "city": null,
         "citizenship": null,
-        "is_with_disabilities": false,
+        "days_to_contact": null,
+        "time_to_contact_from": null,
+        "time_to_contact_to": null,
         "is_resource_owner": false,
         "is_verified": false,
-        "competencies": []
+        "competencies": [
+            8,
+            7
+        ],
+        "physical_limitations": [
+            1
+        ]
     }
 },
 {
     "model": "cv.cv",
-    "pk": 7,
+    "pk": 12,
     "fields": {
-        "created_at": "2021-08-10T10:43:37.284Z",
-        "updated_at": "2021-08-10T10:43:37.284Z",
+        "created_at": "2021-08-14T13:51:37.670Z",
+        "updated_at": "2021-08-14T14:08:27.103Z",
         "user": null,
-        "last_name": null,
-        "first_name": null,
-        "middle_name": null,
-        "photo": "704528386add56e60e4eb28fc22f30dc.jpg",
-        "gender": null,
-        "birth_date": null,
-        "country": null,
-        "city": null,
-        "citizenship": null,
-        "is_with_disabilities": false,
-        "is_resource_owner": false,
+        "last_name": "Нестерова",
+        "first_name": "Юля",
+        "middle_name": "Ильинична",
+        "photo": "cv/000/001/2/photo/395763367a97f5433043488c39cec74c59bd2a8c9ab83877d3904624a3248aab.gif",
+        "gender": "F",
+        "birth_date": "2021-08-14",
+        "country": 1,
+        "city": 1,
+        "citizenship": 1,
+        "days_to_contact": null,
+        "time_to_contact_from": null,
+        "time_to_contact_to": null,
+        "is_resource_owner": true,
         "is_verified": false,
-        "competencies": []
-    }
-},
-{
-    "model": "cv.cv",
-    "pk": 8,
-    "fields": {
-        "created_at": "2021-08-10T10:54:01.672Z",
-        "updated_at": "2021-08-10T10:54:01.672Z",
-        "user": null,
-        "last_name": null,
-        "first_name": null,
-        "middle_name": null,
-        "photo": "cv/000/Non/e/photo/080bedd5273ce53c5b47bc49e2db1f1da21e28bd3e3dc5c1a2f5ce98c018d682.jpg",
-        "gender": null,
-        "birth_date": null,
-        "country": null,
-        "city": null,
-        "citizenship": null,
-        "is_with_disabilities": false,
-        "is_resource_owner": false,
-        "is_verified": false,
-        "competencies": []
+        "competencies": [
+            1,
+            2
+        ],
+        "physical_limitations": [
+            1,
+            2
+        ]
     }
 },
 {
@@ -145,11 +149,11 @@
     "pk": 1,
     "fields": {
         "created_at": "2021-07-11T14:05:38.662Z",
-        "updated_at": "2021-07-11T14:05:38.662Z",
+        "updated_at": "2021-08-13T13:07:07.610Z",
         "cv": 1,
         "contact_type": 2,
         "value": "atlantij@gmail.com",
-        "is_primary": true,
+        "is_primary": false,
         "comment": ""
     }
 },
@@ -284,6 +288,19 @@
     }
 },
 {
+    "model": "cv.cvcontact",
+    "pk": 24,
+    "fields": {
+        "created_at": "2021-08-14T14:04:07.897Z",
+        "updated_at": "2021-08-14T14:05:08.422Z",
+        "cv": 12,
+        "contact_type": 2,
+        "value": "asd@qwe.com",
+        "is_primary": true,
+        "comment": null
+    }
+},
+{
     "model": "cv.cvtimeslot",
     "pk": 1,
     "fields": {
@@ -352,6 +369,23 @@
     }
 },
 {
+    "model": "cv.cvtimeslot",
+    "pk": 5,
+    "fields": {
+        "created_at": "2021-08-14T14:02:08.754Z",
+        "updated_at": "2021-08-14T14:02:08.754Z",
+        "cv": 12,
+        "date_from": "2020-08-14",
+        "date_to": "2021-08-14",
+        "country": 1,
+        "city": 2,
+        "type_of_employment": 3,
+        "price": 1050.0,
+        "is_work_permit_required": true,
+        "description": "string"
+    }
+},
+{
     "model": "cv.cvposition",
     "pk": 1,
     "fields": {
@@ -403,6 +437,20 @@
         "cv": 1,
         "position": 1,
         "competencies": []
+    }
+},
+{
+    "model": "cv.cvposition",
+    "pk": 6,
+    "fields": {
+        "created_at": "2021-08-14T14:00:12.617Z",
+        "updated_at": "2021-08-14T14:00:12.617Z",
+        "cv": 12,
+        "position": 1,
+        "competencies": [
+            6,
+            7
+        ]
     }
 },
 {
@@ -505,6 +553,17 @@
     }
 },
 {
+    "model": "cv.cvpositionfile",
+    "pk": 17,
+    "fields": {
+        "created_at": "2021-08-14T14:00:44.744Z",
+        "updated_at": "2021-08-14T14:00:44.744Z",
+        "file_name": "примеры алеф вак",
+        "cv_position": 6,
+        "file": "cv/000/001/2/position/39e3834126022d735b43a21728b310f6c51abdffa3e133c7ebef487e2a61b3bc.docx"
+    }
+},
+{
     "model": "cv.cvcareer",
     "pk": 1,
     "fields": {
@@ -566,6 +625,28 @@
     }
 },
 {
+    "model": "cv.cvcareer",
+    "pk": 6,
+    "fields": {
+        "created_at": "2021-08-14T13:56:10.570Z",
+        "updated_at": "2021-08-14T13:56:10.570Z",
+        "cv": 12,
+        "date_from": "2021-08-14",
+        "date_to": "2021-08-14",
+        "organization": 1,
+        "position": 1,
+        "description": "string",
+        "is_verified": true,
+        "competencies": [
+            3,
+            4
+        ],
+        "projects": [
+            1
+        ]
+    }
+},
+{
     "model": "cv.cvcareerfile",
     "pk": 2,
     "fields": {
@@ -585,6 +666,38 @@
         "file_name": "out_rec_repl",
         "cv_career": 1,
         "file": "cv/000/000/1/career/b7c31e4b62ce76fe03cbd34de2a5a1d10eed169f991299247a8777df1b3d005f.seq"
+    }
+},
+{
+    "model": "cv.cvcareerfile",
+    "pk": 4,
+    "fields": {
+        "created_at": "2021-08-14T13:56:27.771Z",
+        "updated_at": "2021-08-14T13:56:27.771Z",
+        "file_name": "Резюме",
+        "cv_career": 6,
+        "file": "cv/000/001/2/career/95e8a6c798ec61a39e1133f2f2faa417d3e56a178a3fd35658de45f2e230093c.pdf"
+    }
+},
+{
+    "model": "cv.cvproject",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-08-14T15:02:26.719Z",
+        "updated_at": "2021-08-14T15:02:26.719Z",
+        "cv": 12,
+        "name": "WebCam portal",
+        "date_from": "2011-08-14",
+        "date_to": "2021-08-14",
+        "organization": 1,
+        "position": 1,
+        "industry_sector": 1,
+        "description": "WOW",
+        "is_verified": true,
+        "competencies": [
+            1,
+            2
+        ]
     }
 },
 {
@@ -624,6 +737,26 @@
     }
 },
 {
+    "model": "cv.cveducation",
+    "pk": 3,
+    "fields": {
+        "created_at": "2021-08-14T13:59:37.474Z",
+        "updated_at": "2021-08-14T13:59:37.474Z",
+        "cv": 12,
+        "date_from": "2021-08-14",
+        "date_to": "2021-08-14",
+        "is_verified": true,
+        "description": "string",
+        "education_place": 2,
+        "education_speciality": 2,
+        "education_graduate": 2,
+        "competencies": [
+            1,
+            5
+        ]
+    }
+},
+{
     "model": "cv.cvcertificate",
     "pk": 1,
     "fields": {
@@ -642,6 +775,38 @@
             1,
             2
         ]
+    }
+},
+{
+    "model": "cv.cvcertificate",
+    "pk": 2,
+    "fields": {
+        "created_at": "2021-08-14T13:55:30.130Z",
+        "updated_at": "2021-08-14T13:55:30.130Z",
+        "cv": 12,
+        "date": "2021-08-14",
+        "is_verified": true,
+        "name": "string",
+        "number": "string",
+        "description": "string",
+        "education_place": 1,
+        "education_speciality": 1,
+        "education_graduate": 1,
+        "competencies": [
+            3,
+            4
+        ]
+    }
+},
+{
+    "model": "cv.cvfile",
+    "pk": 1,
+    "fields": {
+        "created_at": "2021-08-14T13:53:22.191Z",
+        "updated_at": "2021-08-14T13:53:22.191Z",
+        "file_name": "примеры алеф вак",
+        "cv": 12,
+        "file": "cv/000/001/2/file/c0df5e6883c8216b35486782dff0416a290f108ce27ecf80a2dc733b11570bb3.docx"
     }
 }
 ]
