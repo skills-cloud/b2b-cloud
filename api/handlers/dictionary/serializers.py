@@ -63,6 +63,16 @@ class CompetenceSerializer(DictionaryBaseSerializer):
         model = dictionary_models.Competence
 
 
+class PhysicalLimitationSerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.PhysicalLimitation
+
+
+class IndustrySectorSerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.IndustrySector
+
+
 class CompetenceInlineSerializer(CompetenceSerializer):
     class Meta(CompetenceSerializer.Meta):
         fields = ['id', 'name']

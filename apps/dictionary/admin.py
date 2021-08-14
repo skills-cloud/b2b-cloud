@@ -62,6 +62,16 @@ class PositionAdmin(DictionaryBaseAdmin):
     pass
 
 
+@admin.register(dictionary_models.PhysicalLimitation)
+class PhysicalLimitationAdmin(DictionaryBaseAdmin):
+    pass
+
+
+@admin.register(dictionary_models.IndustrySector)
+class IndustrySectorAdmin(DictionaryBaseAdmin):
+    pass
+
+
 @admin.register(dictionary_models.Competence)
 class CompetenceAdmin(DraggableMPTTAdmin):
     search_fields = ['name']
