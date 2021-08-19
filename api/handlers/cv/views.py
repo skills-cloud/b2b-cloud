@@ -57,26 +57,14 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     queryset = cv_models.CV.objects
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related(
-            'country',
-            'city',
-            'citizenship',
-            'competencies',
-            'contacts', 'contacts__contact_type',
-            'time_slots', 'time_slots__country', 'time_slots__city', 'time_slots__type_of_employment',
-            'positions', 'positions__position', 'positions__files',
-            'career', 'career__files', 'career__organization', 'career__projects', 'career__position',
-            'education',
-            'certificates',
-            'files',
-        )
+        return super().get_queryset().prefetch_related(*cv_models.CV.objects.get_queryset_prefetch_related())
 
     def get_serializer_class(self):
         if self.action == 'list':
             return cv_serializers.CvListSerializer
         if self.request.method in SAFE_METHODS:
             return cv_serializers.CvDetailReadSerializer
-        return cv_serializers.CvDetailSerializer
+        return cv_serializers.CvDetailWriteSerializer
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -150,7 +138,7 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     @transaction.atomic
     def set_photo(self, request, pk, *args, **kwargs):
         serializer = cv_serializers.CvSetPhotoSerializer(instance=self.get_object(), data=request.data)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -205,7 +193,8 @@ class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
             return self.serializer_read_class
         return self.serializer_class
 
-    def get_queryset_prefetch_related(self) -> List:
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
         return []
 
     def get_queryset(self):
@@ -240,7 +229,8 @@ class CvContactViewSet(CvLinkedObjectViewSet):
     serializer_class = cv_serializers.CvContactSerializer
     serializer_read_class = cv_serializers.CvContactReadSerializer
 
-    def get_queryset_prefetch_related(self):
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
         return ['contact_type']
 
     @swagger_auto_schema(
@@ -257,7 +247,7 @@ class CvContactViewSet(CvLinkedObjectViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -297,7 +287,8 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
     serializer_class = cv_serializers.CvTimeSlotSerializer
     serializer_read_class = cv_serializers.CvTimeSlotReadSerializer
 
-    def get_queryset_prefetch_related(self):
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
         return ['country', 'city', 'type_of_employment']
 
     @swagger_auto_schema(
@@ -352,8 +343,9 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
     serializer_class = cv_serializers.CvPositionSerializer
     serializer_read_class = cv_serializers.CvPositionReadSerializer
 
-    def get_queryset_prefetch_related(self):
-        return ['position', 'competencies']
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
+        return ['position', 'competencies', 'files']
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -380,7 +372,7 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
     @transaction.atomic
     def upload_file(self, request, pk, *args, **kwargs):
         request_serializer = cv_serializers.CvPositionFileSerializer(data=request.data)
-        request_serializer.is_valid()
+        request_serializer.is_valid(raise_exception=True)
         instance = request_serializer.save(cv_position_id=self.get_object().id)
         response_serializer = cv_serializers.CvPositionFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
@@ -408,7 +400,7 @@ class CvCareerViewSet(CvLinkedObjectViewSet):
     serializer_read_class = cv_serializers.CvCareerReadSerializer
 
     def get_queryset_prefetch_related(self):
-        return ['organization', 'position', 'competencies', 'projects']
+        return ['organization', 'position', 'competencies', 'projects', 'projects__organization', 'files']
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -442,7 +434,7 @@ class CvCareerViewSet(CvLinkedObjectViewSet):
     @transaction.atomic
     def upload_file(self, request, pk, *args, **kwargs):
         request_serializer = cv_serializers.CvCareerFileSerializer(data=request.data)
-        request_serializer.is_valid()
+        request_serializer.is_valid(raise_exception=True)
         instance = request_serializer.save(cv_career_id=self.get_object().id)
         response_serializer = cv_serializers.CvCareerFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
@@ -486,8 +478,9 @@ class CvEducationViewSet(CvLinkedObjectViewSet):
     serializer_class = cv_serializers.CvEducationSerializer
     serializer_read_class = cv_serializers.CvEducationReadSerializer
 
-    def get_queryset_prefetch_related(self):
-        return ['education_place', 'education_place', 'education_place']
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
+        return ['education_place', 'education_graduate', 'education_speciality']
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -512,13 +505,57 @@ class CvEducationViewSet(CvLinkedObjectViewSet):
         return super().list(request, *args, **kwargs)
 
 
+class CvProjectViewSet(CvLinkedObjectViewSet):
+    class Filter(CvLinkedObjectFilter):
+        position_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Position.objects)
+        organization_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=main_models.Organization.objects)
+        industry_sector_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.IndustrySector.objects)
+
+    queryset = cv_models.CvProject.objects
+    serializer_class = cv_serializers.CvProjectSerializer
+    serializer_read_class = cv_serializers.CvProjectReadSerializer
+
+    def get_queryset_prefetch_related(self):
+        return ['organization', 'position', 'competencies', 'projects', 'projects__organization', 'files']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            cv_linked_filter_cv_field,
+            openapi.Parameter(
+                'position_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+            openapi.Parameter(
+                'organization_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+            openapi.Parameter(
+                'industry_sector_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
 class CvCertificateViewSet(CvLinkedObjectViewSet):
     queryset = cv_models.CvCertificate.objects
     serializer_class = cv_serializers.CvCertificateSerializer
     serializer_read_class = cv_serializers.CvCertificateReadSerializer
 
-    def get_queryset_prefetch_related(self):
-        return ['education_place', 'education_place', 'education_place']
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
+        return ['education_place', 'education_graduate', 'education_speciality']
 
     @swagger_auto_schema(
         manual_parameters=[

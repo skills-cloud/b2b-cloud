@@ -94,6 +94,13 @@ class Position(DictionaryModelBase):
         verbose_name_plural = _('должности')
 
 
+class PhysicalLimitation(DictionaryModelBase):
+    class Meta:
+        ordering = ['sorting', 'name']
+        verbose_name = _('физическая особенность')
+        verbose_name_plural = _('физические особенности')
+
+
 class Competence(MPTTModel, DictionaryModelBase):
     sorting = None
     parent = TreeForeignKey(

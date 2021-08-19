@@ -65,6 +65,16 @@ class CompetenceSerializer(DictionaryBaseSerializer):
         exclude = None
 
 
+class PhysicalLimitationSerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.PhysicalLimitation
+
+
+class IndustrySectorSerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.IndustrySector
+
+
 class CompetenceInlineSerializer(CompetenceSerializer):
     pass
 

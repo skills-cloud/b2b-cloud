@@ -1,8 +1,9 @@
-import reversion
+from typing import Optional, List
 from typing import Optional
 from pathlib import Path
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+import reversion
 
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
@@ -37,6 +38,11 @@ class CV(DatesModelBase):
         MALE = 'M', _('Мужской')
         FEMALE = 'F', _('Женский')
 
+    class DaysToContact(models.TextChoices):
+        ALL = 'all', _('Все дни')
+        WORKDAYS = 'workdays', _('Будние дни')
+        WEEKENDS = 'weekends', _('Выходные дни')
+
     UPLOAD_TO = 'cv'
 
     user = models.ForeignKey(
@@ -61,7 +67,16 @@ class CV(DatesModelBase):
         'dictionary.Citizenship', on_delete=models.RESTRICT, null=True, blank=True,
         verbose_name=_('гражданство')
     )
-    is_with_disabilities = models.BooleanField(default=False, verbose_name=_('ограниченные возможности'))
+    physical_limitations = models.ManyToManyField(
+        'dictionary.PhysicalLimitation', blank=True,
+        verbose_name=_('физические особенности')
+    )
+    days_to_contact = models.CharField(
+        max_length=50, choices=DaysToContact.choices, null=True, blank=True,
+        verbose_name=_('дни для связи')
+    )
+    time_to_contact_from = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / с'))
+    time_to_contact_to = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / по'))
     is_resource_owner = models.BooleanField(default=False, verbose_name=_('владелец ресурса'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
 
@@ -75,7 +90,29 @@ class CV(DatesModelBase):
             return self
 
     class Manager(models.Manager.from_queryset(QuerySet)):
-        pass
+        @classmethod
+        def get_queryset_prefetch_related(cls) -> List[str]:
+            return [
+                'user', 'country', 'city', 'citizenship', 'competencies', 'physical_limitations', 'files',
+
+                'contacts', 'contacts__contact_type',
+
+                'time_slots', 'time_slots__country', 'time_slots__city', 'time_slots__type_of_employment',
+
+                'positions', 'positions__position', 'positions__files', 'positions__competencies',
+
+                'career', 'career__files', 'career__organization', 'career__projects', 'career__projects__organization',
+                'career__position', 'career__competencies',
+
+                'projects', 'projects__organization', 'projects__position', 'projects__industry_sector',
+                'projects__competencies',
+
+                'education', 'education__education_place', 'education__education_graduate',
+                'education__education_speciality', 'education__competencies',
+
+                'certificates', 'certificates__education_place', 'certificates__education_graduate',
+                'certificates__education_speciality', 'certificates__competencies',
+            ]
 
     objects = Manager()
 
@@ -109,6 +146,10 @@ class CV(DatesModelBase):
     @property
     def career_count(self) -> int:
         return len(self.career.all())
+
+    @property
+    def projects_count(self) -> int:
+        return len(self.projects.all())
 
     @property
     def education_count(self) -> int:
@@ -287,6 +328,36 @@ class CvCareerFile(FileModelAbstract):
 
     def __str__(self):
         return f'< {self.cv_career_id} / {self.id} >'
+
+
+@reversion.register(follow=['cv'])
+class CvProject(DatesModelBase):
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='projects', verbose_name=_('анкета'))
+    name = models.CharField(max_length=1000, verbose_name=_('название'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
+    organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    position = models.ForeignKey(
+        'dictionary.Position', on_delete=models.RESTRICT,
+        verbose_name=_('должность / роль')
+    )
+    industry_sector = models.ForeignKey(
+        'dictionary.IndustrySector', on_delete=models.RESTRICT, null=True, blank=True,
+        verbose_name=_('отрасль')
+    )
+    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+
+    class Meta:
+        ordering = ['-date_from']
+        verbose_name = _('проект')
+        verbose_name_plural = _('проекты')
+
+    objects = CvLinkedObjectManager()
+
+    def __str__(self):
+        return f'{self.date_from} – {self.date_to} < {self.cv_id} / {self.id} >'
 
 
 @reversion.register(follow=['cv'])
