@@ -120,7 +120,7 @@ class CvPositionSerializer(CvLinkedObjectBaseSerializer):
     class Meta(CvLinkedObjectBaseSerializer.Meta):
         model = cv_models.CvPosition
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'position_id', 'competencies_ids'
+            'position_id', 'competencies_ids', 'title',
         ]
 
 

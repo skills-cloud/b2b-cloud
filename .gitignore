@@ -128,3 +128,5 @@ dmypy.json
 
 .idea
 project/settings/settings_local.py
+project/settings/settings_local_last.py
+project/settings/settings_local_first.py
