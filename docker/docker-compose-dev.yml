@@ -30,6 +30,7 @@ services:
       - redis
     volumes:
       - ../../www/storage:/www/storage
+      - ../../www/shared:/shared
       - ../:/app
     env_file:
       - env-file/dev/app.env
