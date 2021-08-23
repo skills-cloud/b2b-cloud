@@ -499,7 +499,7 @@ class CvProjectViewSet(CvLinkedObjectViewSet):
     serializer_read_class = cv_serializers.CvProjectReadSerializer
 
     def get_queryset_prefetch_related(self):
-        return ['organization', 'position', 'competencies', 'projects', 'projects__organization', 'files']
+        return ['organization', 'position', 'industry_sector', 'competencies']
 
     @swagger_auto_schema(
         manual_parameters=[
