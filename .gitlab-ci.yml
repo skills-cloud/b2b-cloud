@@ -19,6 +19,7 @@ build_branch: &build-branch
     - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-review.yml push
   only:
     - test
+    - demo
     - release
   tags:
     - test
@@ -36,6 +37,15 @@ deploy_branch: &deploy
   tags:
     - test
 
+deploy_demo:
+  <<: *deploy
+  script:
+    - cd docker
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-demo.yml pull || exit 1
+    - docker-compose -p ${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG} -f docker-compose-demo.yml up -d
+  only:
+    - demo
 
 stop_branch:
   stage: stop
