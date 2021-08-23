@@ -201,7 +201,8 @@ class CvProjectSerializer(CvLinkedObjectBaseSerializer):
         queryset=dictionary_models.Position.objects
     )
     industry_sector_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.IndustrySector.objects, required=False
+        required=False, allow_null=True,
+        queryset=dictionary_models.IndustrySector.objects,
     )
     competencies_ids = serializers.PrimaryKeyRelatedIdField(
         source='competencies', required=False, many=True,
