@@ -110,7 +110,7 @@ class CvPositionFileReadSerializer(CvPositionFileSerializer):
 
 class CvPositionSerializer(CvLinkedObjectBaseSerializer):
     position_id = serializers.PrimaryKeyRelatedIdField(
-        required=False,
+        required=False, allow_null=True,
         queryset=dictionary_models.Position.objects
     )
     competencies_ids = serializers.PrimaryKeyRelatedIdField(
@@ -157,7 +157,7 @@ class CvCareerSerializer(CvLinkedObjectBaseSerializer):
         queryset=main_models.Organization.objects
     )
     position_id = serializers.PrimaryKeyRelatedIdField(
-        required=False,
+        required=False, allow_null=True,
         queryset=dictionary_models.Position.objects
     )
     competencies_ids = serializers.PrimaryKeyRelatedIdField(
