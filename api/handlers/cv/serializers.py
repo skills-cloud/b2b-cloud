@@ -133,6 +133,7 @@ class CvPositionFileReadSerializer(CvPositionFileSerializer):
 
 class CvPositionSerializer(CvLinkedObjectBaseSerializer):
     position_id = serializers.PrimaryKeyRelatedIdField(
+        required=False, allow_null=True,
         queryset=dictionary_models.Position.objects
     )
     competencies_ids = serializers.PrimaryKeyRelatedIdField(
@@ -143,7 +144,7 @@ class CvPositionSerializer(CvLinkedObjectBaseSerializer):
     class Meta(CvLinkedObjectBaseSerializer.Meta):
         model = cv_models.CvPosition
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'position_id', 'competencies_ids'
+            'position_id', 'competencies_ids', 'title',
         ]
 
 
@@ -179,6 +180,7 @@ class CvCareerSerializer(CvLinkedObjectBaseSerializer):
         queryset=main_models.Organization.objects
     )
     position_id = serializers.PrimaryKeyRelatedIdField(
+        required=False, allow_null=True,
         queryset=dictionary_models.Position.objects
     )
     competencies_ids = serializers.PrimaryKeyRelatedIdField(
@@ -222,7 +224,8 @@ class CvProjectSerializer(CvLinkedObjectBaseSerializer):
         queryset=dictionary_models.Position.objects
     )
     industry_sector_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.IndustrySector.objects, required=False
+        required=False, allow_null=True,
+        queryset=dictionary_models.IndustrySector.objects,
     )
     competencies_ids = serializers.PrimaryKeyRelatedIdField(
         source='competencies', required=False, many=True,

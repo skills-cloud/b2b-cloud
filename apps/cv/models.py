@@ -79,9 +79,10 @@ class CV(DatesModelBase):
     time_to_contact_to = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / по'))
     is_resource_owner = models.BooleanField(default=False, verbose_name=_('владелец ресурса'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+    about = models.TextField(null=True, blank=True, verbose_name=_('доп. информация'))
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-id']
         verbose_name = _('анкета')
         verbose_name_plural = _('анкеты')
 
@@ -202,7 +203,10 @@ class CvContact(DatesModelBase):
     comment = models.TextField(max_length=1000, null=True, blank=True, verbose_name=_('комментарий'))
 
     class Meta:
-        ordering = ['id']
+        ordering = ['is_primary', '-id']
+        index_together = [
+            [v.replace('-', '') for v in ordering]
+        ]
         unique_together = [
             'cv', 'contact_type', 'value',
         ]
@@ -237,7 +241,10 @@ class CvTimeSlot(DatesModelBase):
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
 
     class Meta:
-        ordering = ['-date_from']
+        ordering = ['-date_from', '-id']
+        index_together = [
+            [v.replace('-', '') for v in ordering]
+        ]
         verbose_name = _('таймслот')
         verbose_name_plural = _('таймслоты')
 
@@ -250,14 +257,15 @@ class CvTimeSlot(DatesModelBase):
 @reversion.register(follow=['cv', 'files'])
 class CvPosition(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='positions', verbose_name=_('анкета'))
+    title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
     position = models.ForeignKey(
-        'dictionary.Position', on_delete=models.RESTRICT,
+        'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
         verbose_name=_('должность')
     )
     competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-id']
         unique_together = [
             ['cv', 'position']
         ]
@@ -279,7 +287,7 @@ class CvPositionFile(FileModelAbstract):
     file = models.FileField(upload_to=upload_to.cv_position_file_upload_to, verbose_name=_('файл'))
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-id']
         verbose_name = _('файл роли')
         verbose_name_plural = _('файлы роли')
 
@@ -293,8 +301,9 @@ class CvCareer(DatesModelBase):
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
     organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
     position = models.ForeignKey(
-        'dictionary.Position', on_delete=models.RESTRICT,
+        'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
         verbose_name=_('должность / роль')
     )
     competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
@@ -303,7 +312,10 @@ class CvCareer(DatesModelBase):
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
 
     class Meta:
-        ordering = ['-date_from']
+        ordering = ['-date_from', '-id']
+        index_together = [
+            [v.replace('-', '') for v in ordering]
+        ]
         verbose_name = _('карьера')
         verbose_name_plural = _('карьера')
 
@@ -322,7 +334,7 @@ class CvCareerFile(FileModelAbstract):
     file = models.FileField(upload_to=upload_to.cv_career_file_upload_to, verbose_name=_('файл'))
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-id']
         verbose_name = _('файл карьеры')
         verbose_name_plural = _('файлы карьеры')
 
@@ -350,7 +362,10 @@ class CvProject(DatesModelBase):
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
 
     class Meta:
-        ordering = ['-date_from']
+        ordering = ['-date_from', '-id']
+        index_together = [
+            [v.replace('-', '') for v in ordering]
+        ]
         verbose_name = _('проект')
         verbose_name_plural = _('проекты')
 
@@ -382,7 +397,10 @@ class CvEducation(DatesModelBase):
     competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
 
     class Meta:
-        ordering = ['-date_from']
+        ordering = ['-date_from', '-id']
+        index_together = [
+            [v.replace('-', '') for v in ordering]
+        ]
         verbose_name = _('образование')
         verbose_name_plural = _('образование')
 
@@ -415,7 +433,10 @@ class CvCertificate(DatesModelBase):
     competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-date', '-id']
+        index_together = [
+            [v.replace('-', '') for v in ordering]
+        ]
         verbose_name = _('сертификат')
         verbose_name_plural = _('сертификаты')
 
@@ -433,7 +454,7 @@ class CvFile(FileModelAbstract):
     file = models.FileField(upload_to=upload_to.cv_file_file_upload_to, verbose_name=_('файл'))
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-id']
         verbose_name = _('файл анкеты')
         verbose_name_plural = _('файлы анкеты')
 

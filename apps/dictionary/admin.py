@@ -6,8 +6,9 @@ from dictionary import models as dictionary_models
 
 
 class DictionaryBaseAdmin(SortableAdminMixin, admin.ModelAdmin):
-    list_display = ['id', 'name']
-    list_editable = ['name']
+    list_display = ['id', 'name', 'is_verified']
+    list_editable = ['name', 'is_verified']
+    list_filter = ['is_verified']
     search_fields = ['name']
     readonly_fields = ['created_at', 'updated_at']
 
@@ -25,7 +26,7 @@ class CountryAdmin(DictionaryBaseAdmin):
 @admin.register(dictionary_models.City)
 class CityAdmin(DictionaryBaseAdmin):
     list_display = DictionaryBaseAdmin.list_display + ['country']
-    list_filter = ['country']
+    list_filter = DictionaryBaseAdmin.list_filter + ['country']
     autocomplete_fields = ['country']
 
     def get_queryset(self, request):
@@ -76,5 +77,6 @@ class IndustrySectorAdmin(DictionaryBaseAdmin):
 class CompetenceAdmin(DraggableMPTTAdmin):
     search_fields = ['name']
     mptt_level_indent = 10
-    list_display = ['tree_actions', 'indented_title']
+    list_display = ['tree_actions', 'indented_title', 'is_verified']
     list_display_links = ['indented_title']
+    list_filter = ['is_verified']

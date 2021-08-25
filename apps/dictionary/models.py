@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 from mptt.models import MPTTModel, TreeForeignKey
 
 from project.contrib.db.models import DatesModelBase
@@ -7,6 +8,8 @@ from project.contrib.db.models import DatesModelBase
 
 class DictionaryModelBase(DatesModelBase):
     name = models.CharField(max_length=500, verbose_name=_('название'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
 
     class Meta(DatesModelBase.Meta):
@@ -59,8 +62,6 @@ class ContactType(DictionaryModelBase):
 
 
 class EducationPlace(DictionaryModelBase):
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-
     class Meta:
         ordering = ['sorting', 'name']
         verbose_name = _('место учебы')
@@ -68,8 +69,6 @@ class EducationPlace(DictionaryModelBase):
 
 
 class EducationSpecialty(DictionaryModelBase):
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-
     class Meta:
         ordering = ['sorting', 'name']
         verbose_name = _('специальность')
@@ -77,8 +76,6 @@ class EducationSpecialty(DictionaryModelBase):
 
 
 class EducationGraduate(DictionaryModelBase):
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-
     class Meta:
         ordering = ['sorting', 'name']
         verbose_name = _('ученая степень')
@@ -86,8 +83,6 @@ class EducationGraduate(DictionaryModelBase):
 
 
 class Position(DictionaryModelBase):
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-
     class Meta:
         ordering = ['sorting', 'name']
         verbose_name = _('должность')
@@ -107,6 +102,7 @@ class Competence(MPTTModel, DictionaryModelBase):
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
         verbose_name=_('родитель')
     )
+    aliases = ArrayField(models.CharField(max_length=500), null=True, blank=True)
 
     class Meta:
         verbose_name = _('компетенция')
