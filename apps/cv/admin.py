@@ -1,14 +1,10 @@
-import copy
 from django.contrib import admin
 import nested_admin
 from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
 from reversion.admin import VersionAdmin
 from admin_auto_filters.filters import AutocompleteFilter
-from django.utils.translation import gettext_lazy as _
 
 from cv import models as cv_models
-
-
 
 
 @admin.register(cv_models.CV)

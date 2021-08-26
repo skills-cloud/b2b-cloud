@@ -5,14 +5,15 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter
+from rest_framework.viewsets import ModelViewSet
 
 from dictionary import models as dictionary_models
 from api.filters import OrderingFilterNullsLast
 from api.handlers.dictionary import serializers as dictionary_serializers
 
 
-class DictionaryBaseViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    http_method_names = ['get', 'post', 'patch']
+class DictionaryBaseViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
     search_fields = ['name']
     ordering_fields = list(itertools.chain(*[

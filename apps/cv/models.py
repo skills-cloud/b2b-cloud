@@ -1,7 +1,8 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from typing import Optional
 from pathlib import Path
-from django.db import models
+from django.db import models, transaction
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 import reversion
 
@@ -32,7 +33,7 @@ class FileModelAbstract(DatesModelBase):
             return None
 
 
-@reversion.register(follow=['contacts', 'positions', 'career', 'education', 'certificates', 'files'])
+@reversion.register(follow=['contacts', 'positions', 'career', 'education', 'certificates', 'files', 'competencies'])
 class CV(DatesModelBase):
     class Gender(models.TextChoices):
         MALE = 'M', _('Мужской')
@@ -94,7 +95,9 @@ class CV(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
-                'user', 'country', 'city', 'citizenship', 'competencies', 'physical_limitations', 'files',
+                'user', 'country', 'city', 'citizenship', 'physical_limitations', 'files',
+
+                'competencies', 'competencies__competence',
 
                 'contacts', 'contacts__contact_type',
 
@@ -113,6 +116,7 @@ class CV(DatesModelBase):
 
                 'certificates', 'certificates__education_place', 'certificates__education_graduate',
                 'certificates__education_speciality', 'certificates__competencies',
+
             ]
 
     objects = Manager()
@@ -175,20 +179,39 @@ class CvLinkedObjectManager(models.Manager.from_queryset(CvLinkedObjectQuerySet)
 class CvCompetence(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='competencies', verbose_name=_('анкета'))
     competence = models.ForeignKey('dictionary.Competence', on_delete=models.RESTRICT, verbose_name=_('компетенция'))
-    years = models.FloatField(null=True, blank=True, verbose_name=_('опыт лет'), help_text='float')
+    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
 
     class Meta:
-        ordering = ['-years', 'id']
+        ordering = ['-year_started', 'id']
         unique_together = [
             ['cv', 'competence']
         ]
         verbose_name = _('компетенция')
         verbose_name_plural = _('компетенции')
 
-    objects = CvLinkedObjectManager()
+    class Manager(CvLinkedObjectManager):
+        @transaction.atomic
+        def replace_for_cv(self, cv: CV, bulk_rows_data: List[Dict[str, Any]]) -> List['CvCompetence']:
+            self.filter(cv=cv).delete()
+            field_names = ['cv', 'cv_id', 'competence', 'competence_id', 'year_started']
+            return self.bulk_create(
+                CvCompetence(
+                    cv=cv,
+                    **{k: v for k, v in row.items() if k in field_names}
+                )
+                for row in bulk_rows_data
+            )
+
+    objects = Manager()
 
     def __str__(self):
-        return f'< {self.cv_id} / {self.id} >'
+        return f'{self.cv_id} / {self.competence_id} < {self.id} >'
+
+    @property
+    def years(self) -> Optional[int]:
+        if not self.year_started:
+            return
+        return timezone.now().year - self.year_started
 
 
 @reversion.register(follow=['cv'])
