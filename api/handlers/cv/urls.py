@@ -9,6 +9,7 @@ class Router(routers.DefaultRouter):
 
 router = Router()
 router.register('cv', views.CvViewSet)
+router.register('competence', views.CvCompetenceViewSet)
 router.register('contact', views.CvContactViewSet)
 router.register('time-slot', views.CvTimeSlotViewSet)
 router.register('position', views.CvPositionViewSet)

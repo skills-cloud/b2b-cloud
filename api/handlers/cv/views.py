@@ -3,17 +3,17 @@ from typing import List
 
 from django.db import transaction
 from django.db.models import Q
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
-from django_filters import DateFromToRangeFilter
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from django_filters import rest_framework as filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
+from django_filters import DateFromToRangeFilter
+from django_filters import rest_framework as filters
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from dictionary import models as dictionary_models
 from main import models as main_models
@@ -25,9 +25,8 @@ from api.filters import (
     DateRangeWidget,
 )
 from api.serializers import StatusSerializer
-from api.views_mixins import ViewSetFilteredByUserMixin
+from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.handlers.cv import serializers as cv_serializers
-from project.contrib.db import get_sql_from_queryset
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
 cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
@@ -169,6 +168,22 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         get_object_or_404(queryset=cv_models.CvFile.objects, pk=file_id).delete()
         return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
 
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvCompetenceCvReplaceSerializer(many=True),
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvCompetenceSerializer(many=True)
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='replace-competencies')
+    @transaction.atomic
+    def replace_competencies(self, request, pk, *args, **kwargs):
+        cv = self.get_object()
+        request_serializer = cv_serializers.CvCompetenceCvReplaceSerializer(data=request.data, many=True)
+        request_serializer.is_valid()
+        result_rows = cv_models.CvCompetence.objects.replace_for_cv(cv, request_serializer.data)
+        response_serializer = cv_serializers.CvCompetenceSerializer(result_rows, many=True)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
 
 class CvLinkedObjectFilter(filters.FilterSet):
     cv_id = filters.ModelChoiceFilter(queryset=cv_models.CV.objects)
@@ -181,17 +196,9 @@ class CvLinkedObjectFilterBackend(filters.DjangoFilterBackend):
         return super().get_filterset_class(view, queryset) or CvLinkedObjectFilter
 
 
-class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
+class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, viewsets.ModelViewSet):
     http_method_names = cv_viewsets_http_method_names
     filter_backends = [CvLinkedObjectFilterBackend, OrderingFilterNullsLast, SearchFilter]
-
-    serializer_class = None
-    serializer_read_class = None
-
-    def get_serializer_class(self):
-        if self.request.method in SAFE_METHODS:
-            return self.serializer_read_class
-        return self.serializer_class
 
     @classmethod
     def get_queryset_prefetch_related(cls) -> List[str]:
@@ -201,6 +208,23 @@ class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return super().get_queryset().prefetch_related(
             *self.get_queryset_prefetch_related()
         )
+
+
+class CvCompetenceViewSet(CvLinkedObjectViewSet):
+    queryset = cv_models.CvCompetence.objects
+    serializer_class = cv_serializers.CvCompetenceSerializer
+    serializer_read_class = cv_serializers.CvCompetenceReadSerializer
+
+    def get_queryset_prefetch_related(self):
+        return ['competence']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            cv_linked_filter_cv_field,
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CvContactViewSet(CvLinkedObjectViewSet):

@@ -1,19 +1,22 @@
 from pathlib import Path
-from rest_framework import fields
+from typing import Dict
+
+from django.utils import timezone
+from rest_framework import serializers
+from rest_framework.relations import PrimaryKeyRelatedField
 
 from acc.models import User
-from api import serializers
-from api.handlers.acc.serializers import UserInlineSerializer
-from dictionary import models as dictionary_models
 from main import models as main_models
+from dictionary import models as dictionary_models
 from cv import models as cv_models
-
+from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
+from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.main import serializers as main_serializers
 
 
-class FileModelBaseSerializer(serializers.ModelSerializer):
+class FileModelBaseSerializer(ModelSerializer):
     class Meta:
         fields = ['id', 'file', 'file_name']
 
@@ -25,12 +28,48 @@ class FileModelBaseSerializer(serializers.ModelSerializer):
 
 
 class CvLinkedObjectBaseSerializer(ModelSerializer):
-    cv_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=cv_models.CV.objects
-    )
+    cv_id = PrimaryKeyRelatedIdField(queryset=cv_models.CV.objects)
 
     class Meta:
         fields = ['id', 'cv_id']
+
+
+########################################################################################################################
+# CvCompetence
+########################################################################################################################
+
+
+class CvCompetenceSerializer(CvLinkedObjectBaseSerializer):
+    competence_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Competence.objects
+    )
+    years = serializers.IntegerField(required=False, allow_null=True)
+
+    class Meta:
+        model = cv_models.CvCompetence
+        fields = CvLinkedObjectBaseSerializer.Meta.fields + [
+            'competence_id', 'years',
+        ]
+
+
+class CvCompetenceCvReplaceSerializer(CvCompetenceSerializer):
+    cv_id = None
+    year_started = serializers.IntegerField(read_only=True)
+
+    class Meta(CvCompetenceSerializer.Meta):
+        fields = ['competence_id', 'years', 'year_started']
+
+    def to_internal_value(self, data: Dict):
+        if 'year_started' not in data and data.get('years'):
+            data['year_started'] = timezone.now().year - data['years']
+        return data
+
+
+class CvCompetenceReadSerializer(CvCompetenceSerializer):
+    competence = dictionary_serializers.CompetenceSerializer(read_only=True)
+
+    class Meta(CvCompetenceSerializer.Meta):
+        fields = CvCompetenceSerializer.Meta.fields + ['competence']
 
 
 ########################################################################################################################
@@ -39,7 +78,7 @@ class CvLinkedObjectBaseSerializer(ModelSerializer):
 
 
 class CvContactSerializer(CvLinkedObjectBaseSerializer):
-    contact_type_id = serializers.PrimaryKeyRelatedIdField(
+    contact_type_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.ContactType.objects
     )
 
@@ -63,13 +102,15 @@ class CvContactReadSerializer(CvContactSerializer):
 
 
 class CvTimeSlotSerializer(CvLinkedObjectBaseSerializer):
-    country_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.Country.objects, allow_null=True, required=False
+    country_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Country.objects,
+        allow_null=True, required=False,
     )
-    city_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.City.objects, allow_null=True, required=False
+    city_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.City.objects,
+        allow_null=True, required=False,
     )
-    type_of_employment_id = serializers.PrimaryKeyRelatedIdField(
+    type_of_employment_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.TypeOfEmployment.objects
     )
 
@@ -109,13 +150,13 @@ class CvPositionFileReadSerializer(CvPositionFileSerializer):
 
 
 class CvPositionSerializer(CvLinkedObjectBaseSerializer):
-    position_id = serializers.PrimaryKeyRelatedIdField(
+    position_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Position.objects,
         required=False, allow_null=True,
-        queryset=dictionary_models.Position.objects
     )
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(
-        source='competencies', required=False, many=True,
-        queryset=dictionary_models.Competence.objects,
+    competencies_ids = PrimaryKeyRelatedIdField(
+        source='competencies', queryset=dictionary_models.Competence.objects,
+        many=True, allow_null=True, required=False,
     )
 
     class Meta(CvLinkedObjectBaseSerializer.Meta):
@@ -153,20 +194,20 @@ class CvCareerFileReadSerializer(CvCareerFileSerializer):
 
 
 class CvCareerSerializer(CvLinkedObjectBaseSerializer):
-    organization_id = serializers.PrimaryKeyRelatedIdField(
+    organization_id = PrimaryKeyRelatedIdField(
         queryset=main_models.Organization.objects
     )
-    position_id = serializers.PrimaryKeyRelatedIdField(
+    position_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Position.objects,
         required=False, allow_null=True,
-        queryset=dictionary_models.Position.objects
     )
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(
-        source='competencies', required=False, many=True,
-        queryset=dictionary_models.Competence.objects,
+    competencies_ids = PrimaryKeyRelatedIdField(
+        source='competencies', queryset=dictionary_models.Competence.objects,
+        many=True, required=False, allow_null=True,
     )
-    projects_ids = serializers.PrimaryKeyRelatedIdField(
-        source='projects', required=False, many=True,
-        queryset=main_models.OrganizationProject.objects,
+    projects_ids = PrimaryKeyRelatedIdField(
+        source='projects', queryset=main_models.OrganizationProject.objects,
+        many=True, required=False, allow_null=True,
     )
 
     class Meta(CvLinkedObjectBaseSerializer.Meta):
@@ -194,19 +235,19 @@ class CvCareerReadSerializer(CvCareerSerializer):
 
 
 class CvProjectSerializer(CvLinkedObjectBaseSerializer):
-    organization_id = serializers.PrimaryKeyRelatedIdField(
+    organization_id = PrimaryKeyRelatedIdField(
         queryset=main_models.Organization.objects
     )
-    position_id = serializers.PrimaryKeyRelatedIdField(
+    position_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Position.objects
     )
-    industry_sector_id = serializers.PrimaryKeyRelatedIdField(
-        required=False, allow_null=True,
+    industry_sector_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.IndustrySector.objects,
+        required=False, allow_null=True,
     )
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(
-        source='competencies', required=False, many=True,
-        queryset=dictionary_models.Competence.objects,
+    competencies_ids = PrimaryKeyRelatedIdField(
+        source='competencies', queryset=dictionary_models.Competence.objects,
+        many=True, required=False, allow_null=True,
     )
 
     class Meta(CvLinkedObjectBaseSerializer.Meta):
@@ -235,19 +276,18 @@ class CvProjectReadSerializer(CvProjectSerializer):
 
 
 class CvEducationSerializer(CvLinkedObjectBaseSerializer):
-    education_place_id = serializers.PrimaryKeyRelatedIdField(
+    education_place_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.EducationPlace.objects
     )
-    education_speciality_id = serializers.PrimaryKeyRelatedIdField(
+    education_speciality_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.EducationSpecialty.objects
     )
-    education_graduate_id = serializers.PrimaryKeyRelatedIdField(
+    education_graduate_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.EducationGraduate.objects
     )
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(
-        source='competencies', required=False, many=True,
-        queryset=dictionary_models.Competence.objects,
-
+    competencies_ids = PrimaryKeyRelatedIdField(
+        source='competencies', queryset=dictionary_models.Competence.objects,
+        many=True, required=False, allow_null=True,
     )
 
     class Meta(CvLinkedObjectBaseSerializer.Meta):
@@ -276,18 +316,18 @@ class CvEducationReadSerializer(CvEducationSerializer):
 
 
 class CvCertificateSerializer(CvLinkedObjectBaseSerializer):
-    education_place_id = serializers.PrimaryKeyRelatedIdField(
+    education_place_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.EducationPlace.objects
     )
-    education_speciality_id = serializers.PrimaryKeyRelatedIdField(
+    education_speciality_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.EducationSpecialty.objects
     )
-    education_graduate_id = serializers.PrimaryKeyRelatedIdField(
+    education_graduate_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.EducationGraduate.objects
     )
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(
-        source='competencies', required=False, many=True,
-        queryset=dictionary_models.Competence.objects,
+    competencies_ids = PrimaryKeyRelatedIdField(
+        source='competencies', queryset=dictionary_models.Competence.objects,
+        many=True, required=False, allow_null=True,
     )
 
     class Meta(CvLinkedObjectBaseSerializer.Meta):
@@ -337,32 +377,33 @@ class CvSetPhotoSerializer(ModelSerializer):
 
 
 class CvDetailWriteSerializer(ModelSerializer):
-    user_id = serializers.PrimaryKeyRelatedIdField(queryset=User.objects, allow_null=True, required=False)
-    country_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.Country.objects, allow_null=True, required=False
+    user_id = PrimaryKeyRelatedIdField(
+        queryset=User.objects,
+        allow_null=True, required=False,
     )
-    city_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.City.objects, allow_null=True, required=False
+    country_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Country.objects,
+        allow_null=True, required=False,
     )
-    citizenship_id = serializers.PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.Citizenship.objects, allow_null=True, required=False
+    city_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.City.objects,
+        allow_null=True, required=False,
     )
-    physical_limitations_ids = serializers.PrimaryKeyRelatedIdField(
-        source='physical_limitations', required=False, many=True,
-        queryset=dictionary_models.PhysicalLimitation.objects,
+    citizenship_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Citizenship.objects,
+        allow_null=True, required=False,
     )
-    competencies_ids = serializers.PrimaryKeyRelatedIdField(
-        source='competencies', required=False, many=True,
-        queryset=dictionary_models.Competence.objects,
+    physical_limitations_ids = PrimaryKeyRelatedIdField(
+        source='physical_limitations', queryset=dictionary_models.PhysicalLimitation.objects,
+        many=True, required=False, allow_null=True,
     )
 
     class Meta:
         model = cv_models.CV
         fields = [
             'id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender', 'birth_date', 'is_resource_owner',
-            'user_id', 'country_id', 'city_id', 'citizenship_id',
-            'days_to_contact', 'time_to_contact_from', 'time_to_contact_to',
-            'physical_limitations_ids', 'competencies_ids',
+            'user_id', 'country_id', 'city_id', 'citizenship_id', 'days_to_contact', 'time_to_contact_from',
+            'time_to_contact_to', 'physical_limitations_ids',
         ]
 
 
@@ -373,7 +414,6 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
     citizenship = dictionary_serializers.CitizenshipSerializer(read_only=True, allow_null=True)
 
     physical_limitations = dictionary_serializers.PhysicalLimitationSerializer(many=True, read_only=True)
-    competencies = dictionary_serializers.CompetenceInlineSerializer(many=True, read_only=True)
 
     contacts = CvContactReadSerializer(many=True, read_only=True)
     time_slots = CvTimeSlotReadSerializer(many=True, read_only=True)
@@ -383,6 +423,7 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
     education = CvEducationReadSerializer(many=True, read_only=True)
     certificates = CvCertificateReadSerializer(many=True, read_only=True)
     files = CvFileReadSerializer(many=True, read_only=True)
+    competencies = CvCompetenceReadSerializer(many=True, read_only=True)
 
     class Meta(CvDetailWriteSerializer.Meta):
         fields = CvDetailWriteSerializer.Meta.fields + [

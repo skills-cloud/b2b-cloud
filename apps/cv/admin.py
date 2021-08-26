@@ -1,7 +1,6 @@
 from django.contrib import admin
 import nested_admin
 from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
-from mptt.admin import TreeRelatedFieldListFilter
 from reversion.admin import VersionAdmin
 from admin_auto_filters.filters import AutocompleteFilter
 
@@ -21,6 +20,11 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     class CitizenshipFilter(AutocompleteFilter):
         title = cv_models.CV._meta.get_field('citizenship').verbose_name
         field_name = 'citizenship'
+
+    class CvCompetenceInline(nested_admin.NestedTabularInline):
+        model = cv_models.CvCompetence
+        autocomplete_fields = ['competence']
+        extra = 0
 
     class CvContactInline(nested_admin.NestedTabularInline):
         model = cv_models.CvContact
@@ -72,6 +76,7 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         extra = 0
 
     inlines = [
+        CvCompetenceInline,
         CvContactInline,
         CvTimeSlotInline,
         CvPositionInline,
@@ -95,11 +100,10 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         'gender', 'is_verified', 'is_resource_owner',
         CountryFilter, CityFilter, CitizenshipFilter,
         ['birth_date', DateRangeFilter],
-        ['competencies', TreeRelatedFieldListFilter],
         ['created_at', DateTimeRangeFilter],
         ['updated_at', DateTimeRangeFilter],
     ]
-    autocomplete_fields = ['user', 'country', 'city', 'citizenship', 'competencies', 'physical_limitations']
+    autocomplete_fields = ['user', 'country', 'city', 'citizenship', 'physical_limitations']
     search_fields = ['first_name', 'last_name', 'middle_name']
     readonly_fields = ['created_at', 'updated_at']
 

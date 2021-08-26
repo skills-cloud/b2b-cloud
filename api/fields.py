@@ -21,3 +21,8 @@ class PrimaryKeyRelatedIdField(PrimaryKeyRelatedField):
             return value.id
         except Exception:
             return int(data)
+
+    def to_representation(self, value):
+        if isinstance(value, int):
+            return value
+        return super().to_representation(value)
