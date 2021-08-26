@@ -48,8 +48,8 @@ class ProjectSerializer(ModelSerializer):
 
 
 class ProjectReadSerializer(ProjectSerializer):
-    resource_managers = UserInlineSerializer(read_only=True)
-    recruiters = UserInlineSerializer(read_only=True)
+    resource_managers = UserInlineSerializer(many=True, read_only=True)
+    recruiters = UserInlineSerializer(many=True, read_only=True)
 
     class Meta(ProjectSerializer.Meta):
         fields = ProjectSerializer.Meta.fields + ['resource_managers', 'recruiters']
