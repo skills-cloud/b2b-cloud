@@ -153,7 +153,7 @@ class RequestSerializer(ModelSerializer):
         model = main_models.Request
         fields = [
             'id', 'type_id', 'customer_id', 'industry_sector_id', 'project_id', 'resource_manager_id', 'recruiter_id',
-            'description', 'status', 'priority', 'deadline_date',
+            'description', 'status', 'priority', 'start_date', 'deadline_date',
         ]
 
 
@@ -167,7 +167,13 @@ class RequestReadSerializer(RequestSerializer):
 
     requirements = RequestRequirementReadSerializer(many=True, read_only=True)
 
+    requirements_count_sum = serializers.SerializerMethodField(read_only=True)
+
     class Meta(RequestSerializer.Meta):
         fields = RequestSerializer.Meta.fields + [
-            'type', 'customer', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements'
+            'type', 'customer', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements_count_sum',
+            'requirements',
         ]
+
+    def get_requirements_count_sum(self, instance: main_models.Request) -> int:
+        return sum(row.count or 0 for row in instance.requirements.all()) or 0
