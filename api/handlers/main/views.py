@@ -89,7 +89,7 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
     search_fields = ['id', 'description']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
-        for k in ['id', 'type', 'priority', 'deadline_date', 'customer']
+        for k in ['id', 'type', 'priority', 'start_date', 'deadline_date', 'customer']
     ]))
     ordering = ['priority', '-id']
 

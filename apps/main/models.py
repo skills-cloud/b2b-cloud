@@ -128,6 +128,7 @@ class Request(DatesModelBase):
         'main.Project', related_name='requests', null=True, blank=True, on_delete=models.RESTRICT,
         verbose_name=_('проект')
     )
+    start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
     deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
     resource_manager = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.RESTRICT,
