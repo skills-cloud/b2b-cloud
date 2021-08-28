@@ -9,16 +9,19 @@ from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.utils.encoding import force_text
 from django.contrib.auth import password_validation
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import generics, status, mixins
+from rest_framework import generics, status, mixins, serializers, parsers
 from rest_framework.response import Response
-from rest_framework import serializers, parsers
 from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.filters import SearchFilter
+from django_filters import rest_framework as filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 from acc.models import User
 from api.serializers import StatusSerializer
 from api.permissions import AllowAny, IsAuthenticated
+from api.filters import OrderingFilterNullsLast
 
 from . import serializers as acc_serializers
 
@@ -147,6 +150,13 @@ class SetTimezone(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         request.session['timezone'] = self.get_serializer(request.data).data['time_zone']
         return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+
+class UserViewSet(ModelViewSet):
+    queryset = User.objects
+    serializer_class = acc_serializers.UserSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['email', 'first_name', 'first_name']
 
 
 ########################################################################################################################
