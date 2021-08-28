@@ -1,6 +1,12 @@
 from django.urls import path
+from rest_framework import routers
 
 from . import views
+
+
+class Router(routers.DefaultRouter):
+    pass
+
 
 urlpatterns = [
     path('whoami/set-photo/', views.WhoAmISetPhotoView.as_view()),
@@ -13,3 +19,9 @@ urlpatterns = [
     # path('acc/password/reset/', views.PasswordResetView.as_view(), name='rest_password'),
     # path('acc/registration/', views.RegistrationView.as_view(), name='registration'),
 ]
+
+router = Router()
+router.register('user', views.UserViewSet)
+
+
+urlpatterns += router.urls
