@@ -14,14 +14,12 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
-from django_filters import rest_framework as filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 from acc.models import User
 from api.serializers import StatusSerializer
 from api.permissions import AllowAny, IsAuthenticated
-from api.filters import OrderingFilterNullsLast
 
 from . import serializers as acc_serializers
 
