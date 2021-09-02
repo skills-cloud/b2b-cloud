@@ -169,11 +169,21 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
             status.HTTP_201_CREATED: StatusSerializer()
         },
     )
-    @action(detail=True, methods=['post'], url_path='link-create/(?P<cv_link_id>[0-9]+)')
+    @action(detail=True, methods=['post'], url_path='cv-link/(?P<cv_link_id>[0-9]+)')
     @transaction.atomic
-    def link_create(self, request, pk, cv_link_id: int, *args, **kwargs):
-        self.get_object().linked.add(cv_link_id)
+    def cv_link(self, request, pk: int, cv_link_id: int, *args, **kwargs):
+        self.get_object().linked.add(
+            get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_link_id)
+        )
         return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['delete'], url_path='cv-unlink/(?P<cv_link_id>[0-9]+)')
+    @transaction.atomic
+    def cv_unlink(self, request, pk: int, cv_link_id: int, *args, **kwargs):
+        self.get_object().linked.remove(
+            get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_link_id)
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CvLinkedObjectFilter(filters.FilterSet):
