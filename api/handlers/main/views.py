@@ -144,6 +144,5 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     @action(detail=True, methods=['delete'], url_path='cv-unlink/(?P<cv_id>[0-9]+)')
     @transaction.atomic
     def cv_unlink(self, request, pk: int, cv_id: int, *args, **kwargs):
-        instance = self.get_object()
-        instance.cv_list.remove(get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id))
+        self.get_object().cv_list.remove(get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id))
         return Response(status=status.HTTP_204_NO_CONTENT)
