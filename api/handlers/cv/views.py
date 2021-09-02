@@ -24,7 +24,7 @@ from api.filters import (
     ModelMultipleChoiceCommaSeparatedFilter,
     DateRangeWidget,
 )
-from api.serializers import StatusSerializer
+from api.serializers import StatusSerializer, EmptySerializer
 from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.handlers.cv import serializers as cv_serializers
 
@@ -156,33 +156,24 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         response_serializer = cv_serializers.CvFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        responses={
-            status.HTTP_204_NO_CONTENT: StatusSerializer()
-        },
-    )
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
-    def delete_file(self, request, pk, file_id, *args, **kwargs):
+    def delete_file(self, request, pk: int, file_id: int, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvFile.objects, pk=file_id).delete()
-        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(cv_models.CvFile.objects.filter_by_user(request.user), id=file_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
-        request_body=cv_serializers.CvCompetenceCvReplaceSerializer(many=True),
+        request_body=EmptySerializer(),
         responses={
-            status.HTTP_201_CREATED: cv_serializers.CvCompetenceSerializer(many=True)
+            status.HTTP_201_CREATED: StatusSerializer()
         },
     )
-    @action(detail=True, methods=['post'], url_path='replace-competencies')
+    @action(detail=True, methods=['post'], url_path='link-create/(?P<cv_link_id>[0-9]+)')
     @transaction.atomic
-    def replace_competencies(self, request, pk, *args, **kwargs):
-        cv = self.get_object()
-        request_serializer = cv_serializers.CvCompetenceCvReplaceSerializer(data=request.data, many=True)
-        request_serializer.is_valid()
-        result_rows = cv_models.CvCompetence.objects.replace_for_cv(cv, request_serializer.data)
-        response_serializer = cv_serializers.CvCompetenceSerializer(result_rows, many=True)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+    def link_create(self, request, pk, cv_link_id: int, *args, **kwargs):
+        self.get_object().linked.add(cv_link_id)
+        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_201_CREATED)
 
 
 class CvLinkedObjectFilter(filters.FilterSet):
@@ -384,17 +375,12 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
         response_serializer = cv_serializers.CvPositionFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        responses={
-            status.HTTP_204_NO_CONTENT: StatusSerializer()
-        },
-    )
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
-    def delete_file(self, request, pk, file_id, *args, **kwargs):
+    def delete_file(self, request, pk: int, file_id: int, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvPositionFile.objects, pk=file_id).delete()
-        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(cv_models.CvPositionFile.objects.filter_by_user(request.user), id=file_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CvCareerViewSet(CvLinkedObjectViewSet):
@@ -446,17 +432,12 @@ class CvCareerViewSet(CvLinkedObjectViewSet):
         response_serializer = cv_serializers.CvCareerFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        responses={
-            status.HTTP_204_NO_CONTENT: StatusSerializer()
-        },
-    )
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
-    def delete_file(self, request, pk, file_id, *args, **kwargs):
+    def delete_file(self, request, pk: int, file_id: int, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvCareerFile.objects, pk=file_id).delete()
-        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(cv_models.CvCareerFile.objects.filter_by_user(request.user), id=file_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CvEducationViewSet(CvLinkedObjectViewSet):

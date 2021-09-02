@@ -3,6 +3,7 @@ import itertools
 from django.db import transaction
 from rest_framework import status
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,7 +11,9 @@ from django_filters import rest_framework as filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
+from api.serializers import EmptySerializer, StatusSerializer
 from main import models as main_models
+from cv import models as cv_models
 from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.handlers.main import serializers as main_serializers
@@ -44,6 +47,7 @@ class MainBaseViewSet(ReadWriteSerializersMixin, ModelViewSet):
 class OrganizationViewSet(MainBaseViewSet):
     queryset = main_models.Organization.objects
     serializer_class = main_serializers.OrganizationSerializer
+    filterset_fields = ['is_customer']
 
 
 class OrganizationProjectViewSet(MainBaseViewSet):
@@ -125,23 +129,21 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     serializer_read_class = main_serializers.RequestRequirementReadSerializer
 
     @swagger_auto_schema(
-        request_body=main_serializers.RequestRequirementCompetenceReplaceSerializer(many=True),
+        request_body=EmptySerializer(),
         responses={
-            status.HTTP_201_CREATED: main_serializers.RequestRequirementCompetenceSerializer(many=True)
+            status.HTTP_201_CREATED: StatusSerializer()
         },
     )
-    @action(detail=True, methods=['post'], url_path='replace-competencies')
+    @action(detail=True, methods=['post'], url_path='cv-link/(?P<cv_id>[0-9]+)')
     @transaction.atomic
-    def replace_competencies(self, request, pk, *args, **kwargs):
+    def cv_link(self, request, pk: int, cv_id: int, *args, **kwargs):
         instance = self.get_object()
-        request_serializer = main_serializers.RequestRequirementCompetenceReplaceSerializer(
-            data=request.data,
-            many=True
-        )
-        request_serializer.is_valid()
-        result_rows = main_models.RequestRequirementCompetence.objects.replace_for_request_requirement(
-            instance,
-            request_serializer.data
-        )
-        response_serializer = main_serializers.RequestRequirementCompetenceSerializer(result_rows, many=True)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        instance.cv_list.add(get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id))
+        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['delete'], url_path='cv-unlink/(?P<cv_id>[0-9]+)')
+    @transaction.atomic
+    def cv_unlink(self, request, pk: int, cv_id: int, *args, **kwargs):
+        instance = self.get_object()
+        instance.cv_list.remove(get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id))
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -7,52 +7,9 @@ from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializer
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
+from api.handlers.cv import serializers as cv_serializers
 
-
-class OrganizationSerializer(ModelSerializer):
-    class Meta:
-        model = main_models.Organization
-        exclude = ['created_at', 'updated_at']
-
-
-class OrganizationProjectSerializer(ModelSerializer):
-    organization_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects
-    )
-
-    class Meta:
-        model = main_models.OrganizationProject
-        fields = ['id', 'organization_id', 'name', 'description', 'created_at', 'updated_at']
-
-
-class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
-    organization = OrganizationSerializer()
-
-    class Meta(OrganizationProjectSerializer.Meta):
-        fields = OrganizationProjectSerializer.Meta.fields + ['organization']
-
-
-class ProjectSerializer(ModelSerializer):
-    resource_managers_ids = PrimaryKeyRelatedIdField(
-        source='resource_managers', queryset=User.objects,
-        many=True, allow_null=True, required=False,
-    )
-    recruiters_ids = PrimaryKeyRelatedIdField(
-        source='recruiters', queryset=User.objects,
-        many=True, allow_null=True, required=False,
-    )
-
-    class Meta:
-        model = main_models.Project
-        fields = ['id', 'name', 'description', 'resource_managers_ids', 'recruiters_ids', 'created_at', 'updated_at']
-
-
-class ProjectReadSerializer(ProjectSerializer):
-    resource_managers = UserInlineSerializer(many=True, read_only=True)
-    recruiters = UserInlineSerializer(many=True, read_only=True)
-
-    class Meta(ProjectSerializer.Meta):
-        fields = ProjectSerializer.Meta.fields + ['resource_managers', 'recruiters']
+from .organization import OrganizationSerializer, ProjectSerializer
 
 
 class RequestTypeSerializer(ModelSerializer):
@@ -69,13 +26,6 @@ class RequestRequirementCompetenceSerializer(ModelSerializer):
     class Meta:
         model = main_models.RequestRequirementCompetence
         fields = ['id', 'request_requirement_id', 'competence_id', 'experience_years', 'sorting']
-
-
-class RequestRequirementCompetenceReplaceSerializer(RequestRequirementCompetenceSerializer):
-    request_requirement_id = None
-
-    class Meta(RequestRequirementCompetenceSerializer.Meta):
-        fields = [k for k in RequestRequirementCompetenceSerializer.Meta.fields if k not in ['request_requirement_id']]
 
 
 class RequestRequirementCompetenceReadSerializer(RequestRequirementCompetenceSerializer):
@@ -117,20 +67,25 @@ class RequestRequirementReadSerializer(RequestRequirementSerializer):
 
     competencies = RequestRequirementCompetenceReadSerializer(many=True, read_only=True)
 
+    cv_list_ids = PrimaryKeyRelatedIdField(source='cv_list', many=True, read_only=True)
+    cv_list = cv_serializers.CvInlineSerializer(many=True, read_only=True)
+
     class Meta(RequestRequirementSerializer.Meta):
         fields = RequestRequirementSerializer.Meta.fields + [
             'position', 'type_of_employment', 'work_location_city',
-            'competencies',
+            'competencies', 'cv_list_ids', 'cv_list',
         ]
 
 
 class RequestSerializer(ModelSerializer):
+    customer_model_field = main_models.Request._meta.get_field('customer')
     type_id = PrimaryKeyRelatedIdField(
         queryset=main_models.RequestType.objects,
         allow_null=True, required=False
     )
     customer_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects,
+        queryset=main_models.Organization.objects.filter(**customer_model_field.get_limit_choices_to()),
+        help_text=customer_model_field.help_text + '<br>`/api/main/organization/?is_customer=true`'
     )
     industry_sector_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.IndustrySector.objects,

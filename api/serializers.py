@@ -6,8 +6,12 @@ from rest_framework import serializers
 from api.fields import PrimaryKeyRelatedIdField
 
 __all__ = [
-    'ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer',
+    'ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer', 'EmptySerializer',
 ]
+
+
+class EmptySerializer(serializers.Serializer):
+    pass
 
 
 class StatusSerializer(serializers.Serializer):

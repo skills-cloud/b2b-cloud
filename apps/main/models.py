@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
+from cv.models import CV
 
 
 class ExperienceYears(models.IntegerChoices):
@@ -25,6 +26,7 @@ class WorkLocationType(models.TextChoices):
 class Organization(DatesModelBase):
     name = models.CharField(max_length=500, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    is_customer = models.BooleanField(default=False, verbose_name=_('заказчик?'))
 
     class Meta:
         ordering = ['name']
@@ -110,7 +112,8 @@ class Request(DatesModelBase):
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     customer = models.ForeignKey(
         'main.Organization', on_delete=models.CASCADE, related_name='requests',
-        verbose_name=_('заказчик')
+        limit_choices_to={'is_customer': True},
+        verbose_name=_('заказчик'), help_text=_('организации отмеченные как заказчики')
     )
     status = models.CharField(
         max_length=50, default=RequestStatus.DRAFT, choices=RequestStatus.choices,
@@ -152,10 +155,11 @@ class Request(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
-                'type', 'customer', 'industry_sector', 'project', 'resource_manager', 'recruiter',
-                'requirements', 'requirements__position', 'requirements__type_of_employment',
-                'requirements__work_location_city', 'requirements__work_location_city__country',
-                'requirements__competencies', 'requirements__competencies__competence',
+                'type', 'customer', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements',
+                *[
+                    f'requirements__{f}'
+                    for f in RequestRequirement.objects.get_queryset_prefetch_related()
+                ]
             ]
 
     objects = Manager()
@@ -198,6 +202,8 @@ class RequestRequirement(DatesModelBase):
     work_location_address = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('адрес'))
     max_price = models.FloatField(null=True, blank=True, verbose_name=_('макс. цена'))
 
+    cv_list = models.ManyToManyField('cv.CV', blank=True, verbose_name=_('анкеты'))
+
     class Meta:
         ordering = ['sorting', 'name']
         verbose_name = _('требование проектного запроса')
@@ -212,7 +218,11 @@ class RequestRequirement(DatesModelBase):
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
                 'position', 'type_of_employment', 'work_location_city', 'work_location_city__country', 'competencies',
-                'competencies__competence',
+                'competencies__competence', 'cv_list',
+                *[
+                    f'cv_list__{f}'
+                    for f in CV.objects.get_queryset_prefetch_related()
+                ]
             ]
 
     objects = Manager()

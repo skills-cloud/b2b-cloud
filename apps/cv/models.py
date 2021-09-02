@@ -81,6 +81,12 @@ class CV(DatesModelBase):
     is_resource_owner = models.BooleanField(default=False, verbose_name=_('владелец ресурса'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
     about = models.TextField(null=True, blank=True, verbose_name=_('доп. информация'))
+    price = models.FloatField(null=True, blank=True, verbose_name=_('ставка'))
+    types_of_employment = models.ManyToManyField(
+        'dictionary.TypeOfEmployment', blank=True,
+        verbose_name=_('тип занятости')
+    )
+    linked = models.ManyToManyField('self', blank=True, symmetrical=True, verbose_name=_('связанные анкеты'))
 
     class Meta:
         ordering = ['-id']
@@ -95,7 +101,9 @@ class CV(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
-                'user', 'country', 'city', 'citizenship', 'physical_limitations', 'files',
+                'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked',
+
+                'files',
 
                 'competencies', 'competencies__competence',
 
@@ -189,20 +197,7 @@ class CvCompetence(DatesModelBase):
         verbose_name = _('компетенция')
         verbose_name_plural = _('компетенции')
 
-    class Manager(CvLinkedObjectManager):
-        @transaction.atomic
-        def replace_for_cv(self, cv: CV, bulk_rows_data: List[Dict[str, Any]]) -> List['CvCompetence']:
-            self.filter(cv=cv).delete()
-            field_names = ['cv', 'cv_id', 'competence', 'competence_id', 'year_started']
-            return self.bulk_create(
-                CvCompetence(
-                    cv=cv,
-                    **{k: v for k, v in row.items() if k in field_names}
-                )
-                for row in bulk_rows_data
-            )
-
-    objects = Manager()
+    objects = CvLinkedObjectManager()
 
     def __str__(self):
         return f'{self.cv_id} / {self.competence_id} < {self.id} >'
@@ -360,6 +355,12 @@ class CvCareerFile(FileModelAbstract):
         ordering = ['-id']
         verbose_name = _('файл карьеры')
         verbose_name_plural = _('файлы карьеры')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self.filter(cv_career__in=CvCareer.objects.filter_by_user(user))
+
+    objects = QuerySet.as_manager()
 
     def __str__(self):
         return f'< {self.cv_career_id} / {self.id} >'
