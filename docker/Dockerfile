@@ -27,9 +27,14 @@ RUN \
         libssl-dev \
         libtool \
         libwebp-dev \
-        libwebp6
+        libwebp6 \
+        lsb-release \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update -y \
+    && apt install -y postgresql-client-13
 RUN pip install -U pip setuptools poetry
-COPY poetry.lock pyproject.toml $WORKDIR
+COPY poetry.lock pyproject.toml $WORKDIR/
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-interaction --no-ansi
 ADD . ${WORKDIR}
