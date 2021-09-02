@@ -15,7 +15,8 @@ class MainBaseAdmin(VersionAdmin):
 
 @admin.register(main_models.Organization)
 class OrganizationAdmin(MainBaseAdmin):
-    pass
+    list_filter = ['is_customer']
+    list_display = MainBaseAdmin.list_display + list_filter
 
 
 @admin.register(main_models.OrganizationProject)
@@ -58,14 +59,21 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
 
     class RequestRequirementInline(nested_admin.NestedTabularInline):
         class RequestRequirementCompetenceInline(nested_admin.NestedTabularInline):
-            autocomplete_fields = ['competence']
             model = main_models.RequestRequirementCompetence
             extra = 0
+            autocomplete_fields = ['competence']
+
+        class RequestRequirementCv(nested_admin.NestedTabularInline):
+            model = main_models.RequestRequirement.cv_list.through
+            extra = 0
+            autocomplete_fields = ['cv']
 
         inlines = [
             RequestRequirementCompetenceInline,
+            RequestRequirementCv,
         ]
         model = main_models.RequestRequirement
+        exclude = ['cv_list']
         autocomplete_fields = ['position', 'type_of_employment', 'work_location_city']
         extra = 0
 

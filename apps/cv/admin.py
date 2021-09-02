@@ -103,7 +103,9 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         ['created_at', DateTimeRangeFilter],
         ['updated_at', DateTimeRangeFilter],
     ]
-    autocomplete_fields = ['user', 'country', 'city', 'citizenship', 'physical_limitations']
+    autocomplete_fields = [
+        'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked'
+    ]
     search_fields = ['first_name', 'last_name', 'middle_name']
     readonly_fields = ['created_at', 'updated_at']
 

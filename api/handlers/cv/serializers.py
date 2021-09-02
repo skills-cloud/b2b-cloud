@@ -13,7 +13,7 @@ from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 from api.handlers.acc.serializers import UserInlineSerializer
-from api.handlers.main import serializers as main_serializers
+from api.handlers.main.serializers.organization import OrganizationSerializer, OrganizationProjectSerializer
 
 
 class FileModelBaseSerializer(ModelSerializer):
@@ -219,9 +219,9 @@ class CvCareerSerializer(CvLinkedObjectBaseSerializer):
 
 
 class CvCareerReadSerializer(CvCareerSerializer):
-    organization = main_serializers.OrganizationSerializer(read_only=True)
+    organization = OrganizationSerializer(read_only=True)
     position = dictionary_serializers.PositionSerializer(read_only=True)
-    projects = main_serializers.OrganizationProjectSerializer(read_only=True, many=True)
+    projects = OrganizationProjectSerializer(read_only=True, many=True)
     files = CvCareerFileReadSerializer(read_only=True, many=True)
     competencies = dictionary_serializers.CompetenceInlineSerializer(many=True, read_only=True)
 
@@ -259,7 +259,7 @@ class CvProjectSerializer(CvLinkedObjectBaseSerializer):
 
 
 class CvProjectReadSerializer(CvProjectSerializer):
-    organization = main_serializers.OrganizationSerializer(read_only=True)
+    organization = OrganizationSerializer(read_only=True)
     position = dictionary_serializers.PositionSerializer(read_only=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True)
     competencies = dictionary_serializers.CompetenceInlineSerializer(many=True, read_only=True)
@@ -397,13 +397,21 @@ class CvDetailWriteSerializer(ModelSerializer):
         source='physical_limitations', queryset=dictionary_models.PhysicalLimitation.objects,
         many=True, required=False, allow_null=True,
     )
+    types_of_employment_ids = PrimaryKeyRelatedIdField(
+        source='types_of_employment', queryset=dictionary_models.PhysicalLimitation.objects,
+        many=True, required=False, allow_null=True,
+    )
+    linked_ids = PrimaryKeyRelatedIdField(
+        source='linked', queryset=cv_models.CV.objects,
+        many=True, required=False, allow_null=True,
+    )
 
     class Meta:
         model = cv_models.CV
         fields = [
             'id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender', 'birth_date', 'is_resource_owner',
             'user_id', 'country_id', 'city_id', 'citizenship_id', 'days_to_contact', 'time_to_contact_from',
-            'time_to_contact_to', 'physical_limitations_ids',
+            'time_to_contact_to', 'price', 'physical_limitations_ids', 'types_of_employment_ids', 'linked_ids',
         ]
 
 
@@ -414,6 +422,7 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
     citizenship = dictionary_serializers.CitizenshipSerializer(read_only=True, allow_null=True)
 
     physical_limitations = dictionary_serializers.PhysicalLimitationSerializer(many=True, read_only=True)
+    types_of_employment = dictionary_serializers.TypeOfEmploymentSerializer(many=True, read_only=True)
 
     contacts = CvContactReadSerializer(many=True, read_only=True)
     time_slots = CvTimeSlotReadSerializer(many=True, read_only=True)
@@ -427,8 +436,10 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
 
     class Meta(CvDetailWriteSerializer.Meta):
         fields = CvDetailWriteSerializer.Meta.fields + [
-            'user', 'country', 'city', 'citizenship', 'physical_limitations', 'contacts', 'time_slots', 'positions',
-            'career', 'projects', 'education', 'certificates', 'files', 'competencies',
+            'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
+
+            'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
+            'competencies',
         ]
 
 
@@ -441,3 +452,7 @@ class CvListSerializer(CvDetailReadSerializer):
                 # 'contacts', 'time_slots', 'positions', 'career', 'education', 'certificates'
             ]
         ]
+
+
+class CvInlineSerializer(CvListSerializer):
+    pass
