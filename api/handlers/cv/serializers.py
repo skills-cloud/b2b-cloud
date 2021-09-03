@@ -35,44 +35,6 @@ class CvLinkedObjectBaseSerializer(ModelSerializer):
 
 
 ########################################################################################################################
-# CvCompetence
-########################################################################################################################
-
-
-class CvCompetenceSerializer(CvLinkedObjectBaseSerializer):
-    competence_id = PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.Competence.objects
-    )
-    years = serializers.IntegerField(required=False, allow_null=True)
-
-    class Meta:
-        model = cv_models.CvCompetence
-        fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'competence_id', 'years',
-        ]
-
-
-class CvCompetenceCvReplaceSerializer(CvCompetenceSerializer):
-    cv_id = None
-    year_started = serializers.IntegerField(read_only=True)
-
-    class Meta(CvCompetenceSerializer.Meta):
-        fields = ['competence_id', 'years', 'year_started']
-
-    def to_internal_value(self, data: Dict):
-        if 'year_started' not in data and data.get('years'):
-            data['year_started'] = timezone.now().year - data['years']
-        return data
-
-
-class CvCompetenceReadSerializer(CvCompetenceSerializer):
-    competence = dictionary_serializers.CompetenceSerializer(read_only=True)
-
-    class Meta(CvCompetenceSerializer.Meta):
-        fields = CvCompetenceSerializer.Meta.fields + ['competence']
-
-
-########################################################################################################################
 # CvContact
 ########################################################################################################################
 
@@ -149,31 +111,70 @@ class CvPositionFileReadSerializer(CvPositionFileSerializer):
         fields = CvPositionFileSerializer.Meta.fields + ['file_name', 'file_ext', 'file_size']
 
 
+class CvPositionCompetenceSerializer(ModelSerializer):
+    competence_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Competence.objects,
+    )
+    years = serializers.IntegerField(required=False, allow_null=True)
+
+    class Meta:
+        model = cv_models.CvPositionCompetence
+        fields = ['cv_position_id', 'competence_id', 'years', ]
+
+
+class CvCompetenceReplaceSerializer(CvPositionCompetenceSerializer):
+    cv_position_id = None
+    year_started = serializers.IntegerField(read_only=True)
+
+    class Meta(CvPositionCompetenceSerializer.Meta):
+        fields = ['competence_id', 'years', 'year_started']
+
+    def to_internal_value(self, data: Dict):
+        if 'year_started' not in data and data.get('years'):
+            data['year_started'] = timezone.now().year - data['years']
+        return data
+
+
+class CvPositionCompetenceReadSerializer(CvPositionCompetenceSerializer):
+    competence = dictionary_serializers.CompetenceSerializer(read_only=True)
+
+    class Meta(CvPositionCompetenceSerializer.Meta):
+        fields = CvPositionCompetenceSerializer.Meta.fields + ['competence']
+
+
 class CvPositionSerializer(CvLinkedObjectBaseSerializer):
+    year_started = serializers.IntegerField(read_only=True)
+    years = serializers.IntegerField(required=False, allow_null=True)
     position_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Position.objects,
         required=False, allow_null=True,
-    )
-    competencies_ids = PrimaryKeyRelatedIdField(
-        source='competencies', queryset=dictionary_models.Competence.objects,
-        many=True, allow_null=True, required=False,
     )
 
     class Meta(CvLinkedObjectBaseSerializer.Meta):
         model = cv_models.CvPosition
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'position_id', 'competencies_ids', 'title',
+            'position_id', 'title', 'years', 'year_started'
         ]
+
+    def to_internal_value(self, data: Dict):
+        if 'year_started' not in data and data.get('years'):
+            data['year_started'] = timezone.now().year - data['years']
+            del data['years']
+        return data
 
 
 class CvPositionReadSerializer(CvPositionSerializer):
     position = dictionary_serializers.PositionSerializer(read_only=True)
     files = CvPositionFileReadSerializer(read_only=True, many=True)
-    competencies = dictionary_serializers.CompetenceInlineSerializer(many=True, read_only=True)
+    competencies_ids = PrimaryKeyRelatedIdField(
+        source='competencies', queryset=cv_models.CvPositionCompetence.objects,
+        many=True, allow_null=True, required=False,
+    )
+    competencies = CvPositionCompetenceReadSerializer(many=True, read_only=True)
 
     class Meta(CvPositionSerializer.Meta):
         fields = CvPositionSerializer.Meta.fields + [
-            'position', 'files', 'competencies',
+            'position', 'files', 'competencies_ids', 'competencies',
         ]
 
 
@@ -432,14 +433,11 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
     education = CvEducationReadSerializer(many=True, read_only=True)
     certificates = CvCertificateReadSerializer(many=True, read_only=True)
     files = CvFileReadSerializer(many=True, read_only=True)
-    competencies = CvCompetenceReadSerializer(many=True, read_only=True)
 
     class Meta(CvDetailWriteSerializer.Meta):
         fields = CvDetailWriteSerializer.Meta.fields + [
             'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
-
             'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
-            'competencies',
         ]
 
 
