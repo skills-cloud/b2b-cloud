@@ -33,7 +33,7 @@ class FileModelAbstract(DatesModelBase):
             return None
 
 
-@reversion.register(follow=['contacts', 'positions', 'career', 'education', 'certificates', 'files', 'competencies'])
+@reversion.register(follow=['contacts', 'positions', 'career', 'projects', 'education', 'certificates', 'files'])
 class CV(DatesModelBase):
     class Gender(models.TextChoices):
         MALE = 'M', _('Мужской')
@@ -94,8 +94,11 @@ class CV(DatesModelBase):
         verbose_name_plural = _('анкеты')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User):
+        def filter_by_user(self, user: User) -> 'CV.QuerySet':
             return self
+
+        def filter_by_position_years(self, years: int) -> 'CV.QuerySet':
+            return self.filter(positions__year_started__lte=timezone.now().year - years)
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
@@ -105,13 +108,12 @@ class CV(DatesModelBase):
 
                 'files',
 
-                'competencies', 'competencies__competence',
-
                 'contacts', 'contacts__contact_type',
 
                 'time_slots', 'time_slots__country', 'time_slots__city', 'time_slots__type_of_employment',
 
                 'positions', 'positions__position', 'positions__files', 'positions__competencies',
+                'positions__competencies__competence',
 
                 'career', 'career__files', 'career__organization', 'career__projects', 'career__projects__organization',
                 'career__position', 'career__competencies',
@@ -139,10 +141,6 @@ class CV(DatesModelBase):
     @property
     def id_verbose(self) -> str:
         return str(self.id).zfill(7)
-
-    @property
-    def competence_count(self) -> int:
-        return len(self.competencies.all())
 
     @property
     def contact_count(self) -> int:
@@ -181,32 +179,6 @@ class CvLinkedObjectQuerySet(models.QuerySet):
 class CvLinkedObjectManager(models.Manager.from_queryset(CvLinkedObjectQuerySet)):
     def get_queryset(self):
         return super().get_queryset().prefetch_related('cv')
-
-
-@reversion.register(follow=['cv'])
-class CvCompetence(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='competencies', verbose_name=_('анкета'))
-    competence = models.ForeignKey('dictionary.Competence', on_delete=models.RESTRICT, verbose_name=_('компетенция'))
-    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
-
-    class Meta:
-        ordering = ['-year_started', 'id']
-        unique_together = [
-            ['cv', 'competence']
-        ]
-        verbose_name = _('компетенция')
-        verbose_name_plural = _('компетенции')
-
-    objects = CvLinkedObjectManager()
-
-    def __str__(self):
-        return f'{self.cv_id} / {self.competence_id} < {self.id} >'
-
-    @property
-    def years(self) -> Optional[int]:
-        if not self.year_started:
-            return
-        return timezone.now().year - self.year_started
 
 
 @reversion.register(follow=['cv'])
@@ -272,7 +244,7 @@ class CvTimeSlot(DatesModelBase):
         return f'{self.date_from} – {self.date_to} < {self.cv_id} / {self.id} >'
 
 
-@reversion.register(follow=['cv', 'files'])
+@reversion.register(follow=['cv', 'files', 'competencies'])
 class CvPosition(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='positions', verbose_name=_('анкета'))
     title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
@@ -280,7 +252,7 @@ class CvPosition(DatesModelBase):
         'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
         verbose_name=_('должность')
     )
-    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
+    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
 
     class Meta:
         ordering = ['-id']
@@ -294,6 +266,53 @@ class CvPosition(DatesModelBase):
 
     def __str__(self):
         return f' < {self.cv_id} / {self.id} >'
+
+    @property
+    def years(self) -> Optional[int]:
+        if not self.year_started:
+            return
+        return timezone.now().year - self.year_started
+
+
+@reversion.register(follow=['cv_position'])
+class CvPositionCompetence(DatesModelBase):
+    cv_position = models.ForeignKey(
+        'cv.CvPosition', on_delete=models.CASCADE, related_name='competencies',
+        verbose_name=_('должность / роль')
+    )
+    competence = models.ForeignKey('dictionary.Competence', on_delete=models.RESTRICT, verbose_name=_('компетенция'))
+    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
+
+    class Meta:
+        ordering = ['-year_started', 'id']
+        unique_together = [
+            ['cv_position', 'competence']
+        ]
+        verbose_name = _('компетенция роли')
+        verbose_name_plural = _('компетенции роли')
+
+    class Manager(models.Manager):
+        @transaction.atomic()
+        def set_for_position(self, cv_position: CvPosition, data: List[Dict[str, int]]) -> List['CvPositionCompetence']:
+            self.filter(cv_position=cv_position).delete()
+            return self.bulk_create([
+                CvPositionCompetence(
+                    cv_position=cv_position,
+                    **{k: v for k, v in row.items() if k not in ['years']}
+                )
+                for row in data
+            ])
+
+    objects = Manager()
+
+    def __str__(self):
+        return f'{self.cv_position_id} / {self.competence_id} < {self.id} >'
+
+    @property
+    def years(self) -> Optional[int]:
+        if not self.year_started:
+            return
+        return timezone.now().year - self.year_started
 
 
 @reversion.register(follow=['cv_position'])

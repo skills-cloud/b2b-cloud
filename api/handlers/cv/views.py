@@ -22,11 +22,12 @@ from cv import models as cv_models
 from api.filters import (
     OrderingFilterNullsLast,
     ModelMultipleChoiceCommaSeparatedFilter,
-    DateRangeWidget,
+    DateRangeWidget, ModelMultipleChoiceCommaSeparatedIdFilter,
 )
 from api.serializers import StatusSerializer, EmptySerializer
 from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.handlers.cv import serializers as cv_serializers
+from project.contrib.db import get_sql_from_queryset
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
 cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
@@ -34,26 +35,45 @@ cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=op
 
 class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     class Filter(filters.FilterSet):
+        id = ModelMultipleChoiceCommaSeparatedIdFilter(queryset=cv_models.CV.objects)
         country_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Country.objects)
         city_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.City.objects)
         citizenship_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Citizenship.objects)
+        positions_ids_any = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='positions__position_id',
+            queryset=dictionary_models.Position.objects,
+        )
+        positions_ids_all = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='positions__position_id',
+            conjoined=True,
+            queryset=dictionary_models.Position.objects,
+        )
         competencies_ids_any = ModelMultipleChoiceCommaSeparatedFilter(
-            field_name='competencies', queryset=dictionary_models.Competence.objects)
+            field_name='positions__competencies__competence_id',
+            queryset=dictionary_models.Competence.objects
+        )
         competencies_ids_all = ModelMultipleChoiceCommaSeparatedFilter(
-            field_name='competencies', conjoined=True,
+            field_name='positions__competencies__competence_id',
+            conjoined=True,
             queryset=dictionary_models.Competence.objects,
         )
+        years = filters.NumberFilter()
+
+        def filter_queryset(self, queryset):
+            if years := self.form.cleaned_data.pop('years'):
+                queryset = queryset.filter_by_position_years(years)
+            return super().filter_queryset(queryset)
 
     http_method_names = cv_viewsets_http_method_names
     filterset_class = Filter
     filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
-    search_fields = ['first_name', 'middle_name', 'last_name']
+    search_fields = ['first_name', 'middle_name', 'last_name', 'positions__title', 'positions__position__title']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
         for k in ['id', 'first_name', 'middle_name', 'last_name', 'created_at', 'updated_at']
     ]))
     ordering = ['-updated_at']
-    queryset = cv_models.CV.objects
+    queryset = cv_models.CV.objects.distinct()
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related(*cv_models.CV.objects.get_queryset_prefetch_related())
@@ -67,6 +87,14 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False
+            ),
             openapi.Parameter(
                 'country_id',
                 openapi.IN_QUERY,
@@ -89,6 +117,22 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
                 description='`ANY`',
+                required=False,
+            ),
+            openapi.Parameter(
+                'positions_ids_any',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False,
+            ),
+            openapi.Parameter(
+                'positions_ids_all',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ALL`',
                 required=False,
             ),
             openapi.Parameter(
@@ -209,23 +253,6 @@ class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, ReadWriteSerializersMixi
         return super().get_queryset().prefetch_related(
             *self.get_queryset_prefetch_related()
         )
-
-
-class CvCompetenceViewSet(CvLinkedObjectViewSet):
-    queryset = cv_models.CvCompetence.objects
-    serializer_class = cv_serializers.CvCompetenceSerializer
-    serializer_read_class = cv_serializers.CvCompetenceReadSerializer
-
-    def get_queryset_prefetch_related(self):
-        return ['competence']
-
-    @swagger_auto_schema(
-        manual_parameters=[
-            cv_linked_filter_cv_field,
-        ]
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
 
 
 class CvContactViewSet(CvLinkedObjectViewSet):
@@ -353,7 +380,7 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
 
     @classmethod
     def get_queryset_prefetch_related(cls) -> List[str]:
-        return ['position', 'competencies', 'files']
+        return ['position', 'competencies', 'competencies__competence', 'files']
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -369,6 +396,26 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvCompetenceReplaceSerializer(many=True),
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvPositionCompetenceSerializer(many=True)
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='competencies-set')
+    @transaction.atomic
+    def competencies_set(self, request, pk: int, *args, **kwargs):
+        request_serializer = cv_serializers.CvCompetenceReplaceSerializer(data=request.data, many=True)
+        request_serializer.is_valid(raise_exception=True)
+        response_serializer = cv_serializers.CvPositionCompetenceSerializer(
+            cv_models.CvPositionCompetence.objects.set_for_position(
+                self.get_object(),
+                request_serializer.to_internal_value(request_serializer.data)
+            ),
+            many=True
+        )
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         request_body=cv_serializers.CvPositionFileSerializer,

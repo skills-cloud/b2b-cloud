@@ -21,11 +21,6 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         title = cv_models.CV._meta.get_field('citizenship').verbose_name
         field_name = 'citizenship'
 
-    class CvCompetenceInline(nested_admin.NestedTabularInline):
-        model = cv_models.CvCompetence
-        autocomplete_fields = ['competence']
-        extra = 0
-
     class CvContactInline(nested_admin.NestedTabularInline):
         model = cv_models.CvContact
         autocomplete_fields = ['contact_type']
@@ -37,13 +32,22 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         extra = 0
 
     class CvPositionInline(nested_admin.NestedTabularInline):
+        class CvPositionCompetenceInline(nested_admin.NestedTabularInline):
+            model = cv_models.CvPositionCompetence
+            autocomplete_fields = ['competence']
+            readonly_fields = ['years']
+            extra = 0
+
         class CvPositionFileInline(nested_admin.NestedTabularInline):
             model = cv_models.CvPositionFile
             extra = 0
 
-        inlines = [CvPositionFileInline]
+        inlines = [
+            CvPositionCompetenceInline,
+            CvPositionFileInline
+        ]
         model = cv_models.CvPosition
-        autocomplete_fields = ['position', 'competencies']
+        autocomplete_fields = ['position']
         extra = 0
 
     class CvCareerInline(nested_admin.NestedTabularInline):
@@ -76,7 +80,6 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         extra = 0
 
     inlines = [
-        CvCompetenceInline,
         CvContactInline,
         CvTimeSlotInline,
         CvPositionInline,
@@ -88,7 +91,7 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     ]
     list_select_related = True
     list_display_counters = [
-        'competence_count', 'contact_count', 'time_slot_count', 'position_count', 'career_count', 'projects_count',
+        'contact_count', 'time_slot_count', 'position_count', 'career_count', 'projects_count',
         'education_count', 'file_count',
     ]
     list_display = (
@@ -110,4 +113,6 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related(*cv_models.CV.objects.get_queryset_prefetch_related())
+        return super().get_queryset(request).prefetch_related(
+            # *cv_models.CV.objects.get_queryset_prefetch_related()
+        )
