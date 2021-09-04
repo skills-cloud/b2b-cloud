@@ -28,6 +28,13 @@ class RequestRequirementCompetenceSerializer(ModelSerializer):
         fields = ['id', 'request_requirement_id', 'competence_id', 'experience_years', 'sorting']
 
 
+class RequestRequirementCompetenceReplaceSerializer(RequestRequirementCompetenceSerializer):
+    request_requirement_id = None
+
+    class Meta(RequestRequirementCompetenceSerializer.Meta):
+        fields = [k for k in RequestRequirementCompetenceSerializer.Meta.fields if k not in ['request_requirement_id']]
+
+
 class RequestRequirementCompetenceReadSerializer(RequestRequirementCompetenceSerializer):
     competence = dictionary_serializers.CompetenceSerializer(read_only=True)
 
