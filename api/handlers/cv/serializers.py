@@ -122,7 +122,7 @@ class CvPositionCompetenceSerializer(ModelSerializer):
         fields = ['cv_position_id', 'competence_id', 'years', ]
 
 
-class CvCompetenceReplaceSerializer(CvPositionCompetenceSerializer):
+class CvPositionCompetenceReplaceSerializer(CvPositionCompetenceSerializer):
     cv_position_id = None
     year_started = serializers.IntegerField(read_only=True)
 

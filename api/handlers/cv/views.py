@@ -397,7 +397,7 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        request_body=cv_serializers.CvCompetenceReplaceSerializer(many=True),
+        request_body=cv_serializers.CvPositionCompetenceReplaceSerializer(many=True),
         responses={
             status.HTTP_201_CREATED: cv_serializers.CvPositionCompetenceSerializer(many=True)
         },
@@ -405,7 +405,7 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
     @action(detail=True, methods=['post'], url_path='competencies-set')
     @transaction.atomic
     def competencies_set(self, request, pk: int, *args, **kwargs):
-        request_serializer = cv_serializers.CvCompetenceReplaceSerializer(data=request.data, many=True)
+        request_serializer = cv_serializers.CvPositionCompetenceReplaceSerializer(data=request.data, many=True)
         request_serializer.is_valid(raise_exception=True)
         response_serializer = cv_serializers.CvPositionCompetenceSerializer(
             cv_models.CvPositionCompetence.objects.set_for_position(
