@@ -27,6 +27,13 @@ class RequestRequirementCompetenceSerializer(ModelSerializer):
         model = main_models.RequestRequirementCompetence
         fields = ['id', 'request_requirement_id', 'competence_id', 'experience_years', 'sorting']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['experience_years'].help_text = '\n'.join(
+            f'`{k}` : *{v}*'
+            for k, v in self.fields['experience_years'].choices.items()
+        )
+
 
 class RequestRequirementCompetenceReplaceSerializer(RequestRequirementCompetenceSerializer):
     request_requirement_id = None
