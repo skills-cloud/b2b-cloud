@@ -27,7 +27,6 @@ from api.filters import (
 from api.serializers import StatusSerializer, EmptySerializer
 from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.handlers.cv import serializers as cv_serializers
-from project.contrib.db import get_sql_from_queryset
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
 cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
@@ -67,7 +66,7 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     http_method_names = cv_viewsets_http_method_names
     filterset_class = Filter
     filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
-    search_fields = ['first_name', 'middle_name', 'last_name', 'positions__title', 'positions__position__title']
+    search_fields = ['first_name', 'middle_name', 'last_name', 'positions__title', 'positions__position__name']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
         for k in ['id', 'first_name', 'middle_name', 'last_name', 'created_at', 'updated_at']
