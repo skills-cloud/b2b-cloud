@@ -255,15 +255,19 @@ class RequestRequirementCompetence(DatesModelBase):
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @transaction.atomic
-        def replace_for_request_requirement(
+        def set_for_request_requirement(
                 self,
                 request_requirement: RequestRequirement,
-                bulk_rows_data: List[Dict[str, Any]]
+                data: List[Dict[str, Any]]
         ) -> List['RequestRequirementCompetence']:
-            return self.bulk_create(
-                RequestRequirementCompetence(request_requirement=request_requirement, **row)
-                for row in bulk_rows_data
-            )
+            self.filter(request_requirement=request_requirement).delete()
+            return self.bulk_create([
+                self.model(
+                    request_requirement=request_requirement,
+                    **{k: v for k, v in row.items() if k not in ['years']}
+                )
+                for row in data
+            ])
 
     objects = Manager()
 

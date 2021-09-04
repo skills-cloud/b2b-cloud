@@ -296,7 +296,7 @@ class CvPositionCompetence(DatesModelBase):
         def set_for_position(self, cv_position: CvPosition, data: List[Dict[str, int]]) -> List['CvPositionCompetence']:
             self.filter(cv_position=cv_position).delete()
             return self.bulk_create([
-                CvPositionCompetence(
+                self.model(
                     cv_position=cv_position,
                     **{k: v for k, v in row.items() if k not in ['years']}
                 )

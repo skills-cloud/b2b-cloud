@@ -146,3 +146,23 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     def cv_unlink(self, request, pk: int, cv_id: int, *args, **kwargs):
         self.get_object().cv_list.remove(get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id))
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(
+        request_body=main_serializers.RequestRequirementCompetenceReplaceSerializer(many=True),
+        responses={
+            status.HTTP_201_CREATED: main_serializers.RequestRequirementCompetenceSerializer(many=True)
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='competencies-set')
+    @transaction.atomic
+    def competencies_set(self, request, pk: int, *args, **kwargs):
+        request_serializer = main_serializers.RequestRequirementCompetenceReplaceSerializer(data=request.data, many=True)
+        request_serializer.is_valid(raise_exception=True)
+        response_serializer = main_serializers.RequestRequirementCompetenceSerializer(
+            main_models.RequestRequirementCompetence.objects.set_for_request_requirement(
+                self.get_object(),
+                request_serializer.to_internal_value(request_serializer.data)
+            ),
+            many=True
+        )
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
