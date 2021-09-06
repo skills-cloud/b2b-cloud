@@ -29,3 +29,8 @@ _base_settings = (
 )
 
 include(*_base_settings)
+
+GRAPH_MODELS = {
+    'all_applications': True,
+    'group_models': True,
+}

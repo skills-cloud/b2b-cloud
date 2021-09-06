@@ -1,3 +1,6 @@
+from drf_yasg.app_settings import SWAGGER_DEFAULTS
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'api.authentication.SessionAuthentication',
@@ -22,4 +25,9 @@ SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': [],
     'USE_SESSION_AUTH': True,
     'REFETCH_SCHEMA_WITH_AUTH': True,
+    'DISPLAY_OPERATION_ID': False,
+    'DEFAULT_FIELD_INSPECTORS': [
+        'api.schema.inspectors.field.PrimaryKeyRelatedFieldInspector',
+        *SWAGGER_DEFAULTS['DEFAULT_FIELD_INSPECTORS'],
+    ]
 }
