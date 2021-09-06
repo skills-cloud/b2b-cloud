@@ -75,7 +75,17 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     queryset = cv_models.CV.objects.distinct()
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related(*cv_models.CV.objects.get_queryset_prefetch_related())
+        return super().get_queryset().prefetch_related(
+            *cv_models.CV.objects.get_queryset_prefetch_related(),
+            *[
+                f'requests_requirements__{f}'
+                for f in main_models.RequestRequirement.objects.get_queryset_prefetch_related_self()
+            ],
+            *[
+                f'requests_requirements__request__{f}'
+                for f in main_models.Request.objects.get_queryset_prefetch_related_self()
+            ],
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':

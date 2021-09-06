@@ -7,7 +7,6 @@ from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializer
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
-from api.handlers.cv import serializers as cv_serializers
 
 from .organization import OrganizationSerializer, ProjectSerializer
 
@@ -75,6 +74,8 @@ class RequestRequirementSerializer(ModelSerializer):
 
 
 class RequestRequirementReadSerializer(RequestRequirementSerializer):
+    from api.handlers.cv.serializers import CvInlineSerializer
+
     position = dictionary_serializers.PositionSerializer(read_only=True)
     type_of_employment = dictionary_serializers.TypeOfEmploymentSerializer(read_only=True)
     work_location_city = dictionary_serializers.CitySerializer(read_only=True)
@@ -82,7 +83,7 @@ class RequestRequirementReadSerializer(RequestRequirementSerializer):
     competencies = RequestRequirementCompetenceReadSerializer(many=True, read_only=True)
 
     cv_list_ids = PrimaryKeyRelatedIdField(source='cv_list', many=True, read_only=True)
-    cv_list = cv_serializers.CvInlineSerializer(many=True, read_only=True)
+    cv_list = CvInlineSerializer(many=True, read_only=True)
 
     class Meta(RequestRequirementSerializer.Meta):
         fields = RequestRequirementSerializer.Meta.fields + [

@@ -1,9 +1,9 @@
+from typing import TYPE_CHECKING, Type
 from pathlib import Path
 from typing import Dict
 
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.relations import PrimaryKeyRelatedField
 
 from acc.models import User
 from main import models as main_models
@@ -14,6 +14,9 @@ from api.serializers import ModelSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.main.serializers.organization import OrganizationSerializer, OrganizationProjectSerializer
+
+if TYPE_CHECKING:
+    from api.handlers.main.serializers.request import RequestRequirementReadSerializer
 
 
 class FileModelBaseSerializer(ModelSerializer):
@@ -439,6 +442,47 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
             'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
             'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
         ]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        fields['requests_requirements'] = self.get_requests_requirements_serializer_class()(many=True, read_only=True)
+        return fields
+
+    def to_representation(self, instance: cv_models.CV):
+        result = super().to_representation(instance)
+        result['requests_requirements'] = self.get_requests_requirements_serializer_class()(
+            instance.requests_requirements.all(), many=True, read_only=True
+        ).data
+        return result
+
+    @classmethod
+    def get_requests_requirements_serializer_class(cls) -> Type['RequestRequirementReadSerializer']:
+        from api.handlers.main.serializers.request import RequestReadSerializer, RequestRequirementReadSerializer
+
+        class CvRequestInlineSerializer(RequestReadSerializer):
+            class Meta(RequestReadSerializer.Meta):
+                ref_name = 'CvRequestInlineSerializer'
+                fields = [
+                    f
+                    for f in RequestReadSerializer.Meta.fields
+                    if f not in ['requirements', 'requirements_count_sum']
+                ]
+
+        class CvRequestRequirementInlineSerializer(RequestRequirementReadSerializer):
+            request = CvRequestInlineSerializer(read_only=True)
+
+            class Meta(RequestRequirementReadSerializer.Meta):
+                ref_name = 'CvRequestRequirementInlineSerializer'
+                fields = [
+                    *[
+                        f
+                        for f in RequestRequirementReadSerializer.Meta.fields
+                        if f not in ['cv_list_ids', 'cv_list']
+                    ],
+                    'request'
+                ]
+
+        return CvRequestRequirementInlineSerializer
 
 
 class CvListSerializer(CvDetailReadSerializer):

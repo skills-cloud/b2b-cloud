@@ -155,11 +155,21 @@ class Request(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
+                *cls.get_queryset_prefetch_related_self(),
+                *cls.get_queryset_prefetch_related_requirements(),
+            ]
+
+        @classmethod
+        def get_queryset_prefetch_related_self(cls) -> List[str]:
+            return [
                 'type', 'customer', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements',
-                *[
-                    f'requirements__{f}'
-                    for f in RequestRequirement.objects.get_queryset_prefetch_related()
-                ]
+            ]
+
+        @classmethod
+        def get_queryset_prefetch_related_requirements(cls) -> List[str]:
+            return [
+                f'requirements__{f}'
+                for f in RequestRequirement.objects.get_queryset_prefetch_related()
             ]
 
     objects = Manager()
@@ -202,7 +212,10 @@ class RequestRequirement(DatesModelBase):
     work_location_address = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('адрес'))
     max_price = models.FloatField(null=True, blank=True, verbose_name=_('макс. цена'))
 
-    cv_list = models.ManyToManyField('cv.CV', blank=True, verbose_name=_('анкеты'))
+    cv_list = models.ManyToManyField(
+        'cv.CV', related_name='requests_requirements', blank=True,
+        verbose_name=_('анкеты')
+    )
 
     class Meta:
         ordering = ['sorting', 'name']
@@ -217,12 +230,22 @@ class RequestRequirement(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
+                *cls.get_queryset_prefetch_related_self(),
+                *cls.get_queryset_prefetch_related_cv_list(),
+            ]
+
+        @classmethod
+        def get_queryset_prefetch_related_self(cls) -> List[str]:
+            return [
                 'position', 'type_of_employment', 'work_location_city', 'work_location_city__country', 'competencies',
                 'competencies__competence', 'cv_list',
-                *[
-                    f'cv_list__{f}'
-                    for f in CV.objects.get_queryset_prefetch_related()
-                ]
+            ]
+
+        @classmethod
+        def get_queryset_prefetch_related_cv_list(cls) -> List[str]:
+            return [
+                f'cv_list__{f}'
+                for f in CV.objects.get_queryset_prefetch_related()
             ]
 
     objects = Manager()
