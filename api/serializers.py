@@ -1,11 +1,17 @@
+from typing import Dict
+
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from api.fields import PrimaryKeyRelatedIdField
 
 __all__ = [
-    'ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer',
+    'ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer', 'EmptySerializer',
 ]
+
+
+class EmptySerializer(serializers.Serializer):
+    pass
 
 
 class StatusSerializer(serializers.Serializer):
@@ -20,7 +26,11 @@ class ModelSerializer(serializers.ModelSerializer):
         result = super().to_representation(instance)
         for field in self._readable_fields:
             if isinstance(field, PrimaryKeyRelatedIdField):
-                result[field.field_name] = getattr(instance, field.field_name)
+                if isinstance(instance, Dict):
+                    field_value = instance.get(field.field_name)
+                else:
+                    field_value = getattr(instance, field.field_name)
+                result[field.field_name] = field_value
         return result
 
 

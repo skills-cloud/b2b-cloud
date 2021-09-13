@@ -112,6 +112,11 @@ class Competence(MPTTModel, DictionaryModelBase):
         level_attr = 'mptt_level'
         order_insertion_by = ['name']
 
+    class ManagerFlat(models.Manager):
+        pass
+
+    objects_flat = ManagerFlat()
+
 
 class IndustrySector(DictionaryModelBase):
     class Meta:

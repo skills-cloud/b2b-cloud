@@ -5,14 +5,15 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins
 from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter
+from rest_framework.viewsets import ModelViewSet
 
 from dictionary import models as dictionary_models
-from api.filters import OrderingFilterNullsLast
+from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedIdFilter
 from api.handlers.dictionary import serializers as dictionary_serializers
 
 
-class DictionaryBaseViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    http_method_names = ['get', 'post', 'patch']
+class DictionaryBaseViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
     search_fields = ['name']
     ordering_fields = list(itertools.chain(*[
@@ -50,7 +51,7 @@ class CityViewSet(DictionaryBaseViewSet):
     queryset = dictionary_models.City.objects.prefetch_related('country')
     serializer_class = dictionary_serializers.CitySerializer
     search_fields = ['name', 'country__name']
-    filterset_fields = ['country__id']
+    filterset_fields = ['country_id']
 
 
 class CitizenshipViewSet(DictionaryBaseViewSet):
@@ -94,7 +95,11 @@ class PhysicalLimitationViewSet(DictionaryBaseViewSet):
 
 
 class CompetenceViewSet(DictionaryBaseViewSet):
-    queryset = dictionary_models.Competence.objects
+    class Filter(filters.FilterSet):
+        id = ModelMultipleChoiceCommaSeparatedIdFilter(queryset=dictionary_models.Competence.objects)
+
+    queryset = dictionary_models.Competence.objects_flat
+    filterset_class = Filter
     serializer_class = dictionary_serializers.CompetenceSerializer
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
@@ -104,6 +109,14 @@ class CompetenceViewSet(DictionaryBaseViewSet):
 
     @swagger_auto_schema(
         manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False
+            ),
             openapi.Parameter(
                 'ordering',
                 openapi.IN_QUERY,

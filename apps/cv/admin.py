@@ -1,7 +1,6 @@
 from django.contrib import admin
 import nested_admin
 from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
-from mptt.admin import TreeRelatedFieldListFilter
 from reversion.admin import VersionAdmin
 from admin_auto_filters.filters import AutocompleteFilter
 
@@ -33,13 +32,22 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         extra = 0
 
     class CvPositionInline(nested_admin.NestedTabularInline):
+        class CvPositionCompetenceInline(nested_admin.NestedTabularInline):
+            model = cv_models.CvPositionCompetence
+            autocomplete_fields = ['competence']
+            readonly_fields = ['years']
+            extra = 0
+
         class CvPositionFileInline(nested_admin.NestedTabularInline):
             model = cv_models.CvPositionFile
             extra = 0
 
-        inlines = [CvPositionFileInline]
+        inlines = [
+            CvPositionCompetenceInline,
+            CvPositionFileInline
+        ]
         model = cv_models.CvPosition
-        autocomplete_fields = ['position', 'competencies']
+        autocomplete_fields = ['position']
         extra = 0
 
     class CvCareerInline(nested_admin.NestedTabularInline):
@@ -83,7 +91,7 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     ]
     list_select_related = True
     list_display_counters = [
-        'competence_count', 'contact_count', 'time_slot_count', 'position_count', 'career_count', 'projects_count',
+        'contact_count', 'time_slot_count', 'position_count', 'career_count', 'projects_count',
         'education_count', 'file_count',
     ]
     list_display = (
@@ -95,13 +103,16 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         'gender', 'is_verified', 'is_resource_owner',
         CountryFilter, CityFilter, CitizenshipFilter,
         ['birth_date', DateRangeFilter],
-        ['competencies', TreeRelatedFieldListFilter],
         ['created_at', DateTimeRangeFilter],
         ['updated_at', DateTimeRangeFilter],
     ]
-    autocomplete_fields = ['user', 'country', 'city', 'citizenship', 'competencies', 'physical_limitations']
+    autocomplete_fields = [
+        'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked'
+    ]
     search_fields = ['first_name', 'last_name', 'middle_name']
     readonly_fields = ['created_at', 'updated_at']
 
     def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related(*cv_models.CV.objects.get_queryset_prefetch_related())
+        return super().get_queryset(request).prefetch_related(
+            # *cv_models.CV.objects.get_queryset_prefetch_related()
+        )

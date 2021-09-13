@@ -58,5 +58,12 @@ class ModelMultipleChoiceCommaSeparatedFilter(CSVWidgetFilterMixin, ModelMultipl
     pass
 
 
+class ModelMultipleChoiceCommaSeparatedIdFilter(CSVWidgetFilterMixin, ModelMultipleChoiceFilter):
+    def filter(self, qs, value):
+        if not value:
+            return qs
+        return super().filter(qs, [o.id if not isinstance(o, int) else o for o in value])
+
+
 class DateRangeWidget(DateRangeWidgetBase):
     suffixes = ['from', 'to']

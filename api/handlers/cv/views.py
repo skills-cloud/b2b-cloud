@@ -3,17 +3,17 @@ from typing import List
 
 from django.db import transaction
 from django.db.models import Q
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, status
-from django_filters import DateFromToRangeFilter
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from django_filters import rest_framework as filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
+from django_filters import DateFromToRangeFilter
+from django_filters import rest_framework as filters
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from dictionary import models as dictionary_models
 from main import models as main_models
@@ -22,12 +22,11 @@ from cv import models as cv_models
 from api.filters import (
     OrderingFilterNullsLast,
     ModelMultipleChoiceCommaSeparatedFilter,
-    DateRangeWidget,
+    DateRangeWidget, ModelMultipleChoiceCommaSeparatedIdFilter,
 )
-from api.serializers import StatusSerializer
-from api.views_mixins import ViewSetFilteredByUserMixin
+from api.serializers import StatusSerializer, EmptySerializer
+from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.handlers.cv import serializers as cv_serializers
-from project.contrib.db import get_sql_from_queryset
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
 cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
@@ -35,29 +34,58 @@ cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=op
 
 class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     class Filter(filters.FilterSet):
+        id = ModelMultipleChoiceCommaSeparatedIdFilter(queryset=cv_models.CV.objects)
         country_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Country.objects)
         city_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.City.objects)
         citizenship_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Citizenship.objects)
+        positions_ids_any = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='positions__position_id',
+            queryset=dictionary_models.Position.objects,
+        )
+        positions_ids_all = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='positions__position_id',
+            conjoined=True,
+            queryset=dictionary_models.Position.objects,
+        )
         competencies_ids_any = ModelMultipleChoiceCommaSeparatedFilter(
-            field_name='competencies', queryset=dictionary_models.Competence.objects)
+            field_name='positions__competencies__competence_id',
+            queryset=dictionary_models.Competence.objects
+        )
         competencies_ids_all = ModelMultipleChoiceCommaSeparatedFilter(
-            field_name='competencies', conjoined=True,
+            field_name='positions__competencies__competence_id',
+            conjoined=True,
             queryset=dictionary_models.Competence.objects,
         )
+        years = filters.NumberFilter()
+
+        def filter_queryset(self, queryset):
+            if years := self.form.cleaned_data.pop('years'):
+                queryset = queryset.filter_by_position_years(years)
+            return super().filter_queryset(queryset)
 
     http_method_names = cv_viewsets_http_method_names
     filterset_class = Filter
     filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
-    search_fields = ['first_name', 'middle_name', 'last_name']
+    search_fields = ['first_name', 'middle_name', 'last_name', 'positions__title', 'positions__position__name']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
         for k in ['id', 'first_name', 'middle_name', 'last_name', 'created_at', 'updated_at']
     ]))
     ordering = ['-updated_at']
-    queryset = cv_models.CV.objects
+    queryset = cv_models.CV.objects.distinct()
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related(*cv_models.CV.objects.get_queryset_prefetch_related())
+        return super().get_queryset().prefetch_related(
+            *cv_models.CV.objects.get_queryset_prefetch_related(),
+            *[
+                f'requests_requirements__{f}'
+                for f in main_models.RequestRequirement.objects.get_queryset_prefetch_related_self()
+            ],
+            *[
+                f'requests_requirements__request__{f}'
+                for f in main_models.Request.objects.get_queryset_prefetch_related_self()
+            ],
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -68,6 +96,14 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         manual_parameters=[
+            openapi.Parameter(
+                'id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False
+            ),
             openapi.Parameter(
                 'country_id',
                 openapi.IN_QUERY,
@@ -90,6 +126,22 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
                 description='`ANY`',
+                required=False,
+            ),
+            openapi.Parameter(
+                'positions_ids_any',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False,
+            ),
+            openapi.Parameter(
+                'positions_ids_all',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ALL`',
                 required=False,
             ),
             openapi.Parameter(
@@ -157,17 +209,34 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         response_serializer = cv_serializers.CvFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        responses={
-            status.HTTP_204_NO_CONTENT: StatusSerializer()
-        },
-    )
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
-    def delete_file(self, request, pk, file_id, *args, **kwargs):
+    def delete_file(self, request, pk: int, file_id: int, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvFile.objects, pk=file_id).delete()
-        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(cv_models.CvFile.objects.filter_by_user(request.user), id=file_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(
+        request_body=EmptySerializer(),
+        responses={
+            status.HTTP_201_CREATED: StatusSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='cv-link/(?P<cv_link_id>[0-9]+)')
+    @transaction.atomic
+    def cv_link(self, request, pk: int, cv_link_id: int, *args, **kwargs):
+        self.get_object().linked.add(
+            get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_link_id)
+        )
+        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['delete'], url_path='cv-unlink/(?P<cv_link_id>[0-9]+)')
+    @transaction.atomic
+    def cv_unlink(self, request, pk: int, cv_link_id: int, *args, **kwargs):
+        self.get_object().linked.remove(
+            get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_link_id)
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CvLinkedObjectFilter(filters.FilterSet):
@@ -181,17 +250,9 @@ class CvLinkedObjectFilterBackend(filters.DjangoFilterBackend):
         return super().get_filterset_class(view, queryset) or CvLinkedObjectFilter
 
 
-class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
+class CvLinkedObjectViewSet(ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, viewsets.ModelViewSet):
     http_method_names = cv_viewsets_http_method_names
     filter_backends = [CvLinkedObjectFilterBackend, OrderingFilterNullsLast, SearchFilter]
-
-    serializer_class = None
-    serializer_read_class = None
-
-    def get_serializer_class(self):
-        if self.request.method in SAFE_METHODS:
-            return self.serializer_read_class
-        return self.serializer_class
 
     @classmethod
     def get_queryset_prefetch_related(cls) -> List[str]:
@@ -328,7 +389,7 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
 
     @classmethod
     def get_queryset_prefetch_related(cls) -> List[str]:
-        return ['position', 'competencies', 'files']
+        return ['position', 'competencies', 'competencies__competence', 'files']
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -346,6 +407,26 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
+        request_body=cv_serializers.CvPositionCompetenceReplaceSerializer(many=True),
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvPositionCompetenceSerializer(many=True)
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='competencies-set')
+    @transaction.atomic
+    def competencies_set(self, request, pk: int, *args, **kwargs):
+        request_serializer = cv_serializers.CvPositionCompetenceReplaceSerializer(data=request.data, many=True)
+        request_serializer.is_valid(raise_exception=True)
+        response_serializer = cv_serializers.CvPositionCompetenceSerializer(
+            cv_models.CvPositionCompetence.objects.set_for_position(
+                self.get_object(),
+                request_serializer.to_internal_value(request_serializer.data)
+            ),
+            many=True
+        )
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
         request_body=cv_serializers.CvPositionFileSerializer,
         responses={
             status.HTTP_201_CREATED: cv_serializers.CvPositionFileReadSerializer()
@@ -360,17 +441,12 @@ class CvPositionViewSet(CvLinkedObjectViewSet):
         response_serializer = cv_serializers.CvPositionFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        responses={
-            status.HTTP_204_NO_CONTENT: StatusSerializer()
-        },
-    )
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
-    def delete_file(self, request, pk, file_id, *args, **kwargs):
+    def delete_file(self, request, pk: int, file_id: int, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvPositionFile.objects, pk=file_id).delete()
-        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(cv_models.CvPositionFile.objects.filter_by_user(request.user), id=file_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CvCareerViewSet(CvLinkedObjectViewSet):
@@ -422,17 +498,12 @@ class CvCareerViewSet(CvLinkedObjectViewSet):
         response_serializer = cv_serializers.CvCareerFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        responses={
-            status.HTTP_204_NO_CONTENT: StatusSerializer()
-        },
-    )
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
-    def delete_file(self, request, pk, file_id, *args, **kwargs):
+    def delete_file(self, request, pk: int, file_id: int, *args, **kwargs):
         self.get_object()
-        get_object_or_404(queryset=cv_models.CvCareerFile.objects, pk=file_id).delete()
-        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(cv_models.CvCareerFile.objects.filter_by_user(request.user), id=file_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CvEducationViewSet(CvLinkedObjectViewSet):

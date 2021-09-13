@@ -1,4 +1,7 @@
+from typing import Optional
+
 from django.db import models
+from django.urls import reverse_lazy
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.relations import PrimaryKeyRelatedField
 
@@ -9,6 +12,12 @@ class CurrentUserIdDefault(CurrentUserDefault):
 
 
 class PrimaryKeyRelatedIdField(PrimaryKeyRelatedField):
+    view_name: str = Optional[str]
+
+    def __init__(self, **kwargs):
+        self.view_name = kwargs.pop('view_name', None)
+        super().__init__(**kwargs)
+
     def get_default(self):
         default = super().get_default()
         if default and isinstance(default, models.Model):
@@ -21,3 +30,8 @@ class PrimaryKeyRelatedIdField(PrimaryKeyRelatedField):
             return value.id
         except Exception:
             return int(data)
+
+    def to_representation(self, value):
+        if isinstance(value, int):
+            return value
+        return super().to_representation(value)
