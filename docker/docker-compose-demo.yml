@@ -29,7 +29,7 @@ services:
     volumes:
       - /work/data/${PROJECT_PREFIX}_${CI_COMMIT_REF_SLUG}/storage:/www/storage
     env_file:
-      - env-file/review/app.env
+      - env-file/demo/app.env
     command: './docker/entry-point/entry-point.sh django'
 
   pg:
