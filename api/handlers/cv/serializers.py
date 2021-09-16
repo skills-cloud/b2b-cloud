@@ -297,8 +297,8 @@ class CvEducationSerializer(CvLinkedObjectBaseSerializer):
     class Meta(CvLinkedObjectBaseSerializer.Meta):
         model = cv_models.CvEducation
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'date_from', 'date_to', 'description', 'is_verified', 'education_place_id', 'education_speciality_id',
-            'education_graduate_id', 'competencies_ids',
+            'date_from', 'date_to', 'diploma_number', 'description', 'is_verified', 'education_place_id',
+            'education_speciality_id', 'education_graduate_id', 'competencies_ids',
         ]
 
 

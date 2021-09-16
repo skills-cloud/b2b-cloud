@@ -424,6 +424,7 @@ class CvEducation(DatesModelBase):
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+    diploma_number = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('номер диплома'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     education_place = models.ForeignKey(
         'dictionary.EducationPlace', on_delete=models.RESTRICT, null=True, blank=True,
