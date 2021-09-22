@@ -7,74 +7,17 @@ from django.utils.translation import gettext_lazy as _
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
 from cv.models import CV
+from main.models.base import Project, ExperienceYears
+from main.models.organization import OrganizationProject
 
-
-class ExperienceYears(models.IntegerChoices):
-    ZERO = 1, _('Менее года')
-    THREE = 3, _('1 – 3 года')
-    FIVE = 5, _('3 - 5 лет')
-    ONE_HUNDRED = 100, _('Более 5 лет')
-
-
-class WorkLocationType(models.TextChoices):
-    OFFICE = 'office', _('Офис')
-    HOME = 'home', _('Удаленная работа')
-    MIXED = 'mixed', _('Офис или удаленная')
-
-
-@reversion.register(follow=['projects'])
-class Organization(DatesModelBase):
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    is_customer = models.BooleanField(default=False, verbose_name=_('заказчик?'))
-
-    class Meta:
-        ordering = ['name']
-        verbose_name = _('организация')
-        verbose_name_plural = _('организации')
-
-    def __str__(self):
-        return self.name
-
-
-@reversion.register(follow=['organization'])
-class OrganizationProject(DatesModelBase):
-    organization = models.ForeignKey(
-        'main.Organization', on_delete=models.CASCADE, related_name='projects',
-        verbose_name=_('организация')
-    )
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-
-    class Meta:
-        ordering = ['name']
-        verbose_name = _('проект организации')
-        verbose_name_plural = _('проекты организаций')
-
-    def __str__(self):
-        return self.name
-
-
-@reversion.register()
-class Project(DatesModelBase):
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    resource_managers = models.ManyToManyField(
-        'acc.User', related_name='projects_as_resource_manager',
-        verbose_name=_('ресурсные менеджеры')
-    )
-    recruiters = models.ManyToManyField(
-        'acc.User', related_name='projects_as_recruiter',
-        verbose_name=_('рекрутеры')
-    )
-
-    class Meta:
-        ordering = ['name']
-        verbose_name = _('проект')
-        verbose_name_plural = _('проекты')
-
-    def __str__(self):
-        return self.name
+__all__ = [
+    'RequestType',
+    'RequestStatus',
+    'RequestPriority',
+    'Request',
+    'RequestRequirement',
+    'RequestRequirementCompetence',
+]
 
 
 @reversion.register()
@@ -105,16 +48,15 @@ class RequestPriority(models.IntegerChoices):
 
 @reversion.register(follow=['requirements'])
 class Request(DatesModelBase):
+    organization_project = models.ForeignKey(
+        'main.OrganizationProject', related_name='requests', on_delete=models.RESTRICT,
+        verbose_name=_('проект заказчика')
+    )
     type = models.ForeignKey(
         'main.RequestType', related_name='requests', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name=_('тип запроса')
     )
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    customer = models.ForeignKey(
-        'main.Organization', on_delete=models.CASCADE, related_name='requests',
-        limit_choices_to={'is_customer': True},
-        verbose_name=_('заказчик'), help_text=_('организации отмеченные как заказчики')
-    )
     status = models.CharField(
         max_length=50, default=RequestStatus.DRAFT, choices=RequestStatus.choices,
         verbose_name=_('статус')
@@ -129,10 +71,15 @@ class Request(DatesModelBase):
     )
     project = models.ForeignKey(
         'main.Project', related_name='requests', null=True, blank=True, on_delete=models.RESTRICT,
-        verbose_name=_('проект')
+        verbose_name=_('внутренний проект'),
+        help_text=_('На текущий момент не используется.<br>Надо задавать связку с проектом заказчика')
     )
     start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
     deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
+    manager = models.ForeignKey(
+        'acc.User', related_name='requests_as_manager', null=True, blank=True,
+        on_delete=models.RESTRICT, verbose_name=_('руководитель проекта')
+    )
     resource_manager = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.RESTRICT,
         related_name='requests_as_resource_manager', verbose_name=_('рес. менеджер')
@@ -157,12 +104,15 @@ class Request(DatesModelBase):
             return [
                 *cls.get_queryset_prefetch_related_self(),
                 *cls.get_queryset_prefetch_related_requirements(),
+                *cls.get_queryset_prefetch_related_project(),
+                *cls.get_queryset_prefetch_related_organization_project(),
             ]
 
         @classmethod
         def get_queryset_prefetch_related_self(cls) -> List[str]:
             return [
-                'type', 'customer', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements',
+                'organization_project', 'type', 'industry_sector', 'project', 'resource_manager', 'recruiter',
+                'requirements',
             ]
 
         @classmethod
@@ -170,6 +120,20 @@ class Request(DatesModelBase):
             return [
                 f'requirements__{f}'
                 for f in RequestRequirement.objects.get_queryset_prefetch_related()
+            ]
+
+        @classmethod
+        def get_queryset_prefetch_related_project(cls) -> List[str]:
+            return [
+                f'project__{f}'
+                for f in Project.objects.get_queryset_prefetch_related()
+            ]
+
+        @classmethod
+        def get_queryset_prefetch_related_organization_project(cls) -> List[str]:
+            return [
+                f'organization_project__{f}'
+                for f in OrganizationProject.objects.get_queryset_prefetch_related()
             ]
 
     objects = Manager()

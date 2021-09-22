@@ -8,8 +8,19 @@ from api.serializers import ModelSerializer
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 from api.handlers.cv.serializers import CvInlineSerializer
+from api.handlers.main.serializers.organization import OrganizationProjectInlineSerializer
+from api.handlers.main.serializers.base import ProjectInlineSerializer
 
-from .organization import OrganizationSerializer, ProjectSerializer
+__all__ = [
+    'RequestTypeSerializer',
+    'RequestRequirementCompetenceSerializer',
+    'RequestRequirementCompetenceReplaceSerializer',
+    'RequestRequirementCompetenceReadSerializer',
+    'RequestRequirementSerializer',
+    'RequestRequirementReadSerializer',
+    'RequestSerializer',
+    'RequestReadSerializer',
+]
 
 
 class RequestTypeSerializer(ModelSerializer):
@@ -92,56 +103,61 @@ class RequestRequirementReadSerializer(RequestRequirementSerializer):
 
 
 class RequestSerializer(ModelSerializer):
-    customer_model_field = main_models.Request._meta.get_field('customer')
     type_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.RequestType.objects,
-        allow_null=True, required=False
-    )
-    customer_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects.filter(**customer_model_field.get_limit_choices_to()),
-        help_text=customer_model_field.help_text + '<br>`/api/main/organization/?is_customer=true`'
+        queryset=main_models.RequestType.objects, allow_null=True, required=False,
+        label=main_models.Request._meta.get_field('type').verbose_name,
     )
     industry_sector_id = PrimaryKeyRelatedIdField(
-        queryset=dictionary_models.IndustrySector.objects,
-        allow_null=True, required=False
+        queryset=dictionary_models.IndustrySector.objects, allow_null=True, required=False,
+        label=main_models.Request._meta.get_field('industry_sector').verbose_name,
+    )
+    organization_project_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationProject.objects,
+        label=main_models.Request._meta.get_field('organization_project').verbose_name,
     )
     project_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Project.objects,
-        allow_null=True, required=False
+        queryset=main_models.Project.objects, allow_null=True, required=False,
+        label=main_models.Request._meta.get_field('project').verbose_name,
+        help_text=main_models.Request._meta.get_field('project').help_text,
+    )
+    manager_id = PrimaryKeyRelatedIdField(
+        queryset=User.objects, allow_null=True, required=False,
+        label=main_models.Request._meta.get_field('manager').verbose_name,
     )
     resource_manager_id = PrimaryKeyRelatedIdField(
-        queryset=User.objects,
-        allow_null=True, required=False
+        queryset=User.objects, allow_null=True, required=False,
+        label=main_models.Request._meta.get_field('resource_manager').verbose_name,
     )
     recruiter_id = PrimaryKeyRelatedIdField(
-        queryset=User.objects,
-        allow_null=True, required=False
+        queryset=User.objects, allow_null=True, required=False,
+        label=main_models.Request._meta.get_field('recruiter').verbose_name,
     )
 
     class Meta:
         model = main_models.Request
         fields = [
-            'id', 'type_id', 'customer_id', 'industry_sector_id', 'project_id', 'resource_manager_id', 'recruiter_id',
-            'description', 'status', 'priority', 'start_date', 'deadline_date',
+            'id', 'organization_project_id', 'type_id', 'industry_sector_id', 'project_id',
+            'manager_id', 'resource_manager_id', 'recruiter_id', 'description', 'status', 'priority', 'start_date',
+            'deadline_date',
         ]
 
 
 class RequestReadSerializer(RequestSerializer):
-    type = RequestTypeSerializer(read_only=True)
-    customer = OrganizationSerializer(read_only=True)
-    industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True)
-    project = ProjectSerializer(read_only=True)
-    resource_manager = UserInlineSerializer(read_only=True)
-    recruiter = UserInlineSerializer(read_only=True)
+    organization_project = OrganizationProjectInlineSerializer(read_only=True)
+    type = RequestTypeSerializer(read_only=True, allow_null=True)
+    industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
+    project = ProjectInlineSerializer(read_only=True, allow_null=True)
+    resource_manager = UserInlineSerializer(read_only=True, allow_null=True)
+    recruiter = UserInlineSerializer(read_only=True, allow_null=True)
 
     requirements = RequestRequirementReadSerializer(many=True, read_only=True)
 
-    requirements_count_sum = serializers.SerializerMethodField(read_only=True)
+    requirements_count_sum = serializers.SerializerMethodField(read_only=True, default=0)
 
     class Meta(RequestSerializer.Meta):
         fields = RequestSerializer.Meta.fields + [
-            'type', 'customer', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements_count_sum',
-            'requirements',
+            'organization_project', 'type', 'industry_sector', 'project', 'resource_manager', 'recruiter',
+            'requirements_count_sum', 'requirements',
         ]
 
     def get_requirements_count_sum(self, instance: main_models.Request) -> int:
