@@ -152,7 +152,7 @@ class RequestReadSerializer(RequestSerializer):
 
     requirements = RequestRequirementReadSerializer(many=True, read_only=True)
 
-    requirements_count_sum = serializers.SerializerMethodField(read_only=True, default=0)
+    requirements_count_sum = serializers.SerializerMethodField(read_only=True)
 
     class Meta(RequestSerializer.Meta):
         fields = RequestSerializer.Meta.fields + [

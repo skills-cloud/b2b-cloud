@@ -1,8 +1,11 @@
+from rest_framework import serializers
+from rest_framework_recursive.fields import RecursiveField
+
 from acc.models import User
 from dictionary import models as dictionary_models
 from main import models as main_models
 from api.fields import PrimaryKeyRelatedIdField
-from api.serializers import ModelSerializer
+from api.serializers import ModelSerializer, ModelSerializerWithCallCleanMethod
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 
@@ -11,6 +14,8 @@ __all__ = [
     'OrganizationProjectSerializer',
     'OrganizationProjectReadSerializer',
     'OrganizationProjectInlineSerializer',
+    'OrganizationProjectCardItemTreeSerializer',
+    'OrganizationProjectCardItemReadTreeSerializer',
 ]
 
 
@@ -65,3 +70,26 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
 
 class OrganizationProjectInlineSerializer(OrganizationProjectReadSerializer):
     pass
+
+
+class OrganizationProjectCardItemTreeSerializer(ModelSerializerWithCallCleanMethod):
+    organization_project_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationProject.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProjectCardItem._meta.get_field('organization_project').verbose_name,
+        help_text=main_models.OrganizationProjectCardItem._meta.get_field('organization_project').help_text,
+    )
+    parent_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationProjectCardItem.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProjectCardItem._meta.get_field('parent').verbose_name,
+    )
+
+    class Meta:
+        model = main_models.OrganizationProjectCardItem
+        fields = ['id', 'organization_project_id', 'parent_id', 'name', 'description']
+
+
+class OrganizationProjectCardItemReadTreeSerializer(OrganizationProjectCardItemTreeSerializer):
+    children = serializers.ListField(source='get_children', child=RecursiveField())
+
+    class Meta(OrganizationProjectCardItemTreeSerializer.Meta):
+        fields = OrganizationProjectCardItemTreeSerializer.Meta.fields + ['children']

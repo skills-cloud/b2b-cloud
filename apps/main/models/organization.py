@@ -1,14 +1,17 @@
-from typing import List, Dict, Any
+from typing import List
 
 import reversion
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from mptt.models import MPTTModel, TreeForeignKey
 
 from project.contrib.db.models import DatesModelBase
 
 __all__ = [
     'Organization',
-    'OrganizationProject'
+    'OrganizationProject',
+    'OrganizationProjectCardItem',
 ]
 
 
@@ -30,7 +33,7 @@ class Organization(DatesModelBase):
 @reversion.register(follow=['organization'])
 class OrganizationProject(DatesModelBase):
     organization = models.ForeignKey(
-        'main.Organization', on_delete=models.CASCADE, related_name='projects',
+        'main.Organization', on_delete=models.RESTRICT, related_name='projects',
         verbose_name=_('организация')
     )
     name = models.CharField(max_length=500, verbose_name=_('название'))
@@ -68,3 +71,43 @@ class OrganizationProject(DatesModelBase):
 
     def __str__(self):
         return self.name
+
+
+class OrganizationProjectCardItem(MPTTModel, DatesModelBase):
+    organization_project = models.ForeignKey(
+        'main.OrganizationProject', on_delete=models.CASCADE, related_name='cards_items', null=True, blank=True,
+        verbose_name=_('проект организации'),
+        help_text=_('необходимо задавать только для корневой карточки')
+    )
+    parent = TreeForeignKey(
+        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
+        verbose_name=_('родительская карточка')
+    )
+    name = models.CharField(max_length=500, verbose_name=_('название'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+
+    class Meta:
+        verbose_name = _('карточка проект организации')
+        verbose_name_plural = _('карточки проектов организаций')
+
+    class MPTTMeta:
+        level_attr = 'mptt_level'
+        order_insertion_by = ['name']
+
+    class ManagerFlat(models.Manager):
+        pass
+
+    objects_flat = ManagerFlat()
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if self.parent and self.organization_project_id is not None:
+            raise ValidationError({
+                'organization_project': _('Проект организации задается только для карточки верхнего уровня')
+            })
+        if self.parent is None and self.organization_project_id is None:
+            raise ValidationError({
+                'organization_project': _('Для карточки верхнего уровня необходимо указать проект организации')
+            })

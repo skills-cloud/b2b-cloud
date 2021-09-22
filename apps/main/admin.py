@@ -1,5 +1,6 @@
 from django.contrib import admin
 import nested_admin
+from mptt.admin import DraggableMPTTAdmin
 from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
 from reversion.admin import VersionAdmin
 from admin_auto_filters.filters import AutocompleteFilter
@@ -107,3 +108,11 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         return super().get_queryset(request).prefetch_related(
             *main_models.Request.objects.get_queryset_prefetch_related()
         )
+
+
+@admin.register(main_models.OrganizationProjectCardItem)
+class CompetenceAdmin(DraggableMPTTAdmin):
+    search_fields = ['name']
+    mptt_level_indent = 10
+    list_display = ['tree_actions', 'indented_title']
+    list_display_links = ['indented_title']
