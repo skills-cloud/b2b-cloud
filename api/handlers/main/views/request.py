@@ -17,53 +17,13 @@ from cv import models as cv_models
 from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.handlers.main import serializers as main_serializers
+from api.handlers.main.views.base import MainBaseViewSet
 
-
-class MainBaseViewSet(ReadWriteSerializersMixin, ModelViewSet):
-    http_method_names = ['get', 'post', 'patch']
-    filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
-    search_fields = ['name']
-    ordering_fields = list(itertools.chain(*[
-        [k, f'-{k}']
-        for k in ['id', 'name']
-    ]))
-    ordering = ['name']
-
-    @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter(
-                'ordering',
-                openapi.IN_QUERY,
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_STRING, enum=ordering_fields),
-                default=ordering
-            ),
-        ],
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-
-class OrganizationViewSet(MainBaseViewSet):
-    queryset = main_models.Organization.objects
-    serializer_class = main_serializers.OrganizationSerializer
-    filterset_fields = ['is_customer']
-
-
-class OrganizationProjectViewSet(MainBaseViewSet):
-    class Filter(filters.FilterSet):
-        organization_id = filters.ModelChoiceFilter(queryset=main_models.Organization.objects)
-
-    filter_class = Filter
-    queryset = main_models.OrganizationProject.objects
-    serializer_class = main_serializers.OrganizationProjectSerializer
-    serializer_read_class = main_serializers.OrganizationProjectReadSerializer
-
-
-class ProjectViewSet(MainBaseViewSet):
-    queryset = main_models.Project.objects
-    serializer_class = main_serializers.ProjectSerializer
-    serializer_read_class = main_serializers.ProjectReadSerializer
+__all__ = [
+    'RequestTypeViewSet',
+    'RequestViewSet',
+    'RequestRequirementViewSet',
+]
 
 
 class RequestTypeViewSet(MainBaseViewSet):
@@ -78,7 +38,7 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
         class Meta:
             model = main_models.Request
             fields = [
-                'type_id', 'customer_id', 'status', 'priority', 'industry_sector_id', 'project_id',
+                'type_id', 'status', 'priority', 'industry_sector_id', 'project_id',
                 'resource_manager_id', 'recruiter_id',
             ]
 
@@ -93,7 +53,7 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
     search_fields = ['id', 'description']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
-        for k in ['id', 'type', 'priority', 'start_date', 'deadline_date', 'customer']
+        for k in ['id', 'type', 'priority', 'start_date', 'deadline_date']
     ]))
     ordering = ['priority', '-id']
 
@@ -156,7 +116,8 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     @action(detail=True, methods=['post'], url_path='competencies-set')
     @transaction.atomic
     def competencies_set(self, request, pk: int, *args, **kwargs):
-        request_serializer = main_serializers.RequestRequirementCompetenceReplaceSerializer(data=request.data, many=True)
+        request_serializer = main_serializers.RequestRequirementCompetenceReplaceSerializer(data=request.data,
+                                                                                            many=True)
         request_serializer.is_valid(raise_exception=True)
         response_serializer = main_serializers.RequestRequirementCompetenceSerializer(
             main_models.RequestRequirementCompetence.objects.set_for_request_requirement(

@@ -1,8 +1,22 @@
+from rest_framework import serializers
+from rest_framework_recursive.fields import RecursiveField
+
 from acc.models import User
+from dictionary import models as dictionary_models
 from main import models as main_models
 from api.fields import PrimaryKeyRelatedIdField
-from api.serializers import ModelSerializer
+from api.serializers import ModelSerializer, ModelSerializerWithCallCleanMethod
 from api.handlers.acc.serializers import UserInlineSerializer
+from api.handlers.dictionary import serializers as dictionary_serializers
+
+__all__ = [
+    'OrganizationSerializer',
+    'OrganizationProjectSerializer',
+    'OrganizationProjectReadSerializer',
+    'OrganizationProjectInlineSerializer',
+    'OrganizationProjectCardItemTreeSerializer',
+    'OrganizationProjectCardItemReadTreeSerializer',
+]
 
 
 class OrganizationSerializer(ModelSerializer):
@@ -13,39 +27,69 @@ class OrganizationSerializer(ModelSerializer):
 
 class OrganizationProjectSerializer(ModelSerializer):
     organization_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects
+        queryset=main_models.Organization.objects,
+        label=main_models.OrganizationProject._meta.get_field('organization').verbose_name,
+    )
+    industry_sector_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.IndustrySector.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProject._meta.get_field('industry_sector').verbose_name,
+    )
+    manager_id = PrimaryKeyRelatedIdField(
+        queryset=User.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProject._meta.get_field('manager').verbose_name,
+    )
+    resource_managers_ids = PrimaryKeyRelatedIdField(
+        source='resource_managers', queryset=User.objects, many=True, required=False, allow_null=True,
+        label=main_models.OrganizationProject._meta.get_field('resource_managers').verbose_name,
+    )
+    recruiters_ids = PrimaryKeyRelatedIdField(
+        source='recruiters', queryset=User.objects, many=True, required=False, allow_null=True,
+        label=main_models.OrganizationProject._meta.get_field('recruiters').verbose_name,
     )
 
     class Meta:
         model = main_models.OrganizationProject
-        fields = ['id', 'organization_id', 'name', 'description', 'created_at', 'updated_at']
+        fields = [
+            'id', 'organization_id', 'industry_sector_id', 'manager_id', 'resource_managers_ids', 'recruiters_ids',
+            'name', 'description', 'date_from', 'date_to', 'created_at', 'updated_at',
+        ]
 
 
 class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
-    organization = OrganizationSerializer()
-
-    class Meta(OrganizationProjectSerializer.Meta):
-        fields = OrganizationProjectSerializer.Meta.fields + ['organization']
-
-
-class ProjectSerializer(ModelSerializer):
-    resource_managers_ids = PrimaryKeyRelatedIdField(
-        source='resource_managers', queryset=User.objects,
-        many=True, allow_null=True, required=False,
-    )
-    recruiters_ids = PrimaryKeyRelatedIdField(
-        source='recruiters', queryset=User.objects,
-        many=True, allow_null=True, required=False,
-    )
-
-    class Meta:
-        model = main_models.Project
-        fields = ['id', 'name', 'description', 'resource_managers_ids', 'recruiters_ids', 'created_at', 'updated_at']
-
-
-class ProjectReadSerializer(ProjectSerializer):
+    organization = OrganizationSerializer(read_only=True)
+    industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
+    manager = UserInlineSerializer(read_only=True, allow_null=True)
     resource_managers = UserInlineSerializer(many=True, read_only=True)
     recruiters = UserInlineSerializer(many=True, read_only=True)
 
-    class Meta(ProjectSerializer.Meta):
-        fields = ProjectSerializer.Meta.fields + ['resource_managers', 'recruiters']
+    class Meta(OrganizationProjectSerializer.Meta):
+        fields = OrganizationProjectSerializer.Meta.fields + [
+            'organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters',
+        ]
+
+
+class OrganizationProjectInlineSerializer(OrganizationProjectReadSerializer):
+    pass
+
+
+class OrganizationProjectCardItemTreeSerializer(ModelSerializerWithCallCleanMethod):
+    organization_project_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationProject.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProjectCardItem._meta.get_field('organization_project').verbose_name,
+        help_text=main_models.OrganizationProjectCardItem._meta.get_field('organization_project').help_text,
+    )
+    parent_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationProjectCardItem.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProjectCardItem._meta.get_field('parent').verbose_name,
+    )
+
+    class Meta:
+        model = main_models.OrganizationProjectCardItem
+        fields = ['id', 'organization_project_id', 'parent_id', 'name', 'description']
+
+
+class OrganizationProjectCardItemReadTreeSerializer(OrganizationProjectCardItemTreeSerializer):
+    children = serializers.ListField(source='get_children', child=RecursiveField())
+
+    class Meta(OrganizationProjectCardItemTreeSerializer.Meta):
+        fields = OrganizationProjectCardItemTreeSerializer.Meta.fields + ['children']
