@@ -38,7 +38,7 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
         class Meta:
             model = main_models.Request
             fields = [
-                'type_id', 'status', 'priority', 'industry_sector_id', 'project_id',
+                'organization_project_id', 'type_id', 'status', 'priority', 'industry_sector_id', 'project_id',
                 'resource_manager_id', 'recruiter_id',
             ]
 
