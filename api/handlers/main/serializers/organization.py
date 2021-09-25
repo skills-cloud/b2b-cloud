@@ -62,9 +62,12 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     resource_managers = UserInlineSerializer(many=True, read_only=True)
     recruiters = UserInlineSerializer(many=True, read_only=True)
 
+    requests_count = serializers.IntegerField(read_only=True)
+
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
             'organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters',
+            'requests_count',
         ]
 
 

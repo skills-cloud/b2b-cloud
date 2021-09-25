@@ -65,12 +65,16 @@ class OrganizationProject(DatesModelBase):
     class Manager(models.Manager):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
-            return ['organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters']
+            return ['organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters', 'requests']
 
     objects = Manager()
 
     def __str__(self):
         return self.name
+
+    @property
+    def requests_count(self) -> int:
+        return len(self.requests.all())
 
 
 class OrganizationProjectCardItem(MPTTModel, DatesModelBase):
