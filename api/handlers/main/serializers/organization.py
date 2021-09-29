@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.relations import RelatedField
 from rest_framework_recursive.fields import RecursiveField
 
 from acc.models import User
@@ -88,7 +89,9 @@ class OrganizationProjectCardItemTreeSerializer(ModelSerializerWithCallCleanMeth
 
     class Meta:
         model = main_models.OrganizationProjectCardItem
-        fields = ['id', 'organization_project_id', 'parent_id', 'name', 'description']
+        fields = [
+            'id', 'organization_project_id', 'parent_id', 'name', 'description'
+        ]
 
 
 class OrganizationProjectCardItemReadTreeSerializer(OrganizationProjectCardItemTreeSerializer):

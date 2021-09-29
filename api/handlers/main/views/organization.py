@@ -1,10 +1,10 @@
 from django_filters import rest_framework as filters
-from django_filters.fields import ModelChoiceField
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 from drf_yasg import openapi
 
+from api.filters import ModelMultipleChoiceCommaSeparatedFilter
 from main import models as main_models
 from api.views_mixins import ReadWriteSerializersMixin
 from api.handlers.main import serializers as main_serializers
@@ -15,6 +15,8 @@ __all__ = [
     'OrganizationProjectViewSet',
     'OrganizationProjectCardItemViewSet',
 ]
+
+from project.contrib.db import get_sql_from_queryset
 
 
 class OrganizationViewSet(MainBaseViewSet):
@@ -44,11 +46,25 @@ class OrganizationProjectCardItemViewSet(
     GenericViewSet
 ):
     class Filter(filters.FilterSet):
-        organization_project_id = ModelChoiceField(queryset=main_models.OrganizationProject.objects)
+        organization_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.Organization.objects,
+            field_name='organization_project__organization'
+        )
+        organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationProject.objects
+        )
+        # only_root_items = filters.BooleanFilter()
 
         class Meta:
             model = main_models.OrganizationProjectCardItem
-            fields = ['organization_project_id']
+            fields = ['organization_project_id', 'organization_id']
+
+        # def filter_queryset(self, queryset):
+        #     only_root_items = self.form.cleaned_data.pop('only_root_items')
+        #     queryset = super().filter_queryset(queryset)
+        #     if only_root_items:
+        #         queryset = queryset.filter(parent__isnull=True)
+        #     return queryset
 
     filterset_class = Filter
     http_method_names = MainBaseViewSet.http_method_names
@@ -57,5 +73,31 @@ class OrganizationProjectCardItemViewSet(
     serializer_class = main_serializers.OrganizationProjectCardItemTreeSerializer
     serializer_read_class = main_serializers.OrganizationProjectCardItemReadTreeSerializer
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'organization_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False,
+            ),
+            openapi.Parameter(
+                'organization_project_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False,
+            ),
+            # openapi.Parameter(
+            #     'only_root_items',
+            #     openapi.IN_QUERY,
+            #     type=openapi.TYPE_BOOLEAN,
+            #     required=False,
+            # ),
+        ],
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
