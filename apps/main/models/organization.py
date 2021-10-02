@@ -1,6 +1,7 @@
 from typing import List
 
 import reversion
+from cacheops import invalidate_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -104,12 +105,13 @@ class OrganizationProjectCardItem(MPTTModel, DatesModelBase):
     objects_flat = ManagerFlat()
 
     def __str__(self):
-        return self.name
+        return f'{self.name} < {self.id} >'
 
     def save(self, *args, **kwargs):
         if self.parent and self.organization_project != self.parent.organization_project:
             self.organization_project = self.parent.organization_project
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        invalidate_model(OrganizationProjectCardItem)
 
     def clean(self):
         if self.parent and self.organization_project_id is not None:

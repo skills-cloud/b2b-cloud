@@ -32,6 +32,11 @@ class OrganizationProjectAdmin(MainBaseAdmin):
         )
 
 
+class OrganizationProjectAdminFilter(AutocompleteFilter):
+    title = main_models.Request._meta.get_field('organization_project').verbose_name
+    field_name = 'organization_project'
+
+
 @admin.register(main_models.Project)
 class ProjectAdmin(MainBaseAdmin):
     autocomplete_fields = ['resource_managers', 'recruiters']
@@ -47,10 +52,6 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     class TypeFilter(AutocompleteFilter):
         title = main_models.Request._meta.get_field('type').verbose_name
         field_name = 'type'
-
-    class OrganizationProjectFilter(AutocompleteFilter):
-        title = main_models.Request._meta.get_field('organization_project').verbose_name
-        field_name = 'organization_project'
 
     class ProjectFilter(AutocompleteFilter):
         title = main_models.Request._meta.get_field('project').verbose_name
@@ -90,7 +91,7 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     list_filter = [
         'priority',
         'status',
-        OrganizationProjectFilter,
+        OrganizationProjectAdminFilter,
         TypeFilter,
         IndustrySectorFilter,
         ProjectFilter,
@@ -111,12 +112,12 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
 
 
 @admin.register(main_models.OrganizationProjectCardItem)
-class CompetenceAdmin(DraggableMPTTAdmin):
+class OrganizationProjectCardItemAdmin(DraggableMPTTAdmin):
     search_fields = ['name', 'description']
     mptt_level_indent = 10
     list_display = ['tree_actions', 'indented_title', 'description', 'organization_project']
     list_display_links = ['indented_title']
-    list_filter = ['organization_project']
+    list_filter = [OrganizationProjectAdminFilter]
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('organization_project')

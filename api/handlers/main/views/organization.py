@@ -16,8 +16,6 @@ __all__ = [
     'OrganizationProjectCardItemViewSet',
 ]
 
-from project.contrib.db import get_sql_from_queryset
-
 
 class OrganizationViewSet(MainBaseViewSet):
     queryset = main_models.Organization.objects
