@@ -53,22 +53,16 @@ class OrganizationProjectCardItemViewSet(
         organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationProject.objects
         )
-        # only_root_items = filters.BooleanFilter()
 
         class Meta:
             model = main_models.OrganizationProjectCardItem
             fields = ['organization_project_id', 'organization_id']
 
-        # def filter_queryset(self, queryset):
-        #     only_root_items = self.form.cleaned_data.pop('only_root_items')
-        #     queryset = super().filter_queryset(queryset)
-        #     if only_root_items:
-        #         queryset = queryset.filter(parent__isnull=True)
-        #     return queryset
-
     filterset_class = Filter
     http_method_names = MainBaseViewSet.http_method_names
-    queryset = main_models.OrganizationProjectCardItem.objects.filter(mptt_level=0).prefetch_related('children')
+    queryset = main_models.OrganizationProjectCardItem.objects.filter(mptt_level=0).prefetch_related(
+        'children'
+    )
     pagination_class = None
     serializer_class = main_serializers.OrganizationProjectCardItemTreeSerializer
     serializer_read_class = main_serializers.OrganizationProjectCardItemReadTreeSerializer
@@ -91,12 +85,6 @@ class OrganizationProjectCardItemViewSet(
                 description='`ANY`',
                 required=False,
             ),
-            # openapi.Parameter(
-            #     'only_root_items',
-            #     openapi.IN_QUERY,
-            #     type=openapi.TYPE_BOOLEAN,
-            #     required=False,
-            # ),
         ],
     )
     def list(self, request, *args, **kwargs):
