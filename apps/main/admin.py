@@ -112,7 +112,11 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
 
 @admin.register(main_models.OrganizationProjectCardItem)
 class CompetenceAdmin(DraggableMPTTAdmin):
-    search_fields = ['name']
+    search_fields = ['name', 'description']
     mptt_level_indent = 10
-    list_display = ['tree_actions', 'indented_title']
+    list_display = ['tree_actions', 'indented_title', 'description', 'organization_project']
     list_display_links = ['indented_title']
+    list_filter = ['organization_project']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('organization_project')

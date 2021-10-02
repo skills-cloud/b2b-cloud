@@ -106,6 +106,11 @@ class OrganizationProjectCardItem(MPTTModel, DatesModelBase):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if self.parent and self.organization_project != self.parent.organization_project:
+            self.organization_project = self.parent.organization_project
+        return super().save(*args, **kwargs)
+
     def clean(self):
         if self.parent and self.organization_project_id is not None:
             raise ValidationError({
