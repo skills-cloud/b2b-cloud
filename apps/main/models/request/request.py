@@ -56,6 +56,7 @@ class Request(DatesModelBase):
         'main.RequestType', related_name='requests', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name=_('тип запроса')
     )
+    title = models.TextField(null=True, blank=True, verbose_name=_('заголовок (название или номер)'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     status = models.CharField(
         max_length=50, default=RequestStatus.DRAFT, choices=RequestStatus.choices,
@@ -154,7 +155,7 @@ class Request(DatesModelBase):
 class RequestRequirement(DatesModelBase):
     request = models.ForeignKey(
         'main.Request', on_delete=models.CASCADE, related_name='requirements',
-        verbose_name=_('запрос')
+        verbose_name=_('проектный запрос')
     )
     sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
     name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('название'))
@@ -201,8 +202,8 @@ class RequestRequirement(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related_self(cls) -> List[str]:
             return [
-                'position', 'type_of_employment', 'work_location_city', 'work_location_city__country', 'competencies',
-                'competencies__competence', 'cv_list',
+                'request', 'position', 'type_of_employment', 'work_location_city', 'work_location_city__country',
+                'competencies', 'competencies__competence', 'cv_list',
             ]
 
         @classmethod
@@ -213,6 +214,9 @@ class RequestRequirement(DatesModelBase):
             ]
 
     objects = Manager()
+
+    def __str__(self):
+        return f'{self.name} / {self.request.title or self.request_id}'
 
 
 @reversion.register(follow=['request_requirement'])

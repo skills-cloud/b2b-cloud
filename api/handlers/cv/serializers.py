@@ -415,11 +415,16 @@ class CvDetailWriteSerializer(ModelSerializer):
         fields = [
             'id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender', 'birth_date', 'is_resource_owner',
             'user_id', 'country_id', 'city_id', 'citizenship_id', 'days_to_contact', 'time_to_contact_from',
-            'time_to_contact_to', 'price', 'physical_limitations_ids', 'types_of_employment_ids', 'linked_ids',
+            'time_to_contact_to', 'price', 'physical_limitations_ids', 'types_of_employment_ids',
+            'linked_ids',
         ]
 
 
-class CvDetailReadSerializer(CvDetailWriteSerializer):
+class CvDetailReadBaseSerializer(CvDetailWriteSerializer):
+    pass
+
+
+class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
     user = UserInlineSerializer(read_only=True, allow_null=True)
     country = dictionary_serializers.CountrySerializer(read_only=True, allow_null=True)
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
@@ -437,8 +442,8 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
     certificates = CvCertificateReadSerializer(many=True, read_only=True)
     files = CvFileReadSerializer(many=True, read_only=True)
 
-    class Meta(CvDetailWriteSerializer.Meta):
-        fields = CvDetailWriteSerializer.Meta.fields + [
+    class Meta(CvDetailReadBaseSerializer.Meta):
+        fields = CvDetailReadBaseSerializer.Meta.fields + [
             'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
             'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
         ]
@@ -485,16 +490,22 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
         return CvRequestRequirementInlineSerializer
 
 
-class CvListSerializer(CvDetailReadSerializer):
-    class Meta(CvDetailReadSerializer.Meta):
+class CvListReadFullSerializer(CvDetailReadFullSerializer):
+    pass
+
+
+class CvInlineFullSerializer(CvListReadFullSerializer):
+    pass
+
+
+class CvInlineShortSerializer(CvDetailReadBaseSerializer):
+    physical_limitations_ids = None
+    types_of_employment_ids = None
+    linked_ids = None
+
+    class Meta(CvDetailReadBaseSerializer.Meta):
         fields = [
-            k
-            for k in CvDetailReadSerializer.Meta.fields
-            if k not in [
-                # 'contacts', 'time_slots', 'positions', 'career', 'education', 'certificates'
+            f for f in CvDetailReadBaseSerializer.Meta.fields if f not in [
+                'physical_limitations_ids', 'types_of_employment_ids', 'linked_ids',
             ]
         ]
-
-
-class CvInlineSerializer(CvListSerializer):
-    pass

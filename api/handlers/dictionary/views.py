@@ -9,12 +9,13 @@ from rest_framework.viewsets import ModelViewSet
 
 from dictionary import models as dictionary_models
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedIdFilter
+from api.backends import FilterBackend
 from api.handlers.dictionary import serializers as dictionary_serializers
 
 
 class DictionaryBaseViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
-    filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
+    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
     search_fields = ['name']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']

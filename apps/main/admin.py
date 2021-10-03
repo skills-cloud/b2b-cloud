@@ -5,8 +5,8 @@ from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
 from reversion.admin import VersionAdmin
 from admin_auto_filters.filters import AutocompleteFilter
 
+from cv.admin import CvAdminFilter
 from main import models as main_models
-
 
 class MainBaseAdmin(VersionAdmin):
     list_display = ['id', 'name']
@@ -33,7 +33,7 @@ class OrganizationProjectAdmin(MainBaseAdmin):
 
 
 class OrganizationProjectAdminFilter(AutocompleteFilter):
-    title = main_models.Request._meta.get_field('organization_project').verbose_name
+    title = main_models.OrganizationProject._meta.verbose_name
     field_name = 'organization_project'
 
 
@@ -121,3 +121,16 @@ class OrganizationProjectCardItemAdmin(DraggableMPTTAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('organization_project')
+
+
+@admin.register(main_models.TimeSheetRow)
+class TimeSheetRowAdmin(admin.ModelAdmin):
+    list_display = ['id', 'task_name', 'request_requirement', 'cv', 'task_name', 'task_description']
+    search_fields = ['task_name', 'task_description']
+    autocomplete_fields = ['cv']
+    list_filter = [CvAdminFilter]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related(
+            *main_models.TimeSheetRow.objects.get_queryset_prefetch_related()
+        )
