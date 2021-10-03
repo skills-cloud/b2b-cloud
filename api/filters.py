@@ -1,10 +1,7 @@
 from django.db.models import F
-from django_filters.fields import ModelMultipleChoiceField
 from django_filters import MultipleChoiceFilter, ModelMultipleChoiceFilter
 from django_filters.widgets import CSVWidget, DateRangeWidget as DateRangeWidgetBase
 from rest_framework.filters import OrderingFilter
-
-from project.contrib.db import get_sql_from_queryset
 
 
 class OrderingFilterNullsLast(OrderingFilter):

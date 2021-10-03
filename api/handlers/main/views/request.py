@@ -15,6 +15,7 @@ from api.serializers import EmptySerializer, StatusSerializer
 from main import models as main_models
 from cv import models as cv_models
 from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
+from api.backends import FilterBackend
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.handlers.main import serializers as main_serializers
 from api.handlers.main.views.base import MainBaseViewSet
@@ -48,12 +49,12 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
     )
     serializer_class = main_serializers.RequestSerializer
     serializer_read_class = main_serializers.RequestReadSerializer
-    filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
+    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
     filterset_class = Filter
-    search_fields = ['id', 'description']
+    search_fields = ['id', 'title', 'description']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
-        for k in ['id', 'type', 'priority', 'start_date', 'deadline_date']
+        for k in ['id', 'type', 'title', 'priority', 'start_date', 'deadline_date']
     ]))
     ordering = ['priority', '-id']
 

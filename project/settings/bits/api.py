@@ -1,6 +1,5 @@
 from drf_yasg.app_settings import SWAGGER_DEFAULTS
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'api.authentication.SessionAuthentication',
@@ -9,7 +8,7 @@ REST_FRAMEWORK = {
         'api.permissions.IsAuthenticated',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
+        'api.backends.FilterBackend',
     ),
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.DefaultPagination',
     'DEFAULT_RENDERER_CLASSES': (

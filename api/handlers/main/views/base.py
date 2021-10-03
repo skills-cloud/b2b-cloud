@@ -8,6 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from main import models as main_models
 from api.views_mixins import ReadWriteSerializersMixin
+from api.backends import FilterBackend
 from api.filters import OrderingFilterNullsLast
 from api.handlers.main import serializers as main_serializers
 
@@ -19,7 +20,7 @@ __all__ = [
 
 class MainBaseViewSet(ReadWriteSerializersMixin, ModelViewSet):
     http_method_names = ['get', 'post', 'patch']
-    filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
+    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
     search_fields = ['name']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']

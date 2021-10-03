@@ -5,9 +5,11 @@ from cacheops import invalidate_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from mptt.models import MPTTModel, TreeForeignKey
+from mptt import models as mptt_models
+from mptt import querysets as mptt_querysets
 
 from project.contrib.db.models import DatesModelBase
+from acc.models import User
 
 __all__ = [
     'Organization',
@@ -78,13 +80,13 @@ class OrganizationProject(DatesModelBase):
         return len(self.requests.all())
 
 
-class OrganizationProjectCardItem(MPTTModel, DatesModelBase):
+class OrganizationProjectCardItem(mptt_models.MPTTModel, DatesModelBase):
     organization_project = models.ForeignKey(
         'main.OrganizationProject', on_delete=models.CASCADE, related_name='cards_items', null=True, blank=True,
         verbose_name=_('проект организации'),
         help_text=_('необходимо задавать только для корневой карточки')
     )
-    parent = TreeForeignKey(
+    parent = mptt_models.TreeForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
         verbose_name=_('родительская карточка')
     )
@@ -99,10 +101,25 @@ class OrganizationProjectCardItem(MPTTModel, DatesModelBase):
         level_attr = 'mptt_level'
         order_insertion_by = ['name']
 
-    class ManagerFlat(models.Manager):
+    class TreeQuerySet(mptt_querysets.TreeQuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class TreeManager(
+        models.Manager.from_queryset(TreeQuerySet),
+        mptt_models.TreeManager
+    ):
         pass
 
-    objects_flat = ManagerFlat()
+    class FlatQuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class FlatManager(models.Manager.from_queryset(FlatQuerySet)):
+        pass
+
+    objects = TreeManager()
+    objects_flat = FlatManager()
 
     def __str__(self):
         return f'{self.name} < {self.id} >'
@@ -114,10 +131,6 @@ class OrganizationProjectCardItem(MPTTModel, DatesModelBase):
         invalidate_model(OrganizationProjectCardItem)
 
     def clean(self):
-        if self.parent and self.organization_project_id is not None:
-            raise ValidationError({
-                'organization_project': _('Проект организации задается только для карточки верхнего уровня')
-            })
         if self.parent is None and self.organization_project_id is None:
             raise ValidationError({
                 'organization_project': _('Для карточки верхнего уровня необходимо указать проект организации')

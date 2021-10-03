@@ -26,6 +26,7 @@ from api.filters import (
 )
 from api.serializers import StatusSerializer, EmptySerializer
 from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
+from api.backends import FilterBackend
 from api.handlers.cv import serializers as cv_serializers
 
 cv_viewsets_http_method_names = ['get', 'post', 'patch', 'delete']
@@ -65,7 +66,7 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
 
     http_method_names = cv_viewsets_http_method_names
     filterset_class = Filter
-    filter_backends = [filters.DjangoFilterBackend, OrderingFilterNullsLast, SearchFilter]
+    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
     search_fields = ['first_name', 'middle_name', 'last_name', 'positions__title', 'positions__position__name']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
@@ -89,9 +90,9 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return cv_serializers.CvListSerializer
+            return cv_serializers.CvListReadFullSerializer
         if self.request.method in SAFE_METHODS:
-            return cv_serializers.CvDetailReadSerializer
+            return cv_serializers.CvDetailReadFullSerializer
         return cv_serializers.CvDetailWriteSerializer
 
     @swagger_auto_schema(
@@ -243,7 +244,7 @@ class CvLinkedObjectFilter(filters.FilterSet):
     cv_id = filters.ModelChoiceFilter(queryset=cv_models.CV.objects)
 
 
-class CvLinkedObjectFilterBackend(filters.DjangoFilterBackend):
+class CvLinkedObjectFilterBackend(FilterBackend):
     def get_filterset_class(self, view, queryset=None):
         if filterset_class := getattr(view, 'Filter', None):
             return filterset_class

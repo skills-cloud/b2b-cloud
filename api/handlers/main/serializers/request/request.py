@@ -7,7 +7,7 @@ from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializer
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
-from api.handlers.cv.serializers import CvInlineSerializer
+from api.handlers.cv.serializers import CvInlineShortSerializer
 from api.handlers.main.serializers.organization import OrganizationProjectInlineSerializer
 from api.handlers.main.serializers.base import ProjectInlineSerializer
 
@@ -18,8 +18,10 @@ __all__ = [
     'RequestRequirementCompetenceReadSerializer',
     'RequestRequirementSerializer',
     'RequestRequirementReadSerializer',
+    'RequestRequirementInlineSerializer',
     'RequestSerializer',
     'RequestReadSerializer',
+    'RequestInlineSerializer',
 ]
 
 
@@ -93,13 +95,18 @@ class RequestRequirementReadSerializer(RequestRequirementSerializer):
     competencies = RequestRequirementCompetenceReadSerializer(many=True, read_only=True)
 
     cv_list_ids = PrimaryKeyRelatedIdField(source='cv_list', many=True, read_only=True)
-    cv_list = CvInlineSerializer(many=True, read_only=True)
+    cv_list = CvInlineShortSerializer(many=True, read_only=True)
 
     class Meta(RequestRequirementSerializer.Meta):
         fields = RequestRequirementSerializer.Meta.fields + [
             'position', 'type_of_employment', 'work_location_city',
             'competencies', 'cv_list_ids', 'cv_list',
         ]
+
+
+class RequestRequirementInlineSerializer(RequestRequirementSerializer):
+    class Meta(RequestRequirementSerializer.Meta):
+        fields = RequestRequirementSerializer.Meta.fields
 
 
 class RequestSerializer(ModelSerializer):
@@ -137,8 +144,8 @@ class RequestSerializer(ModelSerializer):
         model = main_models.Request
         fields = [
             'id', 'organization_project_id', 'type_id', 'industry_sector_id', 'project_id',
-            'manager_id', 'resource_manager_id', 'recruiter_id', 'description', 'status', 'priority', 'start_date',
-            'deadline_date',
+            'manager_id', 'resource_manager_id', 'recruiter_id', 'title', 'description', 'status', 'priority',
+            'start_date', 'deadline_date',
         ]
 
 
@@ -162,3 +169,8 @@ class RequestReadSerializer(RequestSerializer):
 
     def get_requirements_count_sum(self, instance: main_models.Request) -> int:
         return sum(row.count or 0 for row in instance.requirements.all()) or 0
+
+
+class RequestInlineSerializer(RequestSerializer):
+    class Meta(RequestSerializer.Meta):
+        fields = RequestSerializer.Meta.fields

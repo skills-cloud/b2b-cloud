@@ -1,12 +1,13 @@
 from django_filters import rest_framework as filters
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.viewsets import GenericViewSet
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from api.filters import ModelMultipleChoiceCommaSeparatedFilter
 from main import models as main_models
-from api.views_mixins import ReadWriteSerializersMixin
+from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
 from api.handlers.main.views.base import MainBaseViewSet
 
@@ -37,6 +38,7 @@ class OrganizationProjectViewSet(MainBaseViewSet):
 
 class OrganizationProjectCardItemViewSet(
     ReadWriteSerializersMixin,
+    ViewSetFilteredByUserMixin,
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
@@ -57,13 +59,19 @@ class OrganizationProjectCardItemViewSet(
             fields = ['organization_project_id', 'organization_id']
 
     filterset_class = Filter
-    http_method_names = MainBaseViewSet.http_method_names
-    queryset = main_models.OrganizationProjectCardItem.objects.filter(mptt_level=0).prefetch_related(
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    queryset = main_models.OrganizationProjectCardItem.objects.prefetch_related(
         'children'
     )
     pagination_class = None
     serializer_class = main_serializers.OrganizationProjectCardItemTreeSerializer
     serializer_read_class = main_serializers.OrganizationProjectCardItemReadTreeSerializer
+
+    def get_queryset(self) -> main_models.OrganizationProjectCardItem.TreeQuerySet:
+        queryset = super().get_queryset()
+        if self.request.method in SAFE_METHODS:
+            return queryset.filter(mptt_level=0)
+        return queryset
 
     @swagger_auto_schema(
         manual_parameters=[
