@@ -63,7 +63,10 @@ class TimeSheetRow(DatesModelBase):
         return f'{self.task_name} < {self.id} / {self.request_id} >'
 
     def clean(self):
-        if not CV.objects.filter(requests_requirements__request=self.request, id=self.cv_id).exists():
+        if not CV.objects.filter(
+                requests_requirements_links__request_requirement__request=self.request,
+                id=self.cv_id,
+        ).exists():
             raise ValidationError({
                 'cv': _('Анкета не связана с требованием проектного запроса')
             })

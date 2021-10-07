@@ -2,6 +2,7 @@ import itertools
 
 from django.db import transaction
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
@@ -98,9 +99,10 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     @action(detail=True, methods=['post'], url_path='cv-link/(?P<cv_id>[0-9]+)')
     @transaction.atomic
     def cv_link(self, request, pk: int, cv_id: int, *args, **kwargs):
-        card_items_ids = request.data.pop('organization_project_card_items_ids', None)
         details_serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(data=request.data)
         details_serializer.is_valid(raise_exception=True)
+        details = details_serializer.validated_data
+        card_items_ids = details.pop('organization_project_card_items', None)
         instance = main_models.RequestRequirementCv(
             request_requirement=self.get_object(),
             cv=get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id),
@@ -129,9 +131,13 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     @action(detail=True, methods=['post'], url_path='cv-set-details/(?P<cv_id>[0-9]+)')
     @transaction.atomic
     def cv_set_details(self, request, pk: int, cv_id: int, *args, **kwargs):
-        card_items_ids = request.data.pop('organization_project_card_items_ids', None)
-        details_serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(data=request.data)
+        details_serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(
+            data=request.data,
+            instance=self.get_object()
+        )
         details_serializer.is_valid(raise_exception=True)
+        details = details_serializer.validated_data
+        card_items_ids = details.pop('organization_project_card_items', None)
         instance = self._get_cv_linked_or_404(request, cv_id)
         for k, v in details_serializer.validated_data.items():
             setattr(instance, k, v)

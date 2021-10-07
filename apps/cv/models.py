@@ -129,6 +129,21 @@ class CV(DatesModelBase):
 
             ]
 
+        @classmethod
+        def get_queryset_request_requirements_prefetch_related(cls) -> List[str]:
+            from main.models import Request, RequestRequirement
+            prefix = 'requests_requirements_links__request_requirement'
+            return [
+                *[
+                    f'{prefix}__{f}'
+                    for f in RequestRequirement.objects.get_queryset_prefetch_related_self()
+                ],
+                *[
+                    f'{prefix}__request__{f}'
+                    for f in Request.objects.get_queryset_prefetch_related_self()
+                ],
+            ]
+
     objects = Manager()
 
     def __str__(self):

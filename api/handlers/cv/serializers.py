@@ -456,7 +456,11 @@ class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
     def to_representation(self, instance: cv_models.CV):
         result = super().to_representation(instance)
         result['requests_requirements'] = self.get_requests_requirements_serializer_class()(
-            instance.requests_requirements.all(), many=True, read_only=True
+            [
+                row.request_requirement
+                for row in instance.requests_requirements_links.all()
+            ],
+            many=True, read_only=True
         ).data
         return result
 
