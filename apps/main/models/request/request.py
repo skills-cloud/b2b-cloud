@@ -16,6 +16,8 @@ __all__ = [
     'RequestPriority',
     'Request',
     'RequestRequirement',
+    'RequestRequirementCvStatus',
+    'RequestRequirementCv',
     'RequestRequirementCompetence',
 ]
 
@@ -140,7 +142,7 @@ class Request(DatesModelBase):
     objects = Manager()
 
     def __str__(self):
-        return self.id_verbose
+        return f'{self.id_verbose} < {self.id} / {self.organization_project_id} >'
 
     @property
     def id_verbose(self) -> str:
@@ -151,7 +153,7 @@ class Request(DatesModelBase):
         return len(self.requirements.all())
 
 
-@reversion.register(follow=['request', 'competencies'])
+@reversion.register(follow=['request', 'competencies', 'cv_links'])
 class RequestRequirement(DatesModelBase):
     request = models.ForeignKey(
         'main.Request', on_delete=models.CASCADE, related_name='requirements',
@@ -177,11 +179,6 @@ class RequestRequirement(DatesModelBase):
     work_location_address = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('адрес'))
     max_price = models.FloatField(null=True, blank=True, verbose_name=_('макс. цена'))
 
-    cv_list = models.ManyToManyField(
-        'cv.CV', related_name='requests_requirements', blank=True,
-        verbose_name=_('анкеты')
-    )
-
     class Meta:
         ordering = ['sorting', 'name']
         verbose_name = _('требование проектного запроса')
@@ -203,20 +200,67 @@ class RequestRequirement(DatesModelBase):
         def get_queryset_prefetch_related_self(cls) -> List[str]:
             return [
                 'request', 'position', 'type_of_employment', 'work_location_city', 'work_location_city__country',
-                'competencies', 'competencies__competence', 'cv_list',
+                'competencies', 'competencies__competence',
             ]
 
         @classmethod
         def get_queryset_prefetch_related_cv_list(cls) -> List[str]:
             return [
-                f'cv_list__{f}'
-                for f in CV.objects.get_queryset_prefetch_related()
+                'cv_links', 'cv_links__organization_project_card_items', 'cv_links__cv',
+                *[
+                    f'cv_links__cv__{f}'
+                    for f in CV.objects.get_queryset_prefetch_related()
+                ]
             ]
 
     objects = Manager()
 
     def __str__(self):
-        return f'{self.name} / {self.request.title or self.request_id}'
+        return f'{self.name} < {self.id} / {self.request_id} >'
+
+    @property
+    def cv_list_ids(self) -> List[int]:
+        return [cv_link.cv_id for cv_link in self.cv_links.all()]
+
+
+class RequestRequirementCvStatus(models.TextChoices):
+    CANDIDATE = 'candidate'
+    CANCELED = 'canceled'
+    WORKER = 'worker'
+
+
+@reversion.register(follow=['request_requirement'])
+class RequestRequirementCv(DatesModelBase):
+    request_requirement = models.ForeignKey(
+        'main.RequestRequirement', on_delete=models.CASCADE, related_name='cv_links',
+        verbose_name=_('требование проектного запроса')
+    )
+    cv = models.ForeignKey(
+        'cv.CV', on_delete=models.CASCADE, related_name='requests_requirements_links',
+        verbose_name=_('анкета')
+    )
+    status = models.CharField(
+        max_length=50, choices=RequestRequirementCvStatus.choices, default=RequestRequirementCvStatus.CANDIDATE,
+        verbose_name=_('статус')
+    )
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('участие в проекте с'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('участие в проекте по'))
+
+    organization_project_card_items = models.ManyToManyField(
+        'main.OrganizationProjectCardItem', blank=True,
+        verbose_name=_('карточки проекта организации')
+    )
+
+    class Meta:
+        ordering = ['-id']
+        unique_together = [
+            ['request_requirement', 'cv']
+        ]
+        verbose_name = _('анкета требования проектного запроса')
+        verbose_name_plural = _('анкеты требования проектного запроса')
+
+    def __str__(self):
+        return f'{self.id} < {self.cv_id} / {self.request_requirement_id} >'
 
 
 @reversion.register(follow=['request_requirement'])

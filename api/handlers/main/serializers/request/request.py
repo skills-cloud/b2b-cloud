@@ -4,7 +4,7 @@ from acc.models import User
 from main import models as main_models
 from dictionary import models as dictionary_models
 from api.fields import PrimaryKeyRelatedIdField
-from api.serializers import ModelSerializer
+from api.serializers import ModelSerializerWithCallCleanMethod, ModelSerializer
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 from api.handlers.cv.serializers import CvInlineShortSerializer
@@ -16,6 +16,9 @@ __all__ = [
     'RequestRequirementCompetenceSerializer',
     'RequestRequirementCompetenceReplaceSerializer',
     'RequestRequirementCompetenceReadSerializer',
+    'RequestRequirementCvWriteDetailsSerializer',
+    'RequestRequirementCvSerializer',
+    'RequestRequirementCvReadSerializer',
     'RequestRequirementSerializer',
     'RequestRequirementReadSerializer',
     'RequestRequirementInlineSerializer',
@@ -25,13 +28,13 @@ __all__ = [
 ]
 
 
-class RequestTypeSerializer(ModelSerializer):
+class RequestTypeSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.RequestType
         fields = '__all__'
 
 
-class RequestRequirementCompetenceSerializer(ModelSerializer):
+class RequestRequirementCompetenceSerializer(ModelSerializerWithCallCleanMethod):
     competence_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Competence.objects
     )
@@ -62,7 +65,32 @@ class RequestRequirementCompetenceReadSerializer(RequestRequirementCompetenceSer
         fields = RequestRequirementCompetenceSerializer.Meta.fields + ['competence']
 
 
-class RequestRequirementSerializer(ModelSerializer):
+class RequestRequirementCvWriteDetailsSerializer(ModelSerializerWithCallCleanMethod):
+    organization_project_card_items_ids = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationProjectCardItem.objects.all(),
+        source='organization_project_card_items', many=True, required=False,
+    )
+
+    class Meta:
+        model = main_models.RequestRequirementCv
+        fields = ['status', 'date_from', 'date_to', 'organization_project_card_items_ids']
+
+
+class RequestRequirementCvSerializer(RequestRequirementCvWriteDetailsSerializer):
+    class Meta(RequestRequirementCvWriteDetailsSerializer.Meta):
+        fields = RequestRequirementCvWriteDetailsSerializer.Meta.fields + [
+            'id', 'request_requirement_id', 'cv_id', 'created_at', 'updated_at'
+        ]
+
+
+class RequestRequirementCvReadSerializer(RequestRequirementCvSerializer):
+    cv = CvInlineShortSerializer(read_only=True)
+
+    class Meta(RequestRequirementCvSerializer.Meta):
+        fields = RequestRequirementCvSerializer.Meta.fields + ['cv']
+
+
+class RequestRequirementSerializer(ModelSerializerWithCallCleanMethod):
     request_id = PrimaryKeyRelatedIdField(
         queryset=main_models.Request.objects,
     )
@@ -94,13 +122,14 @@ class RequestRequirementReadSerializer(RequestRequirementSerializer):
 
     competencies = RequestRequirementCompetenceReadSerializer(many=True, read_only=True)
 
-    cv_list_ids = PrimaryKeyRelatedIdField(source='cv_list', many=True, read_only=True)
-    cv_list = CvInlineShortSerializer(many=True, read_only=True)
+    cv_list_ids = serializers.ListField(read_only=True)
+    cv_list = RequestRequirementCvReadSerializer(source='cv_links', many=True, read_only=True)
 
     class Meta(RequestRequirementSerializer.Meta):
         fields = RequestRequirementSerializer.Meta.fields + [
             'position', 'type_of_employment', 'work_location_city',
-            'competencies', 'cv_list_ids', 'cv_list',
+            'competencies',
+            'cv_list_ids', 'cv_list',
         ]
 
 
@@ -109,7 +138,7 @@ class RequestRequirementInlineSerializer(RequestRequirementSerializer):
         fields = RequestRequirementSerializer.Meta.fields
 
 
-class RequestSerializer(ModelSerializer):
+class RequestSerializer(ModelSerializerWithCallCleanMethod):
     type_id = PrimaryKeyRelatedIdField(
         queryset=main_models.RequestType.objects, allow_null=True, required=False,
         label=main_models.Request._meta.get_field('type').verbose_name,
@@ -171,6 +200,9 @@ class RequestReadSerializer(RequestSerializer):
         return sum(row.count or 0 for row in instance.requirements.all()) or 0
 
 
-class RequestInlineSerializer(RequestSerializer):
-    class Meta(RequestSerializer.Meta):
-        fields = RequestSerializer.Meta.fields
+class RequestInlineSerializer(RequestReadSerializer):
+    class Meta(RequestReadSerializer.Meta):
+        fields = [f for f in RequestReadSerializer.Meta.fields if f not in [
+            'type', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements',
+            'requirements_count_sum',
+        ]]

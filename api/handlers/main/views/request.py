@@ -90,23 +90,59 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     serializer_read_class = main_serializers.RequestRequirementReadSerializer
 
     @swagger_auto_schema(
-        request_body=EmptySerializer(),
+        request_body=main_serializers.RequestRequirementCvWriteDetailsSerializer(),
         responses={
-            status.HTTP_201_CREATED: StatusSerializer()
+            status.HTTP_200_OK: main_serializers.RequestRequirementCvSerializer()
         },
     )
     @action(detail=True, methods=['post'], url_path='cv-link/(?P<cv_id>[0-9]+)')
     @transaction.atomic
     def cv_link(self, request, pk: int, cv_id: int, *args, **kwargs):
-        instance = self.get_object()
-        instance.cv_list.add(get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id))
-        return Response(StatusSerializer({'status': 'ok'}).data, status=status.HTTP_201_CREATED)
+        card_items_ids = request.data.pop('organization_project_card_items_ids', None)
+        details_serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(data=request.data)
+        details_serializer.is_valid(raise_exception=True)
+        instance = main_models.RequestRequirementCv(
+            request_requirement=self.get_object(),
+            cv=get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id),
+            **details_serializer.validated_data
+        )
+        instance.save()
+        if card_items_ids is not None:
+            instance.organization_project_card_items.add(*card_items_ids)
+        return Response(
+            main_serializers.RequestRequirementCvSerializer(instance=instance).data,
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=True, methods=['delete'], url_path='cv-unlink/(?P<cv_id>[0-9]+)')
     @transaction.atomic
     def cv_unlink(self, request, pk: int, cv_id: int, *args, **kwargs):
-        self.get_object().cv_list.remove(get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id))
+        self._get_cv_linked_or_404(request, cv_id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @swagger_auto_schema(
+        request_body=main_serializers.RequestRequirementCvWriteDetailsSerializer(),
+        responses={
+            status.HTTP_200_OK: main_serializers.RequestRequirementCvSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='cv-set-details/(?P<cv_id>[0-9]+)')
+    @transaction.atomic
+    def cv_set_details(self, request, pk: int, cv_id: int, *args, **kwargs):
+        card_items_ids = request.data.pop('organization_project_card_items_ids', None)
+        details_serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(data=request.data)
+        details_serializer.is_valid(raise_exception=True)
+        instance = self._get_cv_linked_or_404(request, cv_id)
+        for k, v in details_serializer.validated_data.items():
+            setattr(instance, k, v)
+        instance.save()
+        if card_items_ids is not None:
+            instance.organization_project_card_items.clear()
+            instance.organization_project_card_items.add(*card_items_ids)
+        return Response(
+            main_serializers.RequestRequirementCvSerializer(instance=instance).data,
+            status=status.HTTP_200_OK
+        )
 
     @swagger_auto_schema(
         request_body=main_serializers.RequestRequirementCompetenceReplaceSerializer(many=True),
@@ -128,3 +164,9 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
             many=True
         )
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    def _get_cv_linked_or_404(self, request, cv_id: int) -> main_models.RequestRequirementCv:
+        return get_object_or_404(main_models.RequestRequirementCv.objects.filter(
+            request_requirement=self.get_object(),
+            cv=get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id),
+        ))

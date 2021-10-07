@@ -3,7 +3,7 @@ from main import models as main_models
 from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializerWithCallCleanMethod
 from api.handlers.cv.serializers import CvInlineShortSerializer
-from api.handlers.main.serializers.request.request import RequestRequirementInlineSerializer
+from api.handlers.main.serializers.request.request import RequestInlineSerializer
 
 __all__ = [
     'TimeSheetRowSerializer',
@@ -12,9 +12,9 @@ __all__ = [
 
 
 class TimeSheetRowSerializer(ModelSerializerWithCallCleanMethod):
-    request_requirement_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.RequestRequirement.objects,
-        label=main_models.TimeSheetRow._meta.get_field('request_requirement').verbose_name,
+    request_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.Request.objects,
+        label=main_models.TimeSheetRow._meta.get_field('request').verbose_name,
     )
     cv_id = PrimaryKeyRelatedIdField(
         queryset=cv_models.CV.objects,
@@ -24,16 +24,16 @@ class TimeSheetRowSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.TimeSheetRow
         fields = [
-            'id', 'request_requirement_id', 'cv_id',
+            'id', 'request_id', 'cv_id',
             'date_from', 'date_to', 'task_name', 'task_description', 'work_time', 'created_at', 'updated_at',
         ]
 
 
 class TimeSheetRowReadSerializer(TimeSheetRowSerializer):
-    request_requirement = RequestRequirementInlineSerializer()
+    request = RequestInlineSerializer()
     cv = CvInlineShortSerializer()
 
     class Meta(TimeSheetRowSerializer.Meta):
         fields = TimeSheetRowSerializer.Meta.fields + [
-            'request_requirement', 'cv',
+            'request', 'cv',
         ]

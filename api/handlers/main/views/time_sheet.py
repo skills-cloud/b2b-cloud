@@ -24,26 +24,23 @@ class TimeSheetRowViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin,
         cv_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=cv_models.CV.objects,
         )
-        request_requirement_id = ModelMultipleChoiceCommaSeparatedFilter(
-            queryset=main_models.RequestRequirement.objects,
-        )
         request_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.Request.objects,
-            field_name='request_requirement__request',
+            field_name='request',
         )
         organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationProject.objects,
-            field_name='request_requirement__request__organization_project',
+            field_name='request__organization_project',
         )
         organization_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.Organization.objects,
-            field_name='request_requirement__request__organization_project__organization',
+            field_name='request__organization_project__organization',
         )
 
         class Meta:
             model = main_models.TimeSheetRow
             fields = [
-                'cv_id', 'request_requirement_id', 'request_id', 'organization_project_id', 'organization_id',
+                'cv_id', 'request_id', 'organization_project_id', 'organization_id',
             ]
 
         def get_schema_fields(self):
@@ -60,7 +57,7 @@ class TimeSheetRowViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin,
     search_fields = ['task_name', 'task_description']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
-        for k in ['id', 'date_from', 'date_to', 'cv_id', 'request_requirement_id', 'task_name']
+        for k in ['id', 'date_from', 'date_to', 'cv_id', 'reques_id', 'task_name']
     ]))
     ordering = ['-date_from', '-id']
 
@@ -68,14 +65,6 @@ class TimeSheetRowViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin,
         manual_parameters=[
             openapi.Parameter(
                 'cv_id',
-                openapi.IN_QUERY,
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_INTEGER),
-                description='`ANY`',
-                required=False,
-            ),
-            openapi.Parameter(
-                'request_requirement_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
