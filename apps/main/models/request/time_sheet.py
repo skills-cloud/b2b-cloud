@@ -6,8 +6,11 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from project.contrib.db import get_sql_from_queryset
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
+from cv.models import CV
+from main.models.request import Request
 
 __all__ = [
     'TimeSheetRow',
@@ -16,9 +19,9 @@ __all__ = [
 
 @reversion.register()
 class TimeSheetRow(DatesModelBase):
-    request_requirement = models.ForeignKey(
-        'main.RequestRequirement', on_delete=models.RESTRICT, related_name='time_sheet_rows',
-        verbose_name=_('требование проектного запроса')
+    request = models.ForeignKey(
+        'main.Request', on_delete=models.RESTRICT, related_name='time_sheet_rows',
+        verbose_name=_('проектный запрос')
     )
     cv = models.ForeignKey(
         'cv.CV', on_delete=models.RESTRICT, related_name='time_sheet_rows',
@@ -37,13 +40,19 @@ class TimeSheetRow(DatesModelBase):
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List:
-            return ['request_requirement', 'cv']
+            return [
+                'request', 'cv',
+                *[
+                    f'request__{f}'
+                    for f in Request.objects.get_queryset_prefetch_related_self()
+                ]
+            ]
 
     class Meta:
         ordering = ['-date_from']
         index_together = [
-            ['request_requirement', 'date_from'],
-            ['request_requirement', 'task_name'],
+            ['request', 'date_from'],
+            ['request', 'task_name'],
         ]
         verbose_name = _('строка таймшита')
         verbose_name_plural = _('строки таймшитов')
@@ -51,10 +60,10 @@ class TimeSheetRow(DatesModelBase):
     objects = Manager()
 
     def __str__(self):
-        return f'< {self.task_name} / {self.request_requirement} >'
+        return f'{self.task_name} < {self.id} / {self.request_id} >'
 
     def clean(self):
-        if not self.request_requirement.cv_list.filter(id=self.cv_id).exists():
+        if not CV.objects.filter(requests_requirements__request=self.request, id=self.cv_id).exists():
             raise ValidationError({
                 'cv': _('Анкета не связана с требованием проектного запроса')
             })

@@ -482,7 +482,7 @@ class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
                     *[
                         f
                         for f in RequestRequirementReadSerializer.Meta.fields
-                        if f not in ['cv_list_ids', 'cv_list']
+                        # if f not in ['cv_list_ids', 'cv_list']
                     ],
                     'request'
                 ]

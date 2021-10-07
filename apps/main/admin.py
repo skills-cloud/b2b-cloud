@@ -67,17 +67,17 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
             extra = 0
             autocomplete_fields = ['competence']
 
-        class RequestRequirementCv(nested_admin.NestedTabularInline):
-            model = main_models.RequestRequirement.cv_list.through
+        class RequestRequirementCvInline(nested_admin.NestedTabularInline):
+            model = main_models.RequestRequirementCv
+            readonly_fields = ['created_at', 'updated_at']
             extra = 0
-            autocomplete_fields = ['cv']
+            autocomplete_fields = ['cv', 'organization_project_card_items']
 
         inlines = [
             RequestRequirementCompetenceInline,
-            RequestRequirementCv,
+            RequestRequirementCvInline,
         ]
         model = main_models.RequestRequirement
-        exclude = ['cv_list']
         autocomplete_fields = ['position', 'type_of_employment', 'work_location_city']
         extra = 0
 
@@ -125,10 +125,14 @@ class OrganizationProjectCardItemAdmin(DraggableMPTTAdmin):
 
 @admin.register(main_models.TimeSheetRow)
 class TimeSheetRowAdmin(admin.ModelAdmin):
-    list_display = ['id', 'task_name', 'request_requirement', 'cv', 'task_name', 'task_description']
+    class RequestFilter(AutocompleteFilter):
+        title = main_models.TimeSheetRow._meta.get_field('request').verbose_name
+        field_name = 'request'
+
+    list_display = ['id', 'task_name', 'request', 'cv', 'task_name', 'task_description']
     search_fields = ['task_name', 'task_description']
-    autocomplete_fields = ['cv']
-    list_filter = [CvAdminFilter]
+    autocomplete_fields = ['request', 'cv']
+    list_filter = [RequestFilter, CvAdminFilter]
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(
