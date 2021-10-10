@@ -33,3 +33,9 @@ LOGGING = {
         },
     }
 }
+
+SILKY_AUTHENTICATION = True
+SILKY_AUTHORISATION = True
+SILKY_PERMISSIONS = lambda user: user.is_superuser
+SILKY_MAX_RECORDED_REQUESTS = 10 ** 2 * 5
+SILKY_ANALYZE_QUERIES = True
