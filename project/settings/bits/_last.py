@@ -97,3 +97,7 @@ if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {
         'SHOW_TOOLBAR_CALLBACK': lambda _request: True
     }
+
+if DJANGO_SILK_ENABLED:
+    MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
+    INSTALLED_APPS.append('silk')

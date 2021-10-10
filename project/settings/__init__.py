@@ -5,8 +5,12 @@ from split_settings.tools import include, optional
 
 sys.path.append('apps')
 
+DEBUG = False
+DJANGO_SILK_ENABLED = False
+
 environ.setdefault('DJANGO_ENV', 'dev')
 DJANGO_ENV = environ['DJANGO_ENV']
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -34,3 +38,6 @@ GRAPH_MODELS = {
     'all_applications': True,
     'group_models': True,
 }
+
+
+print(DEBUG, DJANGO_SILK_ENABLED)
