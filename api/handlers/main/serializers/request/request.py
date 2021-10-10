@@ -112,6 +112,7 @@ class RequestRequirementSerializer(ModelSerializerWithCallCleanMethod):
         fields = [
             'id', 'request_id', 'position_id', 'type_of_employment_id', 'work_location_city_id',
             'sorting', 'name', 'description', 'experience_years', 'count', 'work_location_address', 'max_price',
+            'date_from', 'date_to',
         ]
 
 

@@ -92,9 +92,23 @@ class CvTimeSlotReadSerializer(CvTimeSlotSerializer):
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
     type_of_employment = dictionary_serializers.TypeOfEmploymentSerializer(read_only=True, allow_null=True)
 
+    request_requirement_id = serializers.IntegerField(source='request_requirement.id', read_only=True, allow_null=True)
+    request_requirement_name = serializers.CharField(source='request_requirement.name', read_only=True, allow_null=True)
+    request_id = serializers.IntegerField(source='request.id', read_only=True, allow_null=True)
+    request_title = serializers.CharField(source='request.title', read_only=True, allow_null=True)
+    organization_project_id = serializers.IntegerField(
+        source='organization_project.id', read_only=True, allow_null=True
+    )
+    organization_project_name = serializers.CharField(
+        source='organization_project.name', read_only=True, allow_null=True
+    )
+
     class Meta(CvTimeSlotSerializer.Meta):
         fields = CvTimeSlotSerializer.Meta.fields + [
-            'country', 'city', 'type_of_employment'
+            'country', 'city', 'type_of_employment',
+
+            'request_requirement_id', 'request_requirement_name', 'request_id', 'request_title',
+            'organization_project_id', 'organization_project_name',
         ]
 
 
