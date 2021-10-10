@@ -17,6 +17,8 @@ CACHES = {
 
 SELECT2_CACHE_BACKEND = 'select2'
 
+CACHEOPS_ENABLED = True
+
 CACHEOPS_REDIS = {
     'host': redis_settings.REDIS_HOST,
     'port': redis_settings.REDIS_PORT,
