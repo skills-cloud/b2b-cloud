@@ -20,7 +20,7 @@ __all__ = [
 @reversion.register()
 class TimeSheetRow(DatesModelBase):
     request = models.ForeignKey(
-        'main.Request', on_delete=models.RESTRICT, related_name='time_sheet_rows',
+        'main.Request', on_delete=models.CASCADE, related_name='time_sheet_rows',
         verbose_name=_('проектный запрос')
     )
     cv = models.ForeignKey(

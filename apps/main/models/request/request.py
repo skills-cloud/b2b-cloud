@@ -178,6 +178,8 @@ class RequestRequirement(DatesModelBase):
     )
     work_location_address = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('адрес'))
     max_price = models.FloatField(null=True, blank=True, verbose_name=_('макс. цена'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('дата с'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('дата по'))
 
     class Meta:
         ordering = ['sorting', 'name']
@@ -224,6 +226,7 @@ class RequestRequirement(DatesModelBase):
 
 
 class RequestRequirementCvStatus(models.TextChoices):
+    PRE_CANDIDATE = 'pre-candidate'
     CANDIDATE = 'candidate'
     CANCELED = 'canceled'
     WORKER = 'worker'
@@ -231,6 +234,9 @@ class RequestRequirementCvStatus(models.TextChoices):
 
 @reversion.register(follow=['request_requirement'])
 class RequestRequirementCv(DatesModelBase):
+    """
+    Есть сигналы
+    """
     request_requirement = models.ForeignKey(
         'main.RequestRequirement', on_delete=models.CASCADE, related_name='cv_links',
         verbose_name=_('требование проектного запроса')
