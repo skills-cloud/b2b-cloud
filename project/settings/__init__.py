@@ -5,6 +5,9 @@ from split_settings.tools import include, optional
 
 sys.path.append('apps')
 
+DEBUG = False
+DJANGO_SILK_ENABLED = False
+
 environ.setdefault('DJANGO_ENV', 'dev')
 DJANGO_ENV = environ['DJANGO_ENV']
 

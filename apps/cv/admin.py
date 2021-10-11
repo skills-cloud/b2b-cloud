@@ -116,3 +116,8 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         return super().get_queryset(request).prefetch_related(
             # *cv_models.CV.objects.get_queryset_prefetch_related()
         )
+
+
+class CvAdminFilter(AutocompleteFilter):
+    title = cv_models.CV._meta.verbose_name.capitalize()
+    field_name = 'cv'

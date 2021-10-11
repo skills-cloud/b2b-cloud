@@ -1,8 +1,6 @@
 import os
 from multiprocessing import cpu_count
 
-DEBUG = False
-
 BASE_URL = 'https://test.dev.b2bcloud.com/'
 
 ALLOWED_HOSTS = ['*']

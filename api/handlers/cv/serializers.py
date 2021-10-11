@@ -92,9 +92,23 @@ class CvTimeSlotReadSerializer(CvTimeSlotSerializer):
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
     type_of_employment = dictionary_serializers.TypeOfEmploymentSerializer(read_only=True, allow_null=True)
 
+    request_requirement_id = serializers.IntegerField(source='request_requirement.id', read_only=True, allow_null=True)
+    request_requirement_name = serializers.CharField(source='request_requirement.name', read_only=True, allow_null=True)
+    request_id = serializers.IntegerField(source='request.id', read_only=True, allow_null=True)
+    request_title = serializers.CharField(source='request.title', read_only=True, allow_null=True)
+    organization_project_id = serializers.IntegerField(
+        source='organization_project.id', read_only=True, allow_null=True
+    )
+    organization_project_name = serializers.CharField(
+        source='organization_project.name', read_only=True, allow_null=True
+    )
+
     class Meta(CvTimeSlotSerializer.Meta):
         fields = CvTimeSlotSerializer.Meta.fields + [
-            'country', 'city', 'type_of_employment'
+            'country', 'city', 'type_of_employment',
+
+            'request_requirement_id', 'request_requirement_name', 'request_id', 'request_title',
+            'organization_project_id', 'organization_project_name',
         ]
 
 
@@ -297,8 +311,8 @@ class CvEducationSerializer(CvLinkedObjectBaseSerializer):
     class Meta(CvLinkedObjectBaseSerializer.Meta):
         model = cv_models.CvEducation
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
-            'date_from', 'date_to', 'description', 'is_verified', 'education_place_id', 'education_speciality_id',
-            'education_graduate_id', 'competencies_ids',
+            'date_from', 'date_to', 'diploma_number', 'description', 'is_verified', 'education_place_id',
+            'education_speciality_id', 'education_graduate_id', 'competencies_ids',
         ]
 
 
@@ -415,11 +429,16 @@ class CvDetailWriteSerializer(ModelSerializer):
         fields = [
             'id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender', 'birth_date', 'is_resource_owner',
             'user_id', 'country_id', 'city_id', 'citizenship_id', 'days_to_contact', 'time_to_contact_from',
-            'time_to_contact_to', 'price', 'physical_limitations_ids', 'types_of_employment_ids', 'linked_ids',
+            'time_to_contact_to', 'price', 'physical_limitations_ids', 'types_of_employment_ids',
+            'linked_ids',
         ]
 
 
-class CvDetailReadSerializer(CvDetailWriteSerializer):
+class CvDetailReadBaseSerializer(CvDetailWriteSerializer):
+    pass
+
+
+class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
     user = UserInlineSerializer(read_only=True, allow_null=True)
     country = dictionary_serializers.CountrySerializer(read_only=True, allow_null=True)
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
@@ -437,8 +456,8 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
     certificates = CvCertificateReadSerializer(many=True, read_only=True)
     files = CvFileReadSerializer(many=True, read_only=True)
 
-    class Meta(CvDetailWriteSerializer.Meta):
-        fields = CvDetailWriteSerializer.Meta.fields + [
+    class Meta(CvDetailReadBaseSerializer.Meta):
+        fields = CvDetailReadBaseSerializer.Meta.fields + [
             'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
             'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
         ]
@@ -451,7 +470,11 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
     def to_representation(self, instance: cv_models.CV):
         result = super().to_representation(instance)
         result['requests_requirements'] = self.get_requests_requirements_serializer_class()(
-            instance.requests_requirements.all(), many=True, read_only=True
+            [
+                row.request_requirement
+                for row in instance.requests_requirements_links.all()
+            ],
+            many=True, read_only=True
         ).data
         return result
 
@@ -477,7 +500,7 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
                     *[
                         f
                         for f in RequestRequirementReadSerializer.Meta.fields
-                        if f not in ['cv_list_ids', 'cv_list']
+                        # if f not in ['cv_list_ids', 'cv_list']
                     ],
                     'request'
                 ]
@@ -485,16 +508,22 @@ class CvDetailReadSerializer(CvDetailWriteSerializer):
         return CvRequestRequirementInlineSerializer
 
 
-class CvListSerializer(CvDetailReadSerializer):
-    class Meta(CvDetailReadSerializer.Meta):
+class CvListReadFullSerializer(CvDetailReadFullSerializer):
+    pass
+
+
+class CvInlineFullSerializer(CvListReadFullSerializer):
+    pass
+
+
+class CvInlineShortSerializer(CvDetailReadBaseSerializer):
+    physical_limitations_ids = None
+    types_of_employment_ids = None
+    linked_ids = None
+
+    class Meta(CvDetailReadBaseSerializer.Meta):
         fields = [
-            k
-            for k in CvDetailReadSerializer.Meta.fields
-            if k not in [
-                # 'contacts', 'time_slots', 'positions', 'career', 'education', 'certificates'
+            f for f in CvDetailReadBaseSerializer.Meta.fields if f not in [
+                'physical_limitations_ids', 'types_of_employment_ids', 'linked_ids',
             ]
         ]
-
-
-class CvInlineSerializer(CvListSerializer):
-    pass

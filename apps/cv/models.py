@@ -1,5 +1,4 @@
-from typing import Optional, List, Dict, Any
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, List, Dict
 from pathlib import Path
 from django.db import models, transaction
 from django.utils import timezone
@@ -9,6 +8,9 @@ import reversion
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
 from cv import models_upload_to as upload_to
+
+if TYPE_CHECKING:
+    from main.models import OrganizationProject, RequestRequirement, Request
 
 
 class FileModelAbstract(DatesModelBase):
@@ -111,6 +113,9 @@ class CV(DatesModelBase):
                 'contacts', 'contacts__contact_type',
 
                 'time_slots', 'time_slots__country', 'time_slots__city', 'time_slots__type_of_employment',
+                'time_slots__request_requirement_link', 'time_slots__request_requirement_link__request_requirement',
+                'time_slots__request_requirement_link__request_requirement__request',
+                'time_slots__request_requirement_link__request_requirement__request__organization_project',
 
                 'positions', 'positions__position', 'positions__files', 'positions__competencies',
                 'positions__competencies__competence',
@@ -127,6 +132,21 @@ class CV(DatesModelBase):
                 'certificates', 'certificates__education_place', 'certificates__education_graduate',
                 'certificates__education_speciality', 'certificates__competencies',
 
+            ]
+
+        @classmethod
+        def get_queryset_request_requirements_prefetch_related(cls) -> List[str]:
+            from main.models import Request, RequestRequirement
+            prefix = 'requests_requirements_links__request_requirement'
+            return [
+                *[
+                    f'{prefix}__{f}'
+                    for f in RequestRequirement.objects.get_queryset_prefetch_related_self()
+                ],
+                *[
+                    f'{prefix}__request__{f}'
+                    for f in Request.objects.get_queryset_prefetch_related_self()
+                ],
             ]
 
     objects = Manager()
@@ -178,7 +198,13 @@ class CvLinkedObjectQuerySet(models.QuerySet):
 
 class CvLinkedObjectManager(models.Manager.from_queryset(CvLinkedObjectQuerySet)):
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('cv')
+        return super().get_queryset().prefetch_related(
+            *self.get_queryset_prefetch_related()
+        )
+
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
+        return ['cv']
 
 
 @reversion.register(follow=['cv'])
@@ -212,6 +238,10 @@ class CvContact(DatesModelBase):
 @reversion.register(follow=['cv'])
 class CvTimeSlot(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='time_slots', verbose_name=_('анкета'))
+    request_requirement_link = models.ForeignKey(
+        'main.RequestRequirementCv', null=True, blank=True, on_delete=models.CASCADE, related_name='time_slots',
+        verbose_name=_('связь с требованием проектного запроса'),
+    )
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
     country = models.ForeignKey(
@@ -238,10 +268,37 @@ class CvTimeSlot(DatesModelBase):
         verbose_name = _('таймслот')
         verbose_name_plural = _('таймслоты')
 
-    objects = CvLinkedObjectManager()
+    class Manager(CvLinkedObjectManager):
+        @classmethod
+        def get_queryset_prefetch_related(cls) -> List[str]:
+            return (
+                super().get_queryset_prefetch_related()
+                # + [
+                #     'request_requirement_link', 'request_requirement_link__request_requirement',
+                #     'request_requirement_link__request_requirement__request',
+                #     'request_requirement_link__request_requirement__request__organization_project',
+                # ]
+            )
+
+    objects = Manager()
 
     def __str__(self):
         return f'{self.date_from} – {self.date_to} < {self.cv_id} / {self.id} >'
+
+    @property
+    def request_requirement(self) -> Optional['RequestRequirement']:
+        if self.request_requirement_link:
+            return self.request_requirement_link.request_requirement
+
+    @property
+    def request(self) -> Optional['Request']:
+        if self.request_requirement:
+            return self.request_requirement.request
+
+    @property
+    def organization_project(self) -> Optional['OrganizationProject']:
+        if self.request:
+            return self.request.organization_project
 
 
 @reversion.register(follow=['cv', 'files', 'competencies'])
@@ -424,6 +481,7 @@ class CvEducation(DatesModelBase):
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+    diploma_number = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('номер диплома'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     education_place = models.ForeignKey(
         'dictionary.EducationPlace', on_delete=models.RESTRICT, null=True, blank=True,
