@@ -3,7 +3,8 @@ from typing import List
 import reversion
 from cacheops import invalidate_model
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
+from django.forms import model_to_dict
 from django.utils.translation import gettext_lazy as _
 from mptt import models as mptt_models
 from mptt import querysets as mptt_querysets
@@ -14,6 +15,7 @@ from acc.models import User
 __all__ = [
     'Organization',
     'OrganizationProject',
+    'OrganizationProjectCardItemTemplate',
     'OrganizationProjectCardItem',
 ]
 
@@ -28,6 +30,15 @@ class Organization(DatesModelBase):
         ordering = ['name']
         verbose_name = _('организация')
         verbose_name_plural = _('организации')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User) -> 'Organization.QuerySet':
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        pass
+
+    objects = Manager()
 
     def __str__(self):
         return self.name
@@ -65,7 +76,11 @@ class OrganizationProject(DatesModelBase):
         verbose_name = _('проект организации')
         verbose_name_plural = _('проекты организаций')
 
-    class Manager(models.Manager):
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User) -> 'OrganizationProject.QuerySet':
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return ['organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters', 'requests']
@@ -80,27 +95,38 @@ class OrganizationProject(DatesModelBase):
         return len(self.requests.all())
 
 
-class OrganizationProjectCardItem(mptt_models.MPTTModel, DatesModelBase):
-    organization_project = models.ForeignKey(
-        'main.OrganizationProject', on_delete=models.CASCADE, related_name='cards_items', null=True, blank=True,
-        verbose_name=_('проект организации'),
-        help_text=_('необходимо задавать только для корневой карточки')
-    )
+class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase):
     parent = mptt_models.TreeForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
         verbose_name=_('родительская карточка')
     )
     name = models.CharField(max_length=500, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    positions = models.ManyToManyField(
+        'dictionary.Position', blank=True, related_name='+', verbose_name=_('должности'))
 
     class Meta:
-        verbose_name = _('карточка проект организации')
-        verbose_name_plural = _('карточки проектов организаций')
+        abstract = True
 
     class MPTTMeta:
         level_attr = 'mptt_level'
         order_insertion_by = ['name']
 
+    def __str__(self):
+        return f'{self.name} < {self.id} >'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        invalidate_model(self.__class__)
+
+    # def clean(self):
+    #     if self.parent and self.positions:
+    #         raise ValidationError({
+    #             'positions': _(' Должности можно задавать только для карточки верхнего уровня')
+    #         })
+
+
+class OrganizationProjectCardItemTemplate(OrganizationProjectCardItemAbstract):
     class TreeQuerySet(mptt_querysets.TreeQuerySet):
         def filter_by_user(self, user: User):
             return self
@@ -121,8 +147,67 @@ class OrganizationProjectCardItem(mptt_models.MPTTModel, DatesModelBase):
     objects = TreeManager()
     objects_flat = FlatManager()
 
-    def __str__(self):
-        return f'{self.name} < {self.id} >'
+    class Meta:
+        verbose_name = _('карточка-шаблон проекта организации')
+        verbose_name_plural = _('карточки-шаблоны проектов организаций')
+
+
+class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
+    organization_project = models.ForeignKey(
+        'main.OrganizationProject', on_delete=models.CASCADE, related_name='cards_items', null=True, blank=True,
+        verbose_name=_('проект организации'),
+        help_text=_('необходимо задавать только для корневой карточки')
+    )
+
+    class Meta:
+        verbose_name = _('карточка проекта организации')
+        verbose_name_plural = _('карточки проектов организаций')
+
+    class TreeQuerySet(mptt_querysets.TreeQuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class TreeManager(
+        models.Manager.from_queryset(TreeQuerySet),
+        mptt_models.TreeManager
+    ):
+        @transaction.atomic
+        def create_tree_by_template(
+                self,
+                organization_project: OrganizationProject,
+                template_root_card_item: OrganizationProjectCardItemTemplate
+        ) -> 'OrganizationProjectCardItem':
+            root_node = self.create(
+                organization_project=organization_project,
+                name=template_root_card_item.name,
+                description=template_root_card_item.description,
+            )
+            root_node.positions.add(*template_root_card_item.positions.all())
+            nodes_map = {template_root_card_item.id: root_node}
+
+            def create_children(template_parent):
+                for tpl_node in reversed(template_parent.get_children()):
+                    node = self.create(
+                        parent=nodes_map[tpl_node.parent_id],
+                        name=tpl_node.name,
+                        description=tpl_node.description,
+                    )
+                    nodes_map[tpl_node.id] = node
+                    create_children(tpl_node)
+
+            create_children(template_root_card_item)
+            # self.rebuild()
+            return root_node
+
+    class FlatQuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class FlatManager(models.Manager.from_queryset(FlatQuerySet)):
+        pass
+
+    objects = TreeManager()
+    objects_flat = FlatManager()
 
     def save(self, *args, **kwargs):
         if self.parent and self.organization_project != self.parent.organization_project:
@@ -131,6 +216,7 @@ class OrganizationProjectCardItem(mptt_models.MPTTModel, DatesModelBase):
         invalidate_model(OrganizationProjectCardItem)
 
     def clean(self):
+        super().clean()
         if self.parent is None and self.organization_project_id is None:
             raise ValidationError({
                 'organization_project': _('Для карточки верхнего уровня необходимо указать проект организации')

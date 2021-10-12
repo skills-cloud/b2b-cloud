@@ -2,11 +2,10 @@ from typing import List
 
 import reversion
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from project.contrib.db import get_sql_from_queryset
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
 from cv.models import CV
@@ -38,6 +37,16 @@ class TimeSheetRow(DatesModelBase):
             return self
 
     class Manager(models.Manager.from_queryset(QuerySet)):
+        @transaction.atomic
+        def create_for_cv(self, cv_ids: List[int], **kwargs) -> List['TimeSheetRow']:
+            for_create = [
+                self.model(cv_id=cv_id, **kwargs)
+                for cv_id in cv_ids
+            ]
+            for o in for_create:
+                o.clean()
+            return self.bulk_create(for_create)
+
         @classmethod
         def get_queryset_prefetch_related(cls) -> List:
             return [
@@ -68,5 +77,5 @@ class TimeSheetRow(DatesModelBase):
                 id=self.cv_id,
         ).exists():
             raise ValidationError({
-                'cv': _('Анкета не связана с требованием проектного запроса')
+                'cv': _(f'Анкета <{self.cv_id}> не связана с требованием проектного запроса')
             })

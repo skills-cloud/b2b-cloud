@@ -18,15 +18,15 @@ class CvTimeSlotService:
     cv: CV
 
     @transaction.atomic
-    def setup(self):
+    def setup_requests_slots(self):
         logger.debug('CvTimeSlotService.setup', extra={'cv': self.cv})
-        self._clean()
-        self._setup()
+        self._clean_requests_slots()
+        self._setup_requests_slots()
 
-    def _clean(self):
-        self.cv.time_slots.all().delete()
+    def _clean_requests_slots(self):
+        self.cv.time_slots.filter(request_requirement_link__isnull=False).delete()
 
-    def _setup(self):
+    def _setup_requests_slots(self):
         for_create = []
         for request_requirement_link in (
                 self.cv.requests_requirements_links
@@ -52,8 +52,10 @@ class CvTimeSlotService:
                     CvTimeSlot(
                         cv=self.cv,
                         request_requirement_link=request_requirement_link,
+                        type_of_employment=request_requirement_link.request_requirement.type_of_employment,
                         date_from=date_from,
                         date_to=date_to,
+                        is_free=False,
                     )
                 )
         if for_create:

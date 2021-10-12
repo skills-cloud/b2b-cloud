@@ -121,3 +121,8 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
 class CvAdminFilter(AutocompleteFilter):
     title = cv_models.CV._meta.verbose_name.capitalize()
     field_name = 'cv'
+
+
+# @admin.register(cv_models.CvTimeSlot)
+# class CvTimeSlotAdmin(VersionAdmin, admin.ModelAdmin):
+#     autocomplete_fields = ['country', 'city', 'type_of_employment']

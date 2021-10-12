@@ -2,7 +2,6 @@ import itertools
 
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
-from django_filters import rest_framework as filters
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 

@@ -12,13 +12,15 @@ class DatesModelBase(models.Model):
 
 
 class ModelDiffMixin:
+    __initial__ = {}
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__initial = self._dict
+        self.__initial__ = self._dict
 
     @property
     def diff(self):
-        d1 = self.__initial
+        d1 = self.__initial__
         d2 = self._dict
         diffs = [(k, (v, d2[k])) for k, v in d1.items() if v != d2[k]]
         return dict(diffs)
@@ -36,7 +38,7 @@ class ModelDiffMixin:
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.__initial = self._dict
+        self.__initial__ = self._dict
 
     @property
     def _dict(self):

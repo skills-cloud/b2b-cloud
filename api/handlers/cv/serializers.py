@@ -83,7 +83,7 @@ class CvTimeSlotSerializer(CvLinkedObjectBaseSerializer):
         model = cv_models.CvTimeSlot
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
             'date_from', 'date_to', 'price', 'is_work_permit_required', 'description',
-            'country_id', 'city_id', 'type_of_employment_id',
+            'country_id', 'city_id', 'type_of_employment_id', 'is_free',
         ]
 
 
@@ -105,7 +105,7 @@ class CvTimeSlotReadSerializer(CvTimeSlotSerializer):
 
     class Meta(CvTimeSlotSerializer.Meta):
         fields = CvTimeSlotSerializer.Meta.fields + [
-            'country', 'city', 'type_of_employment',
+            'country', 'city', 'type_of_employment', 'kind',
 
             'request_requirement_id', 'request_requirement_name', 'request_id', 'request_title',
             'organization_project_id', 'organization_project_name',
