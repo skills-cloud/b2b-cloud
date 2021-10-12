@@ -8,6 +8,7 @@ from admin_auto_filters.filters import AutocompleteFilter
 from cv.admin import CvAdminFilter
 from main import models as main_models
 
+
 class MainBaseAdmin(VersionAdmin):
     list_display = ['id', 'name']
     search_fields = ['name']
@@ -111,12 +112,18 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         )
 
 
-@admin.register(main_models.OrganizationProjectCardItem)
-class OrganizationProjectCardItemAdmin(DraggableMPTTAdmin):
+@admin.register(main_models.OrganizationProjectCardItemTemplate)
+class OrganizationProjectCardItemTemplateAdmin(DraggableMPTTAdmin):
     search_fields = ['name', 'description']
     mptt_level_indent = 10
-    list_display = ['tree_actions', 'indented_title', 'description', 'organization_project']
+    list_display = ['tree_actions', 'indented_title', 'description']
     list_display_links = ['indented_title']
+    autocomplete_fields = ['positions']
+
+
+@admin.register(main_models.OrganizationProjectCardItem)
+class OrganizationProjectCardItemAdmin(OrganizationProjectCardItemTemplateAdmin):
+    list_display = OrganizationProjectCardItemTemplateAdmin.list_display + ['organization_project']
     list_filter = [OrganizationProjectAdminFilter]
 
     def get_queryset(self, request):

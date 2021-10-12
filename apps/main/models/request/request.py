@@ -4,7 +4,7 @@ import reversion
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
-from project.contrib.db.models import DatesModelBase
+from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User
 from cv.models import CV
 from main.models.base import Project, ExperienceYears
@@ -233,7 +233,7 @@ class RequestRequirementCvStatus(models.TextChoices):
 
 
 @reversion.register(follow=['request_requirement'])
-class RequestRequirementCv(DatesModelBase):
+class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
     """
     Есть сигналы
     """

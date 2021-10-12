@@ -1,6 +1,9 @@
 import itertools
 
+from django.core.exceptions import ValidationError
+from rest_framework import status, serializers
 from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
 from drf_yasg import openapi
@@ -8,7 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from cv import models as cv_models
 from main import models as main_models
-from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
+from api.views_mixins import ReadCreateUpdateSerializersMixin, ViewSetFilteredByUserMixin
 from api.backends import FilterBackend
 from api.filters import ModelMultipleChoiceCommaSeparatedFilter, OrderingFilterNullsLast
 from api.handlers.main import serializers as main_serializers
@@ -18,7 +21,7 @@ __all__ = [
 ]
 
 
-class TimeSheetRowViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, ModelViewSet):
+class TimeSheetRowViewSet(ReadCreateUpdateSerializersMixin, ViewSetFilteredByUserMixin, ModelViewSet):
     class Filter(filters.FilterSet):
         task_name = filters.CharFilter()
         cv_id = ModelMultipleChoiceCommaSeparatedFilter(
@@ -52,8 +55,11 @@ class TimeSheetRowViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin,
     queryset = main_models.TimeSheetRow.objects.prefetch_related(
         *main_models.TimeSheetRow.objects.get_queryset_prefetch_related()
     )
-    serializer_class = main_serializers.TimeSheetRowSerializer
+
     serializer_read_class = main_serializers.TimeSheetRowReadSerializer
+    serializer_create_class = main_serializers.TimeSheetRowCreateSerializer
+    serializer_update_class = main_serializers.TimeSheetRowUpdateSerializer
+
     search_fields = ['task_name', 'task_description']
     ordering_fields = list(itertools.chain(*[
         [k, f'-{k}']
@@ -107,3 +113,20 @@ class TimeSheetRowViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin,
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_201_CREATED: main_serializers.TimeSheetRowUpdateSerializer(many=True)
+        }
+    )
+    def create(self, request, *args, **kwargs):
+        request_serializer = self.get_serializer(data=request.data)
+        request_serializer.is_valid(raise_exception=True)
+        request_serializer_data = request_serializer.validated_data
+        cv_ids = request_serializer_data.pop('cv_ids')
+        try:
+            time_sheet_rows = main_models.TimeSheetRow.objects.create_for_cv(cv_ids, **request_serializer_data)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.args[0])
+        response_serializer = main_serializers.TimeSheetRowUpdateSerializer(instance=time_sheet_rows, many=True)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)

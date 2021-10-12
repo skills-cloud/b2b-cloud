@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
@@ -12,6 +13,7 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from django_filters import DateFromToRangeFilter
 from django_filters import rest_framework as filters
+from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
@@ -321,6 +323,12 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
             queryset=dictionary_models.TypeOfEmployment.objects)
         date_range = DateRangeFilterField()
 
+        class Meta:
+            model = cv_models.CvTimeSlot
+            fields = [
+                'country_id', 'city_id', 'type_of_employment_id', 'kind', 'is_free',
+            ]
+
     queryset = cv_models.CvTimeSlot.objects
     serializer_class = cv_serializers.CvTimeSlotSerializer
     serializer_read_class = cv_serializers.CvTimeSlotReadSerializer
@@ -354,6 +362,13 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
                 required=False
             ),
             openapi.Parameter(
+                'kind',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                enum=cv_models.CvTimeSlotKind.values,
+                required=False
+            ),
+            openapi.Parameter(
                 'date_range_from',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_STRING,
@@ -367,10 +382,21 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
                 format=openapi.FORMAT_DATE,
                 required=False
             ),
+            openapi.Parameter(
+                'is_free',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
+                required=False
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if self.get_object().kind == cv_models.CvTimeSlotKind.REQUEST_REQUIREMENT:
+            raise ValidationError({'kind': _('Нельзя удалять слот, созданный системой')})
+        return super().destroy(request, *args, **kwargs)
 
 
 class CvPositionViewSet(CvLinkedObjectViewSet):

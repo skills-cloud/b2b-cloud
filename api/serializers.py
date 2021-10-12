@@ -1,7 +1,6 @@
-import copy
 from typing import Dict
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, FieldDoesNotExist
 from django.db.models import ManyToManyField
 from rest_framework import serializers
 
@@ -40,13 +39,15 @@ class ModelSerializerWithCallCleanMethod(ModelSerializer):
     def is_valid(self, raise_exception=False):
         if not super().is_valid(raise_exception=raise_exception):
             return False
-        validated_data = self.validated_data.copy()
-        for field in [
-            self.Meta.model._meta.get_field(field_name)
-            for field_name in validated_data
-        ]:
+        validated_data = {}
+        for field_name, field_value in self.validated_data.items():
+            try:
+                field = self.Meta.model._meta.get_field(field_name)
+            except FieldDoesNotExist:
+                continue
             if isinstance(field, ManyToManyField):
-                del validated_data[field.name]
+                continue
+            validated_data[field_name] = field_value
         instance = self.instance
         if not instance:
             instance = self.Meta.model(**validated_data)
