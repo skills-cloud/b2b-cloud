@@ -152,7 +152,7 @@ class SetTimezone(generics.GenericAPIView):
 
 class UserViewSet(ModelViewSet):
     http_method_names = ['get']
-    queryset = User.objects
+    queryset = User.objects.all()
     serializer_class = acc_serializers.UserSerializer
     filter_backends = [SearchFilter]
     search_fields = ['email', 'first_name', 'first_name']
