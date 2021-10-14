@@ -292,8 +292,6 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
             id__in=cards_items_ids,
             organization_project_id=self.request_requirement.request.organization_project_id
         )
-        # raise Exception(get_sql_from_queryset(cards_items_qs))
-        # raise Exception(len(cards_items_ids) != cards_items_qs.count())
         if len(cards_items_ids) != cards_items_qs.count():
             raise ValidationError({
                 'attributes.organization_project_card_items': _('Неверно задана ID минимум одной карточеки')
