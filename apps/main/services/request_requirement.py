@@ -18,6 +18,6 @@ def request_requirement_time_slots_setup(instance: RequestRequirement):
 
 @transaction.atomic
 def request_requirement_cv_time_slots_setup(instance: RequestRequirementCv):
-    if instance.diff:
+    if 'cv' in instance.diff:
         CvTimeSlotService(CV.objects.get(id=instance.diff['cv'][0])).setup_requests_slots()
     CvTimeSlotService(instance.cv).setup_requests_slots()

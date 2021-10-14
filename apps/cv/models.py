@@ -106,6 +106,7 @@ class CV(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
+                'info',
                 'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked',
 
                 'files',
@@ -573,3 +574,12 @@ class CvFile(FileModelAbstract):
 
     def __str__(self):
         return f'< {self.cv_id} / {self.id} >'
+
+
+class CvInfo(models.Model):
+    cv = models.OneToOneField('cv.CV', primary_key=True, on_delete=models.DO_NOTHING, related_name='info')
+    rating = models.IntegerField(null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'v_cv_info'

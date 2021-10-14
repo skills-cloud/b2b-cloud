@@ -456,10 +456,13 @@ class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
     certificates = CvCertificateReadSerializer(many=True, read_only=True)
     files = CvFileReadSerializer(many=True, read_only=True)
 
+    rating = serializers.IntegerField(source='info.rating', allow_null=True)
+
     class Meta(CvDetailReadBaseSerializer.Meta):
         fields = CvDetailReadBaseSerializer.Meta.fields + [
             'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
             'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
+            'rating',
         ]
 
     def get_fields(self):

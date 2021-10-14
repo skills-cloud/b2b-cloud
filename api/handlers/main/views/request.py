@@ -1,6 +1,9 @@
 import itertools
+import json
+from typing import Dict
 
 from django.db import transaction
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
@@ -99,18 +102,12 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     @action(detail=True, methods=['post'], url_path='cv-link/(?P<cv_id>[0-9]+)')
     @transaction.atomic
     def cv_link(self, request, pk: int, cv_id: int, *args, **kwargs):
-        details_serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(data=request.data)
-        details_serializer.is_valid(raise_exception=True)
-        details = details_serializer.validated_data
-        card_items_ids = details.pop('organization_project_card_items', None)
         instance = main_models.RequestRequirementCv(
             request_requirement=self.get_object(),
             cv=get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id),
-            **details_serializer.validated_data
         )
+        instance = self._save_cv_linked(instance, request.data)
         instance.save()
-        if card_items_ids is not None:
-            instance.organization_project_card_items.add(*card_items_ids)
         return Response(
             main_serializers.RequestRequirementCvSerializer(instance=instance).data,
             status=status.HTTP_200_OK
@@ -131,20 +128,7 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     @action(detail=True, methods=['post'], url_path='cv-set-details/(?P<cv_id>[0-9]+)')
     @transaction.atomic
     def cv_set_details(self, request, pk: int, cv_id: int, *args, **kwargs):
-        details_serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(
-            data=request.data,
-            instance=self.get_object()
-        )
-        details_serializer.is_valid(raise_exception=True)
-        details = details_serializer.validated_data
-        card_items_ids = details.pop('organization_project_card_items', None)
-        instance = self._get_cv_linked_or_404(request, cv_id)
-        for k, v in details_serializer.validated_data.items():
-            setattr(instance, k, v)
-        instance.save()
-        if card_items_ids is not None:
-            instance.organization_project_card_items.clear()
-            instance.organization_project_card_items.add(*card_items_ids)
+        instance = self._save_cv_linked(self._get_cv_linked_or_404(request, cv_id), request.data)
         return Response(
             main_serializers.RequestRequirementCvSerializer(instance=instance).data,
             status=status.HTTP_200_OK
@@ -171,8 +155,32 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
         )
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
+    def _save_cv_linked(
+            self,
+            instance: main_models.RequestRequirementCv,
+            request_data: Dict
+    ) -> main_models.RequestRequirementCv:
+        serializer = main_serializers.RequestRequirementCvWriteDetailsSerializer(
+            data=request_data,
+            instance=instance
+        )
+        serializer.is_valid(raise_exception=True)
+        details = serializer.validated_data
+        cards_items = details.pop('organization_project_card_items', None)
+        for k, v in details.items():
+            setattr(instance, k, v)
+        if cards_items:
+            if not instance.attributes:
+                instance.attributes = {}
+            instance.attributes['organization_project_card_items'] = json.loads(json.dumps(cards_items, default=str))
+        try:
+            instance.save()
+        except DjangoValidationError as e:
+            raise ValidationError(e.args[0])
+        return instance
+
     def _get_cv_linked_or_404(self, request, cv_id: int) -> main_models.RequestRequirementCv:
         return get_object_or_404(main_models.RequestRequirementCv.objects.filter(
             request_requirement=self.get_object(),
-            cv=get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id),
+            cv_id=cv_id,
         ))
