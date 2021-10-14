@@ -1,14 +1,17 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 import reversion
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator, MaxValueValidator
 
+from project.contrib.db import get_sql_from_queryset
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User
 from cv.models import CV
 from main.models.base import Project, ExperienceYears
-from main.models.organization import OrganizationProject
+from main.models.organization import OrganizationProject, OrganizationProjectCardItem
 
 __all__ = [
     'RequestType',
@@ -208,7 +211,7 @@ class RequestRequirement(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related_cv_list(cls) -> List[str]:
             return [
-                'cv_links', 'cv_links__organization_project_card_items', 'cv_links__cv',
+                'cv_links', 'cv_links__cv',
                 *[
                     f'cv_links__cv__{f}'
                     for f in CV.objects.get_queryset_prefetch_related()
@@ -252,9 +255,13 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
     date_from = models.DateField(null=True, blank=True, verbose_name=_('участие в проекте с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('участие в проекте по'))
 
-    organization_project_card_items = models.ManyToManyField(
-        'main.OrganizationProjectCardItem', blank=True,
-        verbose_name=_('карточки проекта организации')
+    rating = models.IntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name=_('рейтинг')
+    )
+    attributes = models.JSONField(
+        default=dict, verbose_name=_('доп. атрибуты'),
+        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
     )
 
     class Meta:
@@ -265,8 +272,32 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
         verbose_name = _('анкета требования проектного запроса')
         verbose_name_plural = _('анкеты требования проектного запроса')
 
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.id} < {self.cv_id} / {self.request_requirement_id} >'
+
+    @property
+    def organization_project_card_items(self) -> List[Dict[str, Union[str, int]]]:
+        return self.attributes.get('organization_project_card_items') or []
+
+    def clean(self):
+        organization_project_card_items = (self.attributes or {}).get('organization_project_card_items')
+        if not organization_project_card_items:
+            return
+        cards_items_ids = [row['id'] for row in organization_project_card_items]
+        cards_items_qs = OrganizationProjectCardItem.objects_flat.filter(
+            id__in=cards_items_ids,
+            organization_project_id=self.request_requirement.request.organization_project_id
+        )
+        # raise Exception(get_sql_from_queryset(cards_items_qs))
+        # raise Exception(len(cards_items_ids) != cards_items_qs.count())
+        if len(cards_items_ids) != cards_items_qs.count():
+            raise ValidationError({
+                'attributes.organization_project_card_items': _('Неверно задана ID минимум одной карточеки')
+            })
 
 
 @reversion.register(follow=['request_requirement'])

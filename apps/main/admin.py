@@ -72,7 +72,7 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
             model = main_models.RequestRequirementCv
             readonly_fields = ['created_at', 'updated_at']
             extra = 0
-            autocomplete_fields = ['cv', 'organization_project_card_items']
+            autocomplete_fields = ['cv']
 
         inlines = [
             RequestRequirementCompetenceInline,

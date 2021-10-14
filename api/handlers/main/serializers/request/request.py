@@ -65,15 +65,19 @@ class RequestRequirementCompetenceReadSerializer(RequestRequirementCompetenceSer
         fields = RequestRequirementCompetenceSerializer.Meta.fields + ['competence']
 
 
-class RequestRequirementCvWriteDetailsSerializer(ModelSerializerWithCallCleanMethod):
-    organization_project_card_items_ids = PrimaryKeyRelatedIdField(
-        queryset=main_models.OrganizationProjectCardItem.objects.all(),
-        source='organization_project_card_items', many=True, required=False,
-    )
+class RequestRequirementCvWriteDetailsSerializer(ModelSerializer):
+    class RequestRequirementCvOrganizationProjectCardItem(serializers.Serializer):
+        id = PrimaryKeyRelatedIdField(queryset=main_models.OrganizationProjectCardItem.objects.all())
+        date = serializers.DateField(required=False, allow_null=True)
+
+    organization_project_card_items = RequestRequirementCvOrganizationProjectCardItem(many=True)
 
     class Meta:
         model = main_models.RequestRequirementCv
-        fields = ['status', 'date_from', 'date_to', 'organization_project_card_items_ids']
+        fields = [
+            'status', 'date_from', 'date_to', 'rating',
+            'organization_project_card_items'
+        ]
 
 
 class RequestRequirementCvSerializer(RequestRequirementCvWriteDetailsSerializer):

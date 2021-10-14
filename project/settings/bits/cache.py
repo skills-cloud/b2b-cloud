@@ -31,6 +31,7 @@ CACHEOPS = {
     'auth.*': {'ops': 'all'},
     'acc.*': {'ops': 'all'},
     'cv.*': {'ops': 'all'},
+    'cv.CvInfo': None,
     'dictionary.*': {'ops': 'all'},
     'main.*': {'ops': 'all'},
     'sorl.thumbnail.*': {'ops': 'all'},
