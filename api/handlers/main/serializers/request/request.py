@@ -70,7 +70,7 @@ class RequestRequirementCvWriteDetailsSerializer(ModelSerializer):
         id = PrimaryKeyRelatedIdField(queryset=main_models.OrganizationProjectCardItem.objects.all())
         date = serializers.DateField(required=False, allow_null=True)
 
-    organization_project_card_items = RequestRequirementCvOrganizationProjectCardItem(many=True)
+    organization_project_card_items = RequestRequirementCvOrganizationProjectCardItem(many=True, required=False)
 
     class Meta:
         model = main_models.RequestRequirementCv
