@@ -6,6 +6,13 @@ class ViewSetFilteredByUserMixin:
         return super().get_queryset().filter_by_user(self.request.user)
 
 
+class ViewSetQuerySetPrefetchRelatedMixin:
+    def get_queryset(self):
+        if prefetched := getattr(self.queryset, 'get_queryset_prefetch_related'):
+            self.queryset = self.queryset.prefetch_related(*prefetched())
+        return super().get_queryset()
+
+
 class ReadWriteSerializersMixin:
     serializer_class = None
     serializer_read_class = None

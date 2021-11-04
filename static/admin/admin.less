@@ -1,12 +1,27 @@
 #changelist-filter {
+    padding: 20px 2px;
+
     .changelist-select-container {
-        max-width: 220px;
-        margin: 0 10px;
-        margin-bottom: 20px;
+        margin: 0 6px !important;
+
     }
+
     h3 {
-        border-top: 1px solid #eaeaea;
+        border-top: 1px solid #121212;
         padding-top: 10px;
+    }
+
+    h3:first-letter {
+        text-transform: uppercase;
+    }
+
+    ul, li, select {
+        padding: 0 4px !important;
+        margin: 0 !important;
+    }
+
+    select {
+        width: 230px !important;
     }
 }
 
@@ -17,6 +32,27 @@
             td {
                 padding-top: 6px;
             }
+
+            td.original {
+                p {
+                    display: none;
+                }
+            }
         }
+    }
+}
+
+#content-main, #nav-sidebar {
+    .app-auth {
+        //display: none !important;
+    }
+
+    .model-funpointtypedifficultylevel {
+        display: none !important;
+    }
+}
+
+.djn-tr-with-nested-custom-1 {
+    .djn-td-with-nested-custom-1 {
     }
 }

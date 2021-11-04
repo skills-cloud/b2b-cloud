@@ -1,0 +1,268 @@
+import random
+import reversion
+from typing import Optional, List
+
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from acc.models import User
+from project.contrib.db.models import DatesModelBase
+
+__all__ = [
+    'FunPointType',
+    'FunPointTypeDifficultyLevel',
+    'FunPointTypePositionLaborEstimate',
+    'ModuleFunPoint',
+    'Module',
+    'ModulePositionLaborEstimate',
+]
+
+
+@reversion.register(follow=['difficulty_levels', 'positions_labor_estimates'])
+class FunPointType(DatesModelBase):
+    organization = models.ForeignKey(
+        'main.Organization', related_name='fun_points_types', null=True, blank=True, on_delete=models.CASCADE,
+        verbose_name=_('заказчик'), help_text=_('глобальный тип, если оставить это поле пустым')
+    )
+    name = models.CharField(max_length=500, verbose_name=_('название'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+
+    class Meta:
+        ordering = ['name']
+        unique_together = [
+            ['organization', 'name']
+        ]
+        verbose_name = _('модули / тип функциональной точки')
+        verbose_name_plural = _('модули / типы функциональных точек')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User) -> 'FunPointType.QuerySet':
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        @classmethod
+        def get_queryset_prefetch_related(cls) -> List[str]:
+            return [
+                'organization',
+                'difficulty_levels', 'positions_labor_estimates', 'positions_labor_estimates__position'
+            ]
+
+    objects = Manager()
+
+    def __str__(self):
+        name = []
+        if self.organization:
+            name.append(self.organization.name)
+        return ' / '.join([*name, self.name])
+
+
+@reversion.register()
+class FunPointTypeDifficultyLevel(DatesModelBase):
+    fun_point_type = models.ForeignKey(
+        'main.FunPointType', related_name='difficulty_levels', on_delete=models.CASCADE,
+        verbose_name=_('уровень сложности')
+    )
+    name = models.CharField(max_length=500, verbose_name=_('название'))
+    factor = models.FloatField(default=1, verbose_name=_('коэффициент'))
+    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+
+    class Meta:
+        ordering = ['sorting', 'id']
+        unique_together = [
+            ['fun_point_type', 'name']
+        ]
+        verbose_name = _('уровень сложности')
+        verbose_name_plural = _('уровни сложности')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        ...
+
+    objects = Manager()
+
+    def __str__(self):
+        return ' / '.join([
+            self.fun_point_type.name,
+            self.name,
+        ])
+
+
+@reversion.register()
+class FunPointTypePositionLaborEstimate(DatesModelBase):
+    fun_point_type = models.ForeignKey(
+        'main.FunPointType', related_name='positions_labor_estimates', on_delete=models.CASCADE,
+        verbose_name=_('уровень сложности')
+    )
+    position = models.ForeignKey(
+        'dictionary.Position', related_name='fun_points_types_labor_estimates', on_delete=models.CASCADE,
+        verbose_name=_('должность')
+    )
+    hours = models.FloatField(default=1, verbose_name=_('норматив'), help_text=_('в часах'))
+    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+
+    class Meta:
+        ordering = ['sorting', 'id']
+        unique_together = [
+            ['fun_point_type', 'position']
+        ]
+        verbose_name = _('норматив трудозатрат')
+        verbose_name_plural = _('нормативы трудозатрат')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        ...
+
+    objects = Manager()
+
+
+@reversion.register(follow=['fun_points', 'positions_labor_estimates'])
+class Module(DatesModelBase):
+    organization_project = models.ForeignKey(
+        'main.OrganizationProject', related_name='modules', on_delete=models.CASCADE,
+        verbose_name=_('проект')
+    )
+    name = models.CharField(max_length=500, verbose_name=_('название'))
+    start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
+    deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
+    manager = models.ForeignKey(
+        'acc.User', related_name='modules', null=True, blank=True,
+        on_delete=models.RESTRICT, verbose_name=_('руководитель')
+    )
+    goals = models.TextField(null=True, blank=True, verbose_name=_('цели'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+
+    class Meta:
+        ordering = ['sorting', 'id']
+        unique_together = [
+            ['organization_project', 'name']
+        ]
+        verbose_name = _('модуль')
+        verbose_name_plural = _('модули')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User) -> 'Module.QuerySet':
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        @classmethod
+        def get_queryset_prefetch_related(cls) -> List[str]:
+            return [
+                'manager',
+                'organization_project', 'organization_project__organization',
+                'positions_labor_estimates', 'positions_labor_estimates__position',
+                *cls.get_queryset_fun_points_prefetch_related(),
+            ]
+
+        @classmethod
+        def get_queryset_fun_points_prefetch_related(cls) -> List[str]:
+            return [
+                'fun_points', 'fun_points__difficulty_level',
+                *[f'fun_points__fun_point_type__{f}' for f in FunPointType.objects.get_queryset_prefetch_related()]
+            ]
+
+    objects = Manager()
+
+    def __str__(self):
+        return ' / '.join([
+            # self.organization_project.name,
+            self.name,
+        ])
+
+    @property
+    def difficulty(self) -> Optional[float]:
+        """
+        difficulty средневзвешанное от ф-х точек
+        """
+        return random.random() * 3
+
+
+@reversion.register()
+class ModuleFunPoint(DatesModelBase):
+    fun_point_type = models.ForeignKey(
+        'main.FunPointType', related_name='fun_points', on_delete=models.RESTRICT,
+        verbose_name=_('тип')
+    )
+    module = models.ForeignKey(
+        'main.Module', related_name='fun_points', on_delete=models.CASCADE,
+        verbose_name=_('модуль')
+    )
+    difficulty_level = models.ForeignKey(
+        'main.FunPointTypeDifficultyLevel', related_name='fun_points', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('уровень сложности')
+    )
+    name = models.CharField(max_length=500, verbose_name=_('название'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+
+    class Meta:
+        ordering = ['sorting', 'id']
+        unique_together = [
+            ['module', 'name']
+        ]
+        verbose_name = _('функциональная точка')
+        verbose_name_plural = _('функциональные точки')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        ...
+
+    objects = Manager()
+
+    def clean(self):
+        if (
+                self.fun_point_type.organization_id
+                and self.fun_point_type.organization_id != self.module.organization_project.organization_id
+        ):
+            raise ValidationError({'fun_point_type': _(
+                'Ф-я точка должна принадлежать компании заказчику проекта модуля или быть общеупотребимой')})
+        if self.difficulty_level and self.fun_point_type_id != self.difficulty_level.fun_point_type_id:
+            raise ValidationError({'difficulty_level': _('Уровень сложности должен принадлежать этому типу ф-й точки')})
+
+    @property
+    def difficulty(self) -> float:
+        if self.difficulty_level:
+            return self.difficulty_level.factor
+        return 1.0
+
+
+@reversion.register()
+class ModulePositionLaborEstimate(DatesModelBase):
+    module = models.ForeignKey(
+        'main.Module', related_name='positions_labor_estimates', on_delete=models.CASCADE,
+        verbose_name=_('модуль')
+    )
+    position = models.ForeignKey(
+        'dictionary.Position', related_name='modules_positions_labor_estimates', on_delete=models.CASCADE,
+        verbose_name=_('должность')
+    )
+    count = models.PositiveIntegerField(default=1, verbose_name=_('кол-во'))
+    hours = models.FloatField(default=1, verbose_name=_('чел/часов'))
+    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+
+    class Meta:
+        ordering = ['sorting', 'id']
+        unique_together = [
+            ['module', 'position']
+        ]
+        verbose_name = _('норматив трудозатрат')
+        verbose_name_plural = _('нормативы трудозатрат')
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        ...
+
+    objects = Manager()

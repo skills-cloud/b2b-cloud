@@ -3,15 +3,16 @@ from typing import List, Dict, Any, Union
 import reversion
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from project.contrib.db import get_sql_from_queryset
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User
 from cv.models import CV
-from main.models.base import Project, ExperienceYears
-from main.models.organization import OrganizationProject, OrganizationProjectCardItem
+from main.models.base import ExperienceYears
+from main.models.organization import OrganizationProjectCardItem
+from main.models.module import Module
 
 __all__ = [
     'RequestType',
@@ -22,6 +23,7 @@ __all__ = [
     'RequestRequirementCvStatus',
     'RequestRequirementCv',
     'RequestRequirementCompetence',
+    'TimeSheetRow',
 ]
 
 
@@ -31,8 +33,8 @@ class RequestType(models.Model):
 
     class Meta:
         ordering = ['name']
-        verbose_name = _('тип проектного запроса')
-        verbose_name_plural = _('типы проектных запросов')
+        verbose_name = _('запросы / тип запроса')
+        verbose_name_plural = _('запросы / типы запросов')
 
     def __str__(self):
         return self.name
@@ -53,9 +55,9 @@ class RequestPriority(models.IntegerChoices):
 
 @reversion.register(follow=['requirements'])
 class Request(DatesModelBase):
-    organization_project = models.ForeignKey(
-        'main.OrganizationProject', related_name='requests', on_delete=models.RESTRICT,
-        verbose_name=_('проект заказчика')
+    module = models.ForeignKey(
+        'main.Module', related_name='requests', on_delete=models.RESTRICT,
+        verbose_name=_('модуль')
     )
     type = models.ForeignKey(
         'main.RequestType', related_name='requests', null=True, blank=True, on_delete=models.CASCADE,
@@ -75,11 +77,6 @@ class Request(DatesModelBase):
         'dictionary.IndustrySector', related_name='requests', null=True, blank=True, on_delete=models.RESTRICT,
         verbose_name=_('отрасль')
     )
-    project = models.ForeignKey(
-        'main.Project', related_name='requests', null=True, blank=True, on_delete=models.RESTRICT,
-        verbose_name=_('внутренний проект'),
-        help_text=_('На текущий момент не используется.<br>Надо задавать связку с проектом заказчика')
-    )
     start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
     deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
     manager = models.ForeignKey(
@@ -97,8 +94,8 @@ class Request(DatesModelBase):
 
     class Meta:
         ordering = ['priority', '-id']
-        verbose_name = _('проектный запрос')
-        verbose_name_plural = _('проектные запросы')
+        verbose_name = _('запрос')
+        verbose_name_plural = _('запросы')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -110,42 +107,39 @@ class Request(DatesModelBase):
             return [
                 *cls.get_queryset_prefetch_related_self(),
                 *cls.get_queryset_prefetch_related_requirements(),
-                *cls.get_queryset_prefetch_related_project(),
-                *cls.get_queryset_prefetch_related_organization_project(),
+                *cls.get_queryset_prefetch_related_module(),
             ]
 
         @classmethod
         def get_queryset_prefetch_related_self(cls) -> List[str]:
             return [
-                'organization_project', 'type', 'industry_sector', 'project', 'resource_manager', 'recruiter',
-                'requirements',
+                'type', 'industry_sector', 'resource_manager', 'recruiter',
             ]
 
         @classmethod
         def get_queryset_prefetch_related_requirements(cls) -> List[str]:
             return [
-                f'requirements__{f}'
-                for f in RequestRequirement.objects.get_queryset_prefetch_related()
+                'requirements',
+                *[
+                    f'requirements__{f}'
+                    for f in RequestRequirement.objects.get_queryset_prefetch_related()
+                ]
             ]
 
         @classmethod
-        def get_queryset_prefetch_related_project(cls) -> List[str]:
+        def get_queryset_prefetch_related_module(cls) -> List[str]:
             return [
-                f'project__{f}'
-                for f in Project.objects.get_queryset_prefetch_related()
-            ]
-
-        @classmethod
-        def get_queryset_prefetch_related_organization_project(cls) -> List[str]:
-            return [
-                f'organization_project__{f}'
-                for f in OrganizationProject.objects.get_queryset_prefetch_related()
+                'module',
+                *[
+                    f'module__{f}'
+                    for f in Module.objects.get_queryset_prefetch_related()
+                ]
             ]
 
     objects = Manager()
 
     def __str__(self):
-        return f'{self.id_verbose} < {self.id} / {self.organization_project_id} >'
+        return f'{self.id_verbose} < {self.id} / {self.module_id} >'
 
     @property
     def id_verbose(self) -> str:
@@ -186,8 +180,8 @@ class RequestRequirement(DatesModelBase):
 
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('требование проектного запроса')
-        verbose_name_plural = _('требования проектного запроса')
+        verbose_name = _('запросы / требование')
+        verbose_name_plural = _('запросы / требования')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -269,8 +263,8 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
         unique_together = [
             ['request_requirement', 'cv']
         ]
-        verbose_name = _('анкета требования проектного запроса')
-        verbose_name_plural = _('анкеты требования проектного запроса')
+        verbose_name = _('анкета')
+        verbose_name_plural = _('анкеты')
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -290,7 +284,7 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
         cards_items_ids = [row['id'] for row in organization_project_card_items]
         cards_items_qs = OrganizationProjectCardItem.objects_flat.filter(
             id__in=cards_items_ids,
-            organization_project_id=self.request_requirement.request.organization_project_id
+            module__organization_project_id=self.request_requirement.request.module.organization_project_id
         )
         if len(cards_items_ids) != cards_items_qs.count():
             raise ValidationError({
@@ -343,3 +337,68 @@ class RequestRequirementCompetence(DatesModelBase):
 
     def __str__(self):
         return f'< {self.request_requirement_id} / {self.id} >'
+
+
+@reversion.register()
+class TimeSheetRow(DatesModelBase):
+    request = models.ForeignKey(
+        'main.Request', on_delete=models.CASCADE, related_name='time_sheet_rows',
+        verbose_name=_('проектный запрос')
+    )
+    cv = models.ForeignKey(
+        'cv.CV', on_delete=models.RESTRICT, related_name='time_sheet_rows',
+        verbose_name=_('анкета исполнителя')
+    )
+    date_from = models.DateField(default=timezone.now, db_index=True, verbose_name=_('дата начала работ'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('дата окончания работ'))
+    task_name = models.CharField(max_length=1000, verbose_name=_('название задачи'))
+    task_description = models.TextField(null=True, blank=True, verbose_name=_('описание задачи'))
+    work_time = models.FloatField(verbose_name=_('затраченное время'))
+
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        @transaction.atomic
+        def create_for_cv(self, cv_ids: List[int], **kwargs) -> List['TimeSheetRow']:
+            for_create = [
+                self.model(cv_id=cv_id, **kwargs)
+                for cv_id in cv_ids
+            ]
+            for o in for_create:
+                o.clean()
+            return self.bulk_create(for_create)
+
+        @classmethod
+        def get_queryset_prefetch_related(cls) -> List:
+            return [
+                'request', 'cv',
+                *[
+                    f'request__{f}'
+                    for f in Request.objects.get_queryset_prefetch_related_self()
+                ]
+            ]
+
+    class Meta:
+        ordering = ['-date_from']
+        index_together = [
+            ['request', 'date_from'],
+            ['request', 'task_name'],
+        ]
+        verbose_name = _('запросы / таймшиты')
+        verbose_name_plural = _('запросы / таймшиты')
+
+    objects = Manager()
+
+    def __str__(self):
+        return f'{self.task_name} < {self.id} / {self.request_id} >'
+
+    def clean(self):
+        if not CV.objects.filter(
+                requests_requirements_links__request_requirement__request=self.request,
+                id=self.cv_id,
+        ).exists():
+            raise ValidationError({
+                'cv': _(f'Анкета <{self.cv_id}> не связана с требованием проектного запроса')
+            })
