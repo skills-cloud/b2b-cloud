@@ -73,8 +73,8 @@ class OrganizationProject(DatesModelBase):
 
     class Meta:
         ordering = ['name']
-        verbose_name = _('проект организации')
-        verbose_name_plural = _('проекты организаций')
+        verbose_name = _('проект')
+        verbose_name_plural = _('проекты')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User) -> 'OrganizationProject.QuerySet':
@@ -83,7 +83,7 @@ class OrganizationProject(DatesModelBase):
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
-            return ['organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters', 'requests']
+            return ['organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters', 'modules']
 
     objects = Manager()
 
@@ -91,8 +91,8 @@ class OrganizationProject(DatesModelBase):
         return self.name
 
     @property
-    def requests_count(self) -> int:
-        return len(self.requests.all())
+    def modules_count(self) -> int:
+        return len(self.modules.all())
 
 
 class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase):
@@ -148,8 +148,8 @@ class OrganizationProjectCardItemTemplate(OrganizationProjectCardItemAbstract):
     objects_flat = FlatManager()
 
     class Meta:
-        verbose_name = _('карточка-шаблон проекта организации')
-        verbose_name_plural = _('карточки-шаблоны проектов организаций')
+        verbose_name = _('организации / карточка-шаблон проекта организации')
+        verbose_name_plural = _('организации / карточки-шаблоны проектов организаций')
 
 
 class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
@@ -160,8 +160,8 @@ class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
     )
 
     class Meta:
-        verbose_name = _('карточка проекта организации')
-        verbose_name_plural = _('карточки проектов организаций')
+        verbose_name = _('организации / карточка проекта организации')
+        verbose_name_plural = _('организации / карточки проектов организаций')
 
     class TreeQuerySet(mptt_querysets.TreeQuerySet):
         def filter_by_user(self, user: User):

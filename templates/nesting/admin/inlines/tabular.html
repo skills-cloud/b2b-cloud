@@ -4,7 +4,7 @@
 {% with inline_admin_formset.formset.is_nested as is_nested %}
 
 {% with inline_admin_formset.opts as inline_opts %}
-<div class="inline-group group djn-group djn-tabular{% if is_nested %} djn-group-nested{% else %} djn-group-root{% endif %}"
+<div class="inline-group group djn-group djn-tabular{% if is_nested %} djn-group-nested{% else %} djn-group-root{% endif %}{% if nested_level %}djn-custom-nested-div djn-custom-nested-div-{{ nested_level }}{% endif %}"
     id="{{ inline_admin_formset.formset.prefix }}-group"
     data-inline-type="stacked"
     data-inline-formset="{{ inline_admin_formset.inline_formset_data }}"
@@ -53,13 +53,13 @@
             <tr class="djn-tr form-row{% if inline_admin_form.original or inline_admin_form.show_url %} has_original{% endif %}">
 
                 <td class="original{% if inline_admin_formset.opts.sortable_field_name %} is-sortable{% endif %}">
-{#                {% if inline_admin_form.original or inline_admin_form.show_url %}<p>#}
-{#                {% if inline_admin_form.original %}#}
-{#                {{ inline_admin_form.original }}#}
-{#                {% if inline_admin_form.model_admin.show_change_link and inline_admin_form.model_admin.has_registered_model %}<a href="{% url inline_admin_form.model_admin.opts|admin_urlname:'change' inline_admin_form.original.pk|admin_urlquote %}" class="{% if inline_admin_formset.has_change_permission %}inlinechangelink{% else %}inlineviewlink{% endif %}">{% if inline_admin_formset.has_change_permission %}{% trans "Change" %}{% else %}{% trans "View" %}{% endif %}</a>{% endif %}#}
-{#                {% endif %}#}
-{#                {% if inline_admin_form.show_url %}<a href="{{ inline_admin_form.absolute_url }}">{% trans "View on site" %}</a>{% endif %}#}
-{#                  </p>{% endif %}#}
+                {% if inline_admin_form.original or inline_admin_form.show_url %}<p>
+                {% if inline_admin_form.original %}
+                {{ inline_admin_form.original }}
+                {% if inline_admin_form.model_admin.show_change_link and inline_admin_form.model_admin.has_registered_model %}<a href="{% url inline_admin_form.model_admin.opts|admin_urlname:'change' inline_admin_form.original.pk|admin_urlquote %}" class="{% if inline_admin_formset.has_change_permission %}inlinechangelink{% else %}inlineviewlink{% endif %}">{% if inline_admin_formset.has_change_permission %}{% trans "Change" %}{% else %}{% trans "View" %}{% endif %}</a>{% endif %}
+                {% endif %}
+                {% if inline_admin_form.show_url %}<a href="{{ inline_admin_form.absolute_url }}">{% trans "View on site" %}</a>{% endif %}
+                  </p>{% endif %}
                 {% if inline_admin_formset.opts.sortable_field_name %}
                 <span class="djn-drag-handler"></span>
                 {% endif %}
@@ -107,11 +107,14 @@
             </tr>
 
             {% if inline_admin_form.form.inlines %}
-                <tr class="djn-tr"><td class="djn-td" colspan="{{ inline_admin_form|cell_count }}">
+                {% with nested_level|default:0|add:1 as next_nested_level %}
+                <tr class="djn-tr djn-tr-with-nested djn-tr-with-nested-custom djn-tr-with-nested-custom-{{ next_nested_level }}">
+                    <td class="djn-td djn-td-with-nested-custom djn-td-with-nested-custom-{{ next_nested_level }}" colspan="{{ inline_admin_form|cell_count }}">
                 {% for nested in inline_admin_form.form.inlines %}
-                    {% include nested.opts.template with inline_admin_formset=nested %}
+                    {% include nested.opts.template with inline_admin_formset=nested nested_level=next_nested_level %}
                 {% endfor %}
                 </td></tr>
+                {% endwith %}
             {% endif %}
 
             </tbody>
@@ -133,6 +136,7 @@
     </div>
 
 </div>
+
 {% endwith %}{# ends with inline_admin_formset.opts as inline_opts #}
 
 {% endwith %}{# ends {% with inline_admin_formset.formset.is_nested as is_nested %} #}

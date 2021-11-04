@@ -1,3 +1,4 @@
+import copy
 from typing import Dict
 
 from django.core.exceptions import ValidationError, FieldDoesNotExist
@@ -48,7 +49,7 @@ class ModelSerializerWithCallCleanMethod(ModelSerializer):
             if isinstance(field, ManyToManyField):
                 continue
             validated_data[field_name] = field_value
-        instance = self.instance
+        instance = copy.copy(self.instance)
         if not instance:
             instance = self.Meta.model(**validated_data)
         else:

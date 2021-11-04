@@ -25,8 +25,19 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': True,
     'REFETCH_SCHEMA_WITH_AUTH': True,
     'DISPLAY_OPERATION_ID': False,
+    'DEFAULT_PAGINATOR_INSPECTORS': [
+        'api.schema.inspectors.query.DefaultPaginationRestResponsePagination',
+        * SWAGGER_DEFAULTS['DEFAULT_PAGINATOR_INSPECTORS'],
+    ],
     'DEFAULT_FIELD_INSPECTORS': [
         'api.schema.inspectors.field.PrimaryKeyRelatedFieldInspector',
-        *SWAGGER_DEFAULTS['DEFAULT_FIELD_INSPECTORS'],
+        'api.schema.inspectors.field.ChoiceFieldInspector',
+        *[
+            f
+            for f in SWAGGER_DEFAULTS['DEFAULT_FIELD_INSPECTORS']
+            if f not in [
+                'drf_yasg.inspectors.ChoiceFieldInspector',
+            ]
+        ],
     ]
 }
