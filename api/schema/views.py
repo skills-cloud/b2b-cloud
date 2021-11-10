@@ -6,7 +6,7 @@ from api.permissions import IsAuthenticatedOrReadOnly
 
 SchemaViewBase = get_schema_view(
     openapi.Info(
-        title="ICI API",
+        title="B2B-Cloud API",
         default_version='v1',
     ),
     public=True,
