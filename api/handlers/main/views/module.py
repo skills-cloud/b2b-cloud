@@ -1,13 +1,19 @@
 import itertools
+from typing import Type
 
+from django.db import transaction
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django_filters import rest_framework as filters
 
 from acc.models import User
 from main import models as main_models
+from main.services.organization_project.module import ModuleLaborEstimateService
 from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, ViewSetQuerySetPrefetchRelatedMixin
 from api.backends import FilterBackend
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
@@ -120,6 +126,67 @@ class ModuleViewSet(
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer(many=True)
+        },
+        operation_description='Получение расчётной оценки трудозатрат на основе ф-х точек'
+    )
+    @action(detail=True, methods=['get'], url_path='get-expected-labor-estimate')
+    @transaction.atomic
+    def get_expected_labor_estimate(self, request, pk, *args, **kwargs):
+        return self._get_labor_estimate_response_by_method('get_expected_labor_estimate')
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer(many=True)
+        },
+        operation_description='Получение разницы расчётной и сохранённой оценок трудозатрат'
+                              '<br>`расчётная - сохранённая`'
+                              '<br><i>т.е. если цифры минусовые – в сохранённой больше, чем в расчётной</i>'
+    )
+    @action(detail=True, methods=['get'], url_path='get-expected-minus-saved-labor-estimate')
+    @transaction.atomic
+    def get_expected_minus_saved_labor_estimate(self, request, pk, *args, **kwargs):
+        return self._get_labor_estimate_response_by_method('get_expected_minus_saved_labor_estimate')
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: main_serializers.ModulePositionLaborEstimateWorkersSerializer(many=True)
+        },
+        operation_description='Получение разницы сохранённой и запрошенной оценок трудозатрат'
+                              '<br>`сохранённая – запрошенная`'
+                              '<br><i>т.е. если цифры минусовые – в запрошенной больше, чем в сохранённая</i>'
+    )
+    @action(detail=True, methods=['get'], url_path='get-saved-minus-requested-labor-estimate')
+    @transaction.atomic
+    def get_saved_minus_requested_labor_estimate(self, request, pk, *args, **kwargs):
+        return self._get_labor_estimate_response_by_method(
+            'get_saved_minus_requested_labor_estimate',
+            serializer_class=main_serializers.ModulePositionLaborEstimateWorkersSerializer
+        )
+
+    def _get_labor_estimate_response_by_method(
+            self,
+            method_name: str,
+
+            serializer_class: Type[main_serializers.ModulePositionLaborEstimateWorkersSerializer]
+            = main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer,
+    ) -> Response:
+        service = ModuleLaborEstimateService(self.get_object())
+        positions_estimates = getattr(service, method_name)().positions_estimates.values()
+        serializer_fields = serializer_class().get_fields().keys()
+        serializer = serializer_class(data=[
+            {
+                **{'position_id': row.position.id},
+                **{'position_name': row.position.name},
+                **({'hours_count': row.hours_count} if 'hours_count' in serializer_fields else {}),
+                **{'workers_count': row.workers_count},
+            }
+            for row in positions_estimates
+        ], many=True)
+        return Response(serializer.initial_data, status=status.HTTP_200_OK)
 
 
 class ModuleFunPointViewSet(ViewSetFilteredByUserMixin, ModelViewSet):

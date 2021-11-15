@@ -56,7 +56,7 @@ class RequestPriority(models.IntegerChoices):
 @reversion.register(follow=['requirements'])
 class Request(DatesModelBase):
     module = models.ForeignKey(
-        'main.Module', related_name='requests', on_delete=models.RESTRICT,
+        'main.Module', related_name='requests', on_delete=models.CASCADE,
         verbose_name=_('модуль')
     )
     type = models.ForeignKey(
@@ -286,7 +286,7 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
             id__in=cards_items_ids,
             module__organization_project_id=self.request_requirement.request.module.organization_project_id
         )
-        if len(cards_items_ids) != cards_items_qs.count():
+        if len(cards_items_ids) != cards_items_qs.workers_count():
             raise ValidationError({
                 'attributes.organization_project_card_items': _('Неверно задана ID минимум одной карточеки')
             })

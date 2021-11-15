@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -24,6 +25,8 @@ __all__ = [
     'ModuleWriteSerializer',
     'ModuleReadSerializer',
     'ModuleInlineSerializer',
+    'ModulePositionLaborEstimateWorkersSerializer',
+    'ModulePositionLaborEstimateWorkersAndHoursSerializer',
 ]
 
 
@@ -101,7 +104,7 @@ class ModuleWriteSerializer(ModelSerializerWithCallCleanMethod):
         model = main_models.Module
         fields = [
             'id', 'organization_project_id', 'name', 'start_date', 'deadline_date', 'manager_id',
-            'goals', 'description', 'created_at', 'updated_at', 'sorting',
+            'work_days_count', 'work_days_hours_count', 'goals', 'description', 'created_at', 'updated_at', 'sorting',
         ]
         validators = [
             UniqueTogetherValidator(
@@ -116,13 +119,23 @@ class ModuleReadSerializer(ModuleWriteSerializer):
     manager = UserInlineSerializer(read_only=True, allow_null=True)
     fun_points = ModuleFunPointInlineSerializer(many=True, read_only=True)
     positions_labor_estimates = ModulePositionLaborEstimateInlineSerializer(many=True, read_only=True)
-    difficulty = serializers.FloatField(allow_null=True, read_only=True)
+    difficulty_factor = serializers.FloatField(allow_null=True, read_only=True)
 
     class Meta(ModuleWriteSerializer.Meta):
         fields = ModuleWriteSerializer.Meta.fields + [
-            'difficulty', 'organization_project', 'manager', 'fun_points', 'positions_labor_estimates',
+            'difficulty_factor', 'organization_project', 'manager', 'fun_points', 'positions_labor_estimates',
         ]
 
 
 class ModuleInlineSerializer(ModuleReadSerializer):
     ...
+
+
+class ModulePositionLaborEstimateWorkersSerializer(serializers.Serializer):
+    position_id = PrimaryKeyRelatedIdField(queryset=dictionary_models.Position.objects)
+    position_name = serializers.CharField()
+    workers_count = serializers.IntegerField(default=1)
+
+
+class ModulePositionLaborEstimateWorkersAndHoursSerializer(ModulePositionLaborEstimateWorkersSerializer):
+    hours_count = serializers.FloatField(default=0, allow_null=True)

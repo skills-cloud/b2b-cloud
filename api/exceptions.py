@@ -1,6 +1,5 @@
 import json
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import RestrictedError
 from django.http import Http404
@@ -11,8 +10,12 @@ from rest_framework.response import Response
 
 
 def custom_exception_handler(exc, context):
-    # if settings.DEBUG:
-    #     raise exc
+    is_debug_mode = False
+    if request := context.get('request', None):
+        if '__debug_error__' in request.GET:
+            is_debug_mode = True
+    if is_debug_mode:
+        raise exc
     response = exception_handler(exc, context)
     if not response:
         response = Response(status=status.HTTP_400_BAD_REQUEST)
@@ -34,6 +37,6 @@ def custom_exception_handler(exc, context):
         if isinstance(details, (list, tuple)):
             details = list(map(str, details))
         else:
-            details = str()
+            details = str(details)
     response.data['details'] = details
     return response

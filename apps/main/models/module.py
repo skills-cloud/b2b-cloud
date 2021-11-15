@@ -7,7 +7,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from acc.models import User
-from project.contrib.db.models import DatesModelBase
+from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 
 __all__ = [
     'FunPointType',
@@ -20,7 +20,7 @@ __all__ = [
 
 
 @reversion.register(follow=['difficulty_levels', 'positions_labor_estimates'])
-class FunPointType(DatesModelBase):
+class FunPointType(ModelDiffMixin, DatesModelBase):
     organization = models.ForeignKey(
         'main.Organization', related_name='fun_points_types', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name=_('заказчик'), help_text=_('глобальный тип, если оставить это поле пустым')
@@ -58,7 +58,7 @@ class FunPointType(DatesModelBase):
 
 
 @reversion.register()
-class FunPointTypeDifficultyLevel(DatesModelBase):
+class FunPointTypeDifficultyLevel(ModelDiffMixin, DatesModelBase):
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='difficulty_levels', on_delete=models.CASCADE,
         verbose_name=_('уровень сложности')
@@ -92,7 +92,7 @@ class FunPointTypeDifficultyLevel(DatesModelBase):
 
 
 @reversion.register()
-class FunPointTypePositionLaborEstimate(DatesModelBase):
+class FunPointTypePositionLaborEstimate(ModelDiffMixin, DatesModelBase):
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='positions_labor_estimates', on_delete=models.CASCADE,
         verbose_name=_('уровень сложности')
@@ -123,7 +123,7 @@ class FunPointTypePositionLaborEstimate(DatesModelBase):
 
 
 @reversion.register(follow=['fun_points', 'positions_labor_estimates'])
-class Module(DatesModelBase):
+class Module(ModelDiffMixin, DatesModelBase):
     organization_project = models.ForeignKey(
         'main.OrganizationProject', related_name='modules', on_delete=models.CASCADE,
         verbose_name=_('проект')
@@ -131,6 +131,12 @@ class Module(DatesModelBase):
     name = models.CharField(max_length=500, verbose_name=_('название'))
     start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
     deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
+    work_days_count = models.IntegerField(
+        null=True, blank=True, verbose_name=_('кол-во рабочих дней'),
+        help_text=_('если пусто, заполнится автоматически из расчета пятидневной рабочей недели'
+                    '<br>ПН-ПТ deadline_date-start_date')
+    )
+    work_days_hours_count = models.IntegerField(default=8, verbose_name=_('кол-во рабочих часов в рабочем дне'))
     manager = models.ForeignKey(
         'acc.User', related_name='modules', null=True, blank=True,
         on_delete=models.RESTRICT, verbose_name=_('руководитель')
@@ -177,7 +183,7 @@ class Module(DatesModelBase):
         ])
 
     @property
-    def difficulty(self) -> Optional[float]:
+    def difficulty_factor(self) -> Optional[float]:
         """
         difficulty средневзвешанное от ф-х точек
         """
@@ -185,7 +191,7 @@ class Module(DatesModelBase):
 
 
 @reversion.register()
-class ModuleFunPoint(DatesModelBase):
+class ModuleFunPoint(ModelDiffMixin, DatesModelBase):
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='fun_points', on_delete=models.RESTRICT,
         verbose_name=_('тип')
@@ -230,7 +236,7 @@ class ModuleFunPoint(DatesModelBase):
             raise ValidationError({'difficulty_level': _('Уровень сложности должен принадлежать этому типу ф-й точки')})
 
     @property
-    def difficulty(self) -> float:
+    def difficulty_factor(self) -> float:
         if self.difficulty_level:
             return self.difficulty_level.factor
         return 1.0

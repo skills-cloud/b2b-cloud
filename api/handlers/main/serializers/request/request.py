@@ -197,7 +197,7 @@ class RequestReadSerializer(RequestSerializer):
         ]
 
     def get_requirements_count_sum(self, instance: main_models.Request) -> int:
-        return sum(row.count or 0 for row in instance.requirements.all()) or 0
+        return sum(row.workers_count or 0 for row in instance.requirements.all()) or 0
 
 
 class RequestInlineSerializer(RequestReadSerializer):

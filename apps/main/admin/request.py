@@ -74,7 +74,7 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         ['updated_at', DateTimeRangeFilter],
     ]
     autocomplete_fields = [
-        'type', 'industry_sector', 'module', 'resource_manager', 'recruiter'
+        'type', 'industry_sector', 'module', 'resource_manager', 'recruiter', 'manager',
     ]
     search_fields = ['id', 'description']
     readonly_fields = ['created_at', 'updated_at']

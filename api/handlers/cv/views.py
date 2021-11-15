@@ -177,20 +177,6 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        request_body=cv_serializers.CvSetPhotoSerializer,
-        responses={
-            status.HTTP_201_CREATED: cv_serializers.CvSetPhotoSerializer()
-        },
-    )
-    @action(detail=True, methods=['post'], url_path='set-photo', parser_classes=[MultiPartParser])
-    @transaction.atomic
-    def set_photo(self, request, pk, *args, **kwargs):
-        serializer = cv_serializers.CvSetPhotoSerializer(instance=self.get_object(), data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @swagger_auto_schema(
         request_body=cv_serializers.CvFileSerializer,
         responses={
             status.HTTP_201_CREATED: cv_serializers.CvFileReadSerializer()
@@ -204,6 +190,20 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         instance = request_serializer.save(cv_id=self.get_object().id)
         response_serializer = cv_serializers.CvFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvSetPhotoSerializer,
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvSetPhotoSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='set-photo', parser_classes=[MultiPartParser])
+    @transaction.atomic
+    def set_photo(self, request, pk, *args, **kwargs):
+        serializer = cv_serializers.CvSetPhotoSerializer(instance=self.get_object(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
