@@ -10,7 +10,7 @@ class DefaultPagination(PageNumberPagination):
 
     def get_paginated_response(self, data):
         return Response(OrderedDict([
-            ('total', self.page.paginator.workers_count),
+            ('total', self.page.paginator.count),
             ('max_page_size', self.max_page_size),
             ('page_size', self.page.paginator.per_page),
             ('page_number', self.page.number),
