@@ -33,6 +33,8 @@ class FunPointTypeDifficultyLevelViewSet(ViewSetFilteredByUserMixin, ModelViewSe
     http_method_names = ['post', 'patch', 'delete']
     queryset = main_models.FunPointTypeDifficultyLevel.objects
     serializer_class = main_serializers.FunPointTypeDifficultyLevelWriteSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
 
 
 class FunPointTypePositionLaborEstimateViewSet(ViewSetFilteredByUserMixin, ModelViewSet):
@@ -51,6 +53,8 @@ class FunPointTypeViewSet(
     queryset = main_models.FunPointType.objects
     serializer_class = main_serializers.FunPointTypeWriteSerializer
     serializer_read_class = main_serializers.FunPointTypeReadSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
 
 
 class ModuleViewSet(
@@ -207,6 +211,8 @@ class ModuleFunPointViewSet(ViewSetFilteredByUserMixin, ModelViewSet):
     http_method_names = ['post', 'patch', 'delete']
     queryset = main_models.ModuleFunPoint.objects
     serializer_class = main_serializers.ModuleFunPointWriteSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
 
 
 class ModulePositionLaborEstimateViewSet(ViewSetFilteredByUserMixin, ModelViewSet):
