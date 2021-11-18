@@ -1,6 +1,8 @@
 import datetime
 import itertools
+import json
 import math
+import pprint
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Dict, Optional
@@ -72,6 +74,22 @@ class LaborEstimate:
 @dataclass
 class ModuleLaborEstimateService:
     instance: main_models.Module
+
+    @transaction.atomic
+    def set_expected_labor_estimate_as_saved(self) -> bool:
+        if not self.get_expected_minus_saved_labor_estimate().positions_estimates:
+            return False
+        self.instance.positions_labor_estimates.all().delete()
+        for_create = []
+        for est in self.get_expected_labor_estimate().positions_estimates.values():
+            for_create.append(main_models.ModulePositionLaborEstimate(
+                module=self.instance,
+                position=est.position,
+                count=est.workers_count,
+                hours=est.hours_count,
+            ))
+        main_models.ModulePositionLaborEstimate.objects.bulk_create(for_create)
+        return True
 
     @transaction.atomic
     def create_request_for_saved_labor_estimate(self) -> Optional[main_models.Request]:

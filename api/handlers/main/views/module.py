@@ -89,7 +89,6 @@ class ModuleViewSet(
 
     @swagger_auto_schema(
         manual_parameters=[
-
             openapi.Parameter(
                 'organization_id',
                 openapi.IN_QUERY,
@@ -134,9 +133,12 @@ class ModuleViewSet(
     @swagger_auto_schema(
         request_body=no_body,
         responses={
-            status.HTTP_200_OK: main_serializers.RequestSerializer(),
+            status.HTTP_201_CREATED: main_serializers.RequestSerializer(),
             status.HTTP_204_NO_CONTENT: '',
         },
+        operation_description='Возвращает'
+                              '<br> * `201` если запрос создан'
+                              '<br> * `204` если запрос не создан – потому, что не было такой необходимости'
     )
     @action(detail=True, methods=['post'], url_path='create-request-for-saved-labor-estimate')
     @transaction.atomic
@@ -146,7 +148,7 @@ class ModuleViewSet(
         if not result:
             return Response(status=status.HTTP_204_NO_CONTENT)
         serializer = main_serializers.RequestSerializer(instance=result)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         responses={
@@ -184,6 +186,24 @@ class ModuleViewSet(
             'get_saved_minus_requested_labor_estimate',
             serializer_class=main_serializers.ModulePositionLaborEstimateWorkersSerializer
         )
+
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={
+            status.HTTP_200_OK: '',
+            status.HTTP_204_NO_CONTENT: '',
+        },
+        operation_description='Возвращает'
+                              '<br> * `200` если что-то поменялось'
+                              '<br> * `204` если ничего не поменялось'
+    )
+    @action(detail=True, methods=['post'], url_path='set-expected-labor-estimate-as-saved')
+    @transaction.atomic
+    def set_expected_labor_estimate_as_saved(self, request, pk, *args, **kwargs):
+        service = ModuleLaborEstimateService(self.get_object())
+        if not service.set_expected_labor_estimate_as_saved():
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
 
     def _get_labor_estimate_response_by_method(
             self,
