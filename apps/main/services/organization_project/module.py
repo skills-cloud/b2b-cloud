@@ -1,11 +1,26 @@
 import datetime
+import itertools
 import math
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Dict, Optional
 
+from django.db import transaction
+
 from dictionary.models import Position
 from main import models as main_models
+
+
+def _prepare_positions_estimates(
+        estimates: Dict[int, 'PositionLaborEstimate'],
+        key_field: str = 'hours_count',
+        is_skip_zero: bool = False,
+) -> OrderedDict[int, 'PositionLaborEstimate']:
+    return OrderedDict([
+        (k, v)
+        for k, v in sorted(estimates.items(), key=lambda x: getattr(x[1], key_field), reverse=True)
+        if not is_skip_zero or getattr(v, key_field) != 0
+    ])
 
 
 @dataclass
@@ -24,10 +39,61 @@ class LaborEstimate:
     positions_estimates: Dict[int, PositionLaborEstimate]
     """{ position_id: PositionLaborEstimate }"""
 
+    def __add__(self, other: 'LaborEstimate'):
+        positions_estimates = {}
+        for est in itertools.chain(self.positions_estimates.values(), other.positions_estimates.values()):
+            pid = est.position.id
+            if pid not in positions_estimates:
+                positions_estimates[pid] = est
+            else:
+                if not positions_estimates[pid].workers_count:
+                    positions_estimates[pid].workers_count = est.workers_count
+                else:
+                    positions_estimates[pid].workers_count += est.workers_count
+                if not positions_estimates[pid].hours_count:
+                    positions_estimates[pid].hours_count = est.hours_count
+                else:
+                    positions_estimates[pid].hours_count += est.hours_count
+        date_from = self.date_from or other.date_from
+        if self.date_from and other.date_from:
+            date_from = min(self.date_from, other.date_from)
+        date_to = self.date_from or other.date_from
+        if self.date_to and other.date_to:
+            date_to = max(self.date_to, other.date_to)
+        return LaborEstimate(
+            date_from=date_from,
+            date_to=date_to,
+            work_days_count=(self.work_days_count or 0) + (other.work_days_count or 0),
+            work_day_hours_count=(self.work_day_hours_count or 0) + (other.work_day_hours_count or 0),
+            positions_estimates=_prepare_positions_estimates(positions_estimates),
+        )
+
 
 @dataclass
 class ModuleLaborEstimateService:
     instance: main_models.Module
+
+    @transaction.atomic
+    def create_request_for_saved_labor_estimate(self) -> Optional[main_models.Request]:
+        estimates_diff = [
+            estimate
+            for estimate in self.get_saved_minus_requested_labor_estimate().positions_estimates.values()
+            if estimate.workers_count > 0
+        ]
+        if not estimates_diff:
+            return
+        request = main_models.Request(
+            module=self.instance
+        )
+        request.save()
+        for position_estimate in estimates_diff:
+            requirement = main_models.RequestRequirement(
+                request=request,
+                position=position_estimate.position,
+                count=position_estimate.workers_count,
+            )
+            requirement.save()
+        return request
 
     def get_expected_labor_estimate(self) -> LaborEstimate:
         estimates = {}
@@ -59,7 +125,7 @@ class ModuleLaborEstimateService:
 
     def get_saved_labor_estimate(self) -> LaborEstimate:
         result = self._get_empty_labor_estimate()
-        result.positions_estimates = self._sort_positions_estimates({
+        result.positions_estimates = _prepare_positions_estimates({
             row.position_id: PositionLaborEstimate(
                 position=row.position,
                 hours_count=row.hours,
@@ -81,7 +147,7 @@ class ModuleLaborEstimateService:
                     )
                 requested[requirement.position_id].workers_count += requirement.count
         result = self._get_empty_labor_estimate()
-        result.positions_estimates = self._sort_positions_estimates(requested, 'workers_count')
+        result.positions_estimates = _prepare_positions_estimates(requested, 'workers_count')
         return result
 
     def get_expected_minus_saved_labor_estimate(self) -> LaborEstimate:
@@ -97,7 +163,7 @@ class ModuleLaborEstimateService:
                 workers_count=getattr(pos_expected, 'workers_count', 0) - getattr(pos_saved, 'workers_count', 0),
             )
         result = self._get_empty_labor_estimate()
-        result.positions_estimates = self._sort_positions_estimates(diff)
+        result.positions_estimates = _prepare_positions_estimates(diff, is_skip_zero=True)
         return result
 
     def get_saved_minus_requested_labor_estimate(self) -> LaborEstimate:
@@ -113,7 +179,7 @@ class ModuleLaborEstimateService:
                 workers_count=getattr(pos_saved, 'workers_count', 0) - getattr(pos_requested, 'workers_count', 0),
             )
         result = self._get_empty_labor_estimate()
-        result.positions_estimates = self._sort_positions_estimates(diff, 'workers_count')
+        result.positions_estimates = _prepare_positions_estimates(diff, 'workers_count', is_skip_zero=True)
         return result
 
     def _get_empty_labor_estimate(self) -> LaborEstimate:
@@ -124,14 +190,3 @@ class ModuleLaborEstimateService:
             work_day_hours_count=self.instance.work_days_hours_count,
             positions_estimates={},
         )
-
-    @classmethod
-    def _sort_positions_estimates(
-            cls,
-            estimates: Dict[int, PositionLaborEstimate],
-            key_field='hours_count'
-    ) -> OrderedDict[int, PositionLaborEstimate]:
-        return OrderedDict([
-            (k, v)
-            for k, v in sorted(estimates.items(), key=lambda x: getattr(x[1], key_field), reverse=True)
-        ])

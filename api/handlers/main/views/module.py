@@ -3,7 +3,7 @@ from typing import Type
 
 from django.db import transaction
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -128,13 +128,29 @@ class ModuleViewSet(
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
+        request_body=no_body,
+        responses={
+            status.HTTP_200_OK: main_serializers.RequestSerializer(),
+            status.HTTP_204_NO_CONTENT: '',
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='create-request-for-saved-labor-estimate')
+    @transaction.atomic
+    def create_request_for_saved_labor_estimate(self, request, pk, *args, **kwargs):
+        service = ModuleLaborEstimateService(self.get_object())
+        result = service.create_request_for_saved_labor_estimate()
+        if not result:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = main_serializers.RequestSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
         responses={
             status.HTTP_200_OK: main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer(many=True)
         },
         operation_description='Получение расчётной оценки трудозатрат на основе ф-х точек'
     )
     @action(detail=True, methods=['get'], url_path='get-expected-labor-estimate')
-    @transaction.atomic
     def get_expected_labor_estimate(self, request, pk, *args, **kwargs):
         return self._get_labor_estimate_response_by_method('get_expected_labor_estimate')
 
@@ -147,7 +163,6 @@ class ModuleViewSet(
                               '<br><i>т.е. если цифры минусовые – в сохранённой больше, чем в расчётной</i>'
     )
     @action(detail=True, methods=['get'], url_path='get-expected-minus-saved-labor-estimate')
-    @transaction.atomic
     def get_expected_minus_saved_labor_estimate(self, request, pk, *args, **kwargs):
         return self._get_labor_estimate_response_by_method('get_expected_minus_saved_labor_estimate')
 
@@ -160,7 +175,6 @@ class ModuleViewSet(
                               '<br><i>т.е. если цифры минусовые – в запрошенной больше, чем в сохранённая</i>'
     )
     @action(detail=True, methods=['get'], url_path='get-saved-minus-requested-labor-estimate')
-    @transaction.atomic
     def get_saved_minus_requested_labor_estimate(self, request, pk, *args, **kwargs):
         return self._get_labor_estimate_response_by_method(
             'get_saved_minus_requested_labor_estimate',

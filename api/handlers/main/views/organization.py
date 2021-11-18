@@ -1,3 +1,5 @@
+from typing import Type
+
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -6,10 +8,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import get_object_or_404
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 
 from main import models as main_models
-from api.serializers import EmptySerializer
+from main.services.organization_project import ProjectLaborEstimateService
 from api.filters import ModelMultipleChoiceCommaSeparatedFilter
 from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
@@ -59,6 +61,37 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     )
     serializer_class = main_serializers.OrganizationProjectSerializer
     serializer_read_class = main_serializers.OrganizationProjectReadSerializer
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer(many=True)
+        },
+        operation_description='Получение сохранённой оценки трудозатрат по всем модулям'
+    )
+    @action(detail=True, methods=['get'], url_path='get-saved-labor-estimate')
+    def get_saved_labor_estimate(self, request, pk, *args, **kwargs):
+        return self._get_labor_estimate_response_by_method('get_saved_labor_estimate')
+
+    def _get_labor_estimate_response_by_method(
+            self,
+            method_name: str,
+
+            serializer_class: Type[main_serializers.ModulePositionLaborEstimateWorkersSerializer]
+            = main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer,
+    ) -> Response:
+        service = ProjectLaborEstimateService(self.get_object())
+        positions_estimates = getattr(service, method_name)().positions_estimates.values()
+        serializer_fields = serializer_class().get_fields().keys()
+        serializer = serializer_class(data=[
+            {
+                **{'position_id': row.position.id},
+                **{'position_name': row.position.name},
+                **({'hours_count': row.hours_count} if 'hours_count' in serializer_fields else {}),
+                **{'workers_count': row.workers_count},
+            }
+            for row in positions_estimates
+        ], many=True)
+        return Response(serializer.initial_data, status=status.HTTP_200_OK)
 
 
 class OrganizationProjectCardItemTemplateViewSet(
@@ -133,7 +166,7 @@ class OrganizationProjectCardItemViewSet(
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        request_body=EmptySerializer(),
+        request_body=no_body,
         responses={
             status.HTTP_201_CREATED: main_serializers.OrganizationProjectCardItemReadTreeSerializer()
         },

@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import RestrictedError
 from django.http import Http404
@@ -15,6 +16,8 @@ def custom_exception_handler(exc, context):
         if '__debug_error__' in request.GET:
             is_debug_mode = True
     if is_debug_mode:
+        raise exc
+    if settings.DEBUG:
         raise exc
     response = exception_handler(exc, context)
     if not response:

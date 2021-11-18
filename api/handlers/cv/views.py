@@ -15,7 +15,7 @@ from django_filters import DateFromToRangeFilter
 from django_filters import rest_framework as filters
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 
 from dictionary import models as dictionary_models
 from main import models as main_models
@@ -26,7 +26,7 @@ from api.filters import (
     ModelMultipleChoiceCommaSeparatedFilter,
     DateRangeWidget, ModelMultipleChoiceCommaSeparatedIdFilter,
 )
-from api.serializers import StatusSerializer, EmptySerializer
+from api.serializers import StatusSerializer
 from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.backends import FilterBackend
 from api.handlers.cv import serializers as cv_serializers
@@ -213,7 +213,7 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
-        request_body=EmptySerializer(),
+        request_body=no_body,
         responses={
             status.HTTP_201_CREATED: StatusSerializer()
         },
