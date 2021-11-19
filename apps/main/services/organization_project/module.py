@@ -21,15 +21,17 @@ def get_module_difficulty_factor(instance: main_models.Module) -> Optional[float
         fun_points_est[fun_point.id] = [0, fun_point.difficulty_factor]
         for est in fun_point.fun_point_type.positions_labor_estimates.all():
             fun_points_est[fun_point.id][0] += est.hours
-    return 1.0
-    if not fun_points_est:
+    vals = [row for row in fun_points_est.values() if row[0]]
+    if not vals:
         return
-    vals = fun_points_est.values()
-    result = numpy.average(
-        [v[1] for v in vals],
-        weights=[v[0] for v in vals]
-    )
-    return round(result, 2)
+    try:
+        result = numpy.average(
+            [v[1] for v in vals],
+            weights=[v[0] for v in vals]
+        )
+        return round(result, 2)
+    except Exception:
+        return
 
 
 def _prepare_positions_estimates(
