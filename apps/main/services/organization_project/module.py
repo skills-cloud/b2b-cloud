@@ -1,8 +1,7 @@
+import math
+import numpy
 import datetime
 import itertools
-import json
-import math
-import pprint
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Dict, Optional
@@ -11,6 +10,25 @@ from django.db import transaction
 
 from dictionary.models import Position
 from main import models as main_models
+
+
+def get_module_difficulty_factor(instance: main_models.Module) -> Optional[float]:
+    """
+    difficulty средневзвешанное от ф-х точек
+    """
+    fun_points_est = {}
+    for fun_point in instance.fun_points.all():
+        fun_points_est[fun_point.id] = [0, fun_point.difficulty_factor]
+        for est in fun_point.fun_point_type.positions_labor_estimates.all():
+            fun_points_est[fun_point.id][0] += est.hours
+    if not fun_points_est:
+        return
+    vals = fun_points_est.values()
+    result = numpy.average(
+        [v[1] for v in vals],
+        weights=[v[0] for v in vals]
+    )
+    return round(result, 2)
 
 
 def _prepare_positions_estimates(

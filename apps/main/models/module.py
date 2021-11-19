@@ -184,10 +184,8 @@ class Module(ModelDiffMixin, DatesModelBase):
 
     @property
     def difficulty_factor(self) -> Optional[float]:
-        """
-        difficulty средневзвешанное от ф-х точек
-        """
-        return random.random() * 3
+        from main.services.organization_project.module import get_module_difficulty_factor
+        return get_module_difficulty_factor(self)
 
 
 @reversion.register()
