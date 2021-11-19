@@ -21,6 +21,7 @@ def get_module_difficulty_factor(instance: main_models.Module) -> Optional[float
         fun_points_est[fun_point.id] = [0, fun_point.difficulty_factor]
         for est in fun_point.fun_point_type.positions_labor_estimates.all():
             fun_points_est[fun_point.id][0] += est.hours
+    return 1.0
     if not fun_points_est:
         return
     vals = fun_points_est.values()
