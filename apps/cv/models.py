@@ -106,6 +106,7 @@ class CV(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
+                'info',
                 'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked',
 
                 'files',
@@ -235,12 +236,21 @@ class CvContact(DatesModelBase):
         return f'{self.contact_type_id} :: {self.value} < {self.cv_id} / {self.id} >'
 
 
+class CvTimeSlotKind(models.TextChoices):
+    MANUAL = 'manual'
+    REQUEST_REQUIREMENT = 'request_requirement'
+
+
 @reversion.register(follow=['cv'])
 class CvTimeSlot(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='time_slots', verbose_name=_('анкета'))
     request_requirement_link = models.ForeignKey(
         'main.RequestRequirementCv', null=True, blank=True, on_delete=models.CASCADE, related_name='time_slots',
         verbose_name=_('связь с требованием проектного запроса'),
+    )
+    kind = models.CharField(
+        max_length=50, choices=CvTimeSlotKind.choices, default=CvTimeSlotKind.MANUAL,
+        verbose_name=_('тип слота'),
     )
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
@@ -259,6 +269,7 @@ class CvTimeSlot(DatesModelBase):
     price = models.FloatField(null=True, blank=True, verbose_name=_('ставка'))
     is_work_permit_required = models.BooleanField(default=False, verbose_name=_('требуется разрешение на работу'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    is_free = models.BooleanField(default=False, verbose_name=_('свободен?'))
 
     class Meta:
         ordering = ['-date_from', '-id']
@@ -563,3 +574,12 @@ class CvFile(FileModelAbstract):
 
     def __str__(self):
         return f'< {self.cv_id} / {self.id} >'
+
+
+class CvInfo(models.Model):
+    cv = models.OneToOneField('cv.CV', primary_key=True, on_delete=models.DO_NOTHING, related_name='info')
+    rating = models.IntegerField(null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'v_cv_info'

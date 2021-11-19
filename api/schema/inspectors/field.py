@@ -1,6 +1,6 @@
 from django.urls import reverse, NoReverseMatch
 from drf_yasg import openapi
-from drf_yasg.inspectors import RelatedFieldInspector, NotHandled
+from drf_yasg.inspectors import RelatedFieldInspector, ChoiceFieldInspector as ChoiceFieldInspectorBase, NotHandled
 from rest_framework.relations import PrimaryKeyRelatedField
 
 
@@ -24,3 +24,9 @@ class PrimaryKeyRelatedFieldInspector(RelatedFieldInspector):
                 setattr(schema, f'x-url-object-{suffix}', reverse(viewset_base_name + '-' + suffix, args=view_args))
             except NoReverseMatch:
                 pass
+
+
+class ChoiceFieldInspector(ChoiceFieldInspectorBase):
+    def add_manual_fields(self, serializer_or_field, schema):
+        if serializer_or_field.choices:
+            setattr(schema, 'x-enum-description', serializer_or_field.choices)

@@ -8,8 +8,7 @@ from api.serializers import ModelSerializerWithCallCleanMethod, ModelSerializer
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 from api.handlers.cv.serializers import CvInlineShortSerializer
-from api.handlers.main.serializers.organization import OrganizationProjectInlineSerializer
-from api.handlers.main.serializers.base import ProjectInlineSerializer
+from api.handlers.main.serializers.module import ModuleInlineSerializer
 
 __all__ = [
     'RequestTypeSerializer',
@@ -65,15 +64,19 @@ class RequestRequirementCompetenceReadSerializer(RequestRequirementCompetenceSer
         fields = RequestRequirementCompetenceSerializer.Meta.fields + ['competence']
 
 
-class RequestRequirementCvWriteDetailsSerializer(ModelSerializerWithCallCleanMethod):
-    organization_project_card_items_ids = PrimaryKeyRelatedIdField(
-        queryset=main_models.OrganizationProjectCardItem.objects.all(),
-        source='organization_project_card_items', many=True, required=False,
-    )
+class RequestRequirementCvWriteDetailsSerializer(ModelSerializer):
+    class RequestRequirementCvOrganizationProjectCardItem(serializers.Serializer):
+        id = PrimaryKeyRelatedIdField(queryset=main_models.OrganizationProjectCardItem.objects.all())
+        date = serializers.DateField(required=False, allow_null=True)
+
+    organization_project_card_items = RequestRequirementCvOrganizationProjectCardItem(many=True, required=False)
 
     class Meta:
         model = main_models.RequestRequirementCv
-        fields = ['status', 'date_from', 'date_to', 'organization_project_card_items_ids']
+        fields = [
+            'status', 'date_from', 'date_to', 'rating',
+            'organization_project_card_items'
+        ]
 
 
 class RequestRequirementCvSerializer(RequestRequirementCvWriteDetailsSerializer):
@@ -148,14 +151,9 @@ class RequestSerializer(ModelSerializerWithCallCleanMethod):
         queryset=dictionary_models.IndustrySector.objects, allow_null=True, required=False,
         label=main_models.Request._meta.get_field('industry_sector').verbose_name,
     )
-    organization_project_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.OrganizationProject.objects,
-        label=main_models.Request._meta.get_field('organization_project').verbose_name,
-    )
-    project_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Project.objects, allow_null=True, required=False,
-        label=main_models.Request._meta.get_field('project').verbose_name,
-        help_text=main_models.Request._meta.get_field('project').help_text,
+    module_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.Module.objects,
+        label=main_models.Request._meta.get_field('module').verbose_name,
     )
     manager_id = PrimaryKeyRelatedIdField(
         queryset=User.objects, allow_null=True, required=False,
@@ -173,17 +171,17 @@ class RequestSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.Request
         fields = [
-            'id', 'organization_project_id', 'type_id', 'industry_sector_id', 'project_id',
+            'id', 'module_id', 'type_id', 'industry_sector_id',
             'manager_id', 'resource_manager_id', 'recruiter_id', 'title', 'description', 'status', 'priority',
             'start_date', 'deadline_date',
         ]
 
 
 class RequestReadSerializer(RequestSerializer):
-    organization_project = OrganizationProjectInlineSerializer(read_only=True)
+    module = ModuleInlineSerializer(read_only=True)
     type = RequestTypeSerializer(read_only=True, allow_null=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
-    project = ProjectInlineSerializer(read_only=True, allow_null=True)
+    manager = UserInlineSerializer(read_only=True, allow_null=True)
     resource_manager = UserInlineSerializer(read_only=True, allow_null=True)
     recruiter = UserInlineSerializer(read_only=True, allow_null=True)
 
@@ -193,7 +191,8 @@ class RequestReadSerializer(RequestSerializer):
 
     class Meta(RequestSerializer.Meta):
         fields = RequestSerializer.Meta.fields + [
-            'organization_project', 'type', 'industry_sector', 'project', 'resource_manager', 'recruiter',
+            'module', 'type', 'industry_sector',
+            'manager', 'resource_manager', 'recruiter',
             'requirements_count_sum', 'requirements',
         ]
 
@@ -204,6 +203,7 @@ class RequestReadSerializer(RequestSerializer):
 class RequestInlineSerializer(RequestReadSerializer):
     class Meta(RequestReadSerializer.Meta):
         fields = [f for f in RequestReadSerializer.Meta.fields if f not in [
-            'type', 'industry_sector', 'project', 'resource_manager', 'recruiter', 'requirements',
+            'type', 'industry_sector',
+            'resource_manager', 'recruiter', 'requirements',
             'requirements_count_sum',
         ]]

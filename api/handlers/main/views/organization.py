@@ -1,12 +1,18 @@
-from django_filters import rest_framework as filters
-from rest_framework import mixins
-from rest_framework.permissions import SAFE_METHODS
-from rest_framework.viewsets import GenericViewSet
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from typing import Type
 
-from api.filters import ModelMultipleChoiceCommaSeparatedFilter
+from django_filters import rest_framework as filters
+from rest_framework import mixins, status
+from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.generics import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema, no_body
+
 from main import models as main_models
+from main.services.organization_project import ProjectLaborEstimateService
+from api.filters import ModelMultipleChoiceCommaSeparatedFilter
 from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
 from api.handlers.main.views.base import MainBaseViewSet
@@ -14,17 +20,38 @@ from api.handlers.main.views.base import MainBaseViewSet
 __all__ = [
     'OrganizationViewSet',
     'OrganizationProjectViewSet',
+    'OrganizationProjectCardItemTemplateViewSet',
     'OrganizationProjectCardItemViewSet',
 ]
 
 
-class OrganizationViewSet(MainBaseViewSet):
+class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     queryset = main_models.Organization.objects
     serializer_class = main_serializers.OrganizationSerializer
     filterset_fields = ['is_customer']
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'ordering',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=MainBaseViewSet.ordering_fields),
+                default=MainBaseViewSet.ordering
+            ),
+            openapi.Parameter(
+                'is_customer',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
-class OrganizationProjectViewSet(MainBaseViewSet):
+
+class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     class Filter(filters.FilterSet):
         organization_id = filters.ModelChoiceFilter(queryset=main_models.Organization.objects)
 
@@ -34,6 +61,48 @@ class OrganizationProjectViewSet(MainBaseViewSet):
     )
     serializer_class = main_serializers.OrganizationProjectSerializer
     serializer_read_class = main_serializers.OrganizationProjectReadSerializer
+
+    @swagger_auto_schema(
+        responses={
+            status.HTTP_200_OK: main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer(many=True)
+        },
+        operation_description='Получение сохранённой оценки трудозатрат по всем модулям'
+    )
+    @action(detail=True, methods=['get'], url_path='get-saved-labor-estimate')
+    def get_saved_labor_estimate(self, request, pk, *args, **kwargs):
+        return self._get_labor_estimate_response_by_method('get_saved_labor_estimate')
+
+    def _get_labor_estimate_response_by_method(
+            self,
+            method_name: str,
+
+            serializer_class: Type[main_serializers.ModulePositionLaborEstimateWorkersSerializer]
+            = main_serializers.ModulePositionLaborEstimateWorkersAndHoursSerializer,
+    ) -> Response:
+        service = ProjectLaborEstimateService(self.get_object())
+        positions_estimates = getattr(service, method_name)().positions_estimates.values()
+        serializer_fields = serializer_class().get_fields().keys()
+        serializer = serializer_class(data=[
+            {
+                **{'position_id': row.position.id},
+                **{'position_name': row.position.name},
+                **({'hours_count': row.hours_count} if 'hours_count' in serializer_fields else {}),
+                **{'workers_count': row.workers_count},
+            }
+            for row in positions_estimates
+        ], many=True)
+        return Response(serializer.initial_data, status=status.HTTP_200_OK)
+
+
+class OrganizationProjectCardItemTemplateViewSet(
+    ViewSetFilteredByUserMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    http_method_names = ['get']
+    queryset = main_models.OrganizationProjectCardItemTemplate.objects.filter(parent__isnull=True)
+    serializer_class = main_serializers.OrganizationProjectCardItemTemplateSerializer
+    pagination_class = None
 
 
 class OrganizationProjectCardItemViewSet(
@@ -64,7 +133,7 @@ class OrganizationProjectCardItemViewSet(
         'children'
     )
     pagination_class = None
-    serializer_class = main_serializers.OrganizationProjectCardItemTreeSerializer
+    serializer_class = main_serializers.OrganizationProjectCardItemSerializer
     serializer_read_class = main_serializers.OrganizationProjectCardItemReadTreeSerializer
 
     def get_queryset(self) -> main_models.OrganizationProjectCardItem.TreeQuerySet:
@@ -95,3 +164,37 @@ class OrganizationProjectCardItemViewSet(
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={
+            status.HTTP_201_CREATED: main_serializers.OrganizationProjectCardItemReadTreeSerializer()
+        },
+    )
+    @action(
+        detail=False,
+        methods=['post'],
+        url_path='create-tree-by-template'
+                 '/(?P<organization_project_id>[0-9]+)'
+                 '/(?P<template_root_card_item_id>[0-9]+)'
+    )
+    def create_tree_by_template(
+            self,
+            request,
+            organization_project_id: int,
+            template_root_card_item_id: int,
+            *args,
+            **kwargs
+    ):
+        root_card = main_models.OrganizationProjectCardItem.objects.create_tree_by_template(
+            organization_project=get_object_or_404(
+                main_models.OrganizationProject.objects.filter_by_user(request.user),
+                id=organization_project_id
+            ),
+            template_root_card_item=get_object_or_404(
+                main_models.OrganizationProjectCardItemTemplate.objects.filter_by_user(request.user),
+                id=template_root_card_item_id
+            ),
+        )
+        response_serializer = main_serializers.OrganizationProjectCardItemReadTreeSerializer(instance=root_card)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)

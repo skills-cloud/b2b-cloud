@@ -1,6 +1,10 @@
+from dateutil.relativedelta import relativedelta
 from django.db.models import F
+from django.utils import timezone
 from django_filters import MultipleChoiceFilter, ModelMultipleChoiceFilter
+from django_filters.constants import EMPTY_VALUES
 from django_filters.widgets import CSVWidget, DateRangeWidget as DateRangeWidgetBase
+from django_filters.rest_framework import BooleanFilter, NumberFilter
 from rest_framework.filters import OrderingFilter
 
 
@@ -64,3 +68,17 @@ class ModelMultipleChoiceCommaSeparatedIdFilter(CSVWidgetFilterMixin, ModelMulti
 
 class DateRangeWidget(DateRangeWidgetBase):
     suffixes = ['from', 'to']
+
+
+class IsNotValueFilter(BooleanFilter):
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+        return super().filter(qs, not value)
+
+
+class YearsFromDateFilter(NumberFilter):
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+        return super().filter(qs, timezone.now().date() - relativedelta(years=value))

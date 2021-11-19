@@ -15,7 +15,8 @@ __all__ = [
     'OrganizationProjectSerializer',
     'OrganizationProjectReadSerializer',
     'OrganizationProjectInlineSerializer',
-    'OrganizationProjectCardItemTreeSerializer',
+    'OrganizationProjectCardItemTemplateSerializer',
+    'OrganizationProjectCardItemSerializer',
     'OrganizationProjectCardItemReadTreeSerializer',
 ]
 
@@ -63,12 +64,12 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     resource_managers = UserInlineSerializer(many=True, read_only=True)
     recruiters = UserInlineSerializer(many=True, read_only=True)
 
-    requests_count = serializers.IntegerField(read_only=True)
+    modules_count = serializers.IntegerField(read_only=True)
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
             'organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters',
-            'requests_count',
+            'modules_count',
         ]
 
 
@@ -76,26 +77,44 @@ class OrganizationProjectInlineSerializer(OrganizationProjectReadSerializer):
     pass
 
 
-class OrganizationProjectCardItemTreeSerializer(ModelSerializerWithCallCleanMethod):
+class OrganizationProjectCardItemBaseSerializer(ModelSerializerWithCallCleanMethod):
+    parent_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationProjectCardItem.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProjectCardItem._meta.get_field('parent').verbose_name,
+    )
+    positions_ids = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Position.objects, source='positions',
+        many=True, allow_null=True, required=False,
+        label=main_models.OrganizationProjectCardItem._meta.get_field('positions').verbose_name,
+    )
+
+    class Meta:
+        fields = [
+            'id', 'parent_id', 'positions_ids', 'name', 'description',
+        ]
+
+
+class OrganizationProjectCardItemTemplateSerializer(OrganizationProjectCardItemBaseSerializer):
+    class Meta(OrganizationProjectCardItemBaseSerializer.Meta):
+        model = main_models.OrganizationProjectCardItemTemplate
+
+
+class OrganizationProjectCardItemSerializer(OrganizationProjectCardItemBaseSerializer):
     organization_project_id = PrimaryKeyRelatedIdField(
         queryset=main_models.OrganizationProject.objects, allow_null=True, required=False,
         label=main_models.OrganizationProjectCardItem._meta.get_field('organization_project').verbose_name,
         help_text=main_models.OrganizationProjectCardItem._meta.get_field('organization_project').help_text,
     )
-    parent_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.OrganizationProjectCardItem.objects, allow_null=True, required=False,
-        label=main_models.OrganizationProjectCardItem._meta.get_field('parent').verbose_name,
-    )
 
-    class Meta:
+    class Meta(OrganizationProjectCardItemBaseSerializer.Meta):
         model = main_models.OrganizationProjectCardItem
-        fields = [
-            'id', 'organization_project_id', 'parent_id', 'name', 'description'
+        fields = OrganizationProjectCardItemBaseSerializer.Meta.fields + [
+            'organization_project_id',
         ]
 
 
-class OrganizationProjectCardItemReadTreeSerializer(OrganizationProjectCardItemTreeSerializer):
+class OrganizationProjectCardItemReadTreeSerializer(OrganizationProjectCardItemSerializer):
     children = serializers.ListField(source='get_children', child=RecursiveField())
 
-    class Meta(OrganizationProjectCardItemTreeSerializer.Meta):
-        fields = OrganizationProjectCardItemTreeSerializer.Meta.fields + ['children']
+    class Meta(OrganizationProjectCardItemSerializer.Meta):
+        fields = OrganizationProjectCardItemSerializer.Meta.fields + ['children']

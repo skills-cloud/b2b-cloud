@@ -83,7 +83,7 @@ class CvTimeSlotSerializer(CvLinkedObjectBaseSerializer):
         model = cv_models.CvTimeSlot
         fields = CvLinkedObjectBaseSerializer.Meta.fields + [
             'date_from', 'date_to', 'price', 'is_work_permit_required', 'description',
-            'country_id', 'city_id', 'type_of_employment_id',
+            'country_id', 'city_id', 'type_of_employment_id', 'is_free',
         ]
 
 
@@ -105,7 +105,7 @@ class CvTimeSlotReadSerializer(CvTimeSlotSerializer):
 
     class Meta(CvTimeSlotSerializer.Meta):
         fields = CvTimeSlotSerializer.Meta.fields + [
-            'country', 'city', 'type_of_employment',
+            'country', 'city', 'type_of_employment', 'kind',
 
             'request_requirement_id', 'request_requirement_name', 'request_id', 'request_title',
             'organization_project_id', 'organization_project_name',
@@ -456,10 +456,13 @@ class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
     certificates = CvCertificateReadSerializer(many=True, read_only=True)
     files = CvFileReadSerializer(many=True, read_only=True)
 
+    rating = serializers.IntegerField(source='info.rating', allow_null=True)
+
     class Meta(CvDetailReadBaseSerializer.Meta):
         fields = CvDetailReadBaseSerializer.Meta.fields + [
             'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
             'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
+            'rating',
         ]
 
     def get_fields(self):
@@ -500,7 +503,7 @@ class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
                     *[
                         f
                         for f in RequestRequirementReadSerializer.Meta.fields
-                        # if f not in ['cv_list_ids', 'cv_list']
+                        if f not in ['cv_list_ids', 'cv_list']
                     ],
                     'request'
                 ]

@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser
@@ -12,8 +13,9 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from django_filters import DateFromToRangeFilter
 from django_filters import rest_framework as filters
+from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 
 from dictionary import models as dictionary_models
 from main import models as main_models
@@ -24,7 +26,7 @@ from api.filters import (
     ModelMultipleChoiceCommaSeparatedFilter,
     DateRangeWidget, ModelMultipleChoiceCommaSeparatedIdFilter,
 )
-from api.serializers import StatusSerializer, EmptySerializer
+from api.serializers import StatusSerializer
 from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.backends import FilterBackend
 from api.handlers.cv import serializers as cv_serializers
@@ -175,20 +177,6 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        request_body=cv_serializers.CvSetPhotoSerializer,
-        responses={
-            status.HTTP_201_CREATED: cv_serializers.CvSetPhotoSerializer()
-        },
-    )
-    @action(detail=True, methods=['post'], url_path='set-photo', parser_classes=[MultiPartParser])
-    @transaction.atomic
-    def set_photo(self, request, pk, *args, **kwargs):
-        serializer = cv_serializers.CvSetPhotoSerializer(instance=self.get_object(), data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @swagger_auto_schema(
         request_body=cv_serializers.CvFileSerializer,
         responses={
             status.HTTP_201_CREATED: cv_serializers.CvFileReadSerializer()
@@ -203,6 +191,20 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         response_serializer = cv_serializers.CvFileReadSerializer(instance=instance)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
+    @swagger_auto_schema(
+        request_body=cv_serializers.CvSetPhotoSerializer,
+        responses={
+            status.HTTP_201_CREATED: cv_serializers.CvSetPhotoSerializer()
+        },
+    )
+    @action(detail=True, methods=['post'], url_path='set-photo', parser_classes=[MultiPartParser])
+    @transaction.atomic
+    def set_photo(self, request, pk, *args, **kwargs):
+        serializer = cv_serializers.CvSetPhotoSerializer(instance=self.get_object(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     @action(detail=True, methods=['delete'], url_path='delete-file/(?P<file_id>[0-9]+)')
     @transaction.atomic
     def delete_file(self, request, pk: int, file_id: int, *args, **kwargs):
@@ -211,7 +213,7 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
-        request_body=EmptySerializer(),
+        request_body=no_body,
         responses={
             status.HTTP_201_CREATED: StatusSerializer()
         },
@@ -321,6 +323,12 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
             queryset=dictionary_models.TypeOfEmployment.objects)
         date_range = DateRangeFilterField()
 
+        class Meta:
+            model = cv_models.CvTimeSlot
+            fields = [
+                'country_id', 'city_id', 'type_of_employment_id', 'kind', 'is_free',
+            ]
+
     queryset = cv_models.CvTimeSlot.objects
     serializer_class = cv_serializers.CvTimeSlotSerializer
     serializer_read_class = cv_serializers.CvTimeSlotReadSerializer
@@ -354,6 +362,13 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
                 required=False
             ),
             openapi.Parameter(
+                'kind',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                enum=cv_models.CvTimeSlotKind.values,
+                required=False
+            ),
+            openapi.Parameter(
                 'date_range_from',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_STRING,
@@ -367,10 +382,21 @@ class CvTimeSlotViewSet(CvLinkedObjectViewSet):
                 format=openapi.FORMAT_DATE,
                 required=False
             ),
+            openapi.Parameter(
+                'is_free',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
+                required=False
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if self.get_object().kind == cv_models.CvTimeSlotKind.REQUEST_REQUIREMENT:
+            raise ValidationError({'kind': _('Нельзя удалять слот, созданный системой')})
+        return super().destroy(request, *args, **kwargs)
 
 
 class CvPositionViewSet(CvLinkedObjectViewSet):
