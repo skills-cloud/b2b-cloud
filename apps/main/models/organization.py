@@ -52,6 +52,8 @@ class OrganizationProject(DatesModelBase):
     )
     name = models.CharField(max_length=500, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    goals = models.TextField(null=True, blank=True, verbose_name=_('цели'))
+    plan_description = models.TextField(null=True, blank=True, verbose_name=_('ресурсный план'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('дата с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('дата по'))
     industry_sector = models.ForeignKey(

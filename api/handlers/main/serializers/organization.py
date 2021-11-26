@@ -53,7 +53,7 @@ class OrganizationProjectSerializer(ModelSerializer):
         model = main_models.OrganizationProject
         fields = [
             'id', 'organization_id', 'industry_sector_id', 'manager_id', 'resource_managers_ids', 'recruiters_ids',
-            'name', 'description', 'date_from', 'date_to', 'created_at', 'updated_at',
+            'name', 'description', 'goals', 'plan_description', 'date_from', 'date_to', 'created_at', 'updated_at',
         ]
 
 
