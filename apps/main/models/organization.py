@@ -22,7 +22,7 @@ __all__ = [
 
 @reversion.register(follow=['projects'])
 class Organization(DatesModelBase):
-    name = models.CharField(max_length=500, verbose_name=_('название'))
+    name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     is_customer = models.BooleanField(default=False, verbose_name=_('заказчик?'))
 

@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING, Optional, List, Dict
 from pathlib import Path
+
 from django.db import models, transaction
 from django.utils import timezone
+from django.contrib.postgres.indexes import GinIndex
 from django.utils.translation import gettext_lazy as _
 import reversion
 
@@ -90,8 +92,16 @@ class CV(DatesModelBase):
     )
     linked = models.ManyToManyField('self', blank=True, symmetrical=True, verbose_name=_('связанные анкеты'))
 
+    attributes = models.JSONField(
+        default=dict, verbose_name=_('доп. атрибуты'),
+        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
+    )
+
     class Meta:
         ordering = ['-id']
+        indexes = [
+            GinIndex(fields=['attributes'])
+        ]
         verbose_name = _('анкета')
         verbose_name_plural = _('анкеты')
 

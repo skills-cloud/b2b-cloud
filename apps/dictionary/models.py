@@ -7,7 +7,7 @@ from project.contrib.db.models import DatesModelBase
 
 
 class DictionaryModelBase(DatesModelBase):
-    name = models.CharField(max_length=500, verbose_name=_('название'))
+    name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
