@@ -23,7 +23,7 @@ _base_settings = (
     'bits/static.py',
     'bits/redis.py',
     'bits/cache.py',
-    # 'bits/celery.py',
+    'bits/celery.py',
     'bits/email.py',
     'bits/api.py',
     'bits/log.py',

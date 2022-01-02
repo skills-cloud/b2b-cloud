@@ -44,6 +44,7 @@ INSTALLED_APPS = (
             'adminsortable2',
             'reversion',
             'nested_admin',
+            'guardian',
         ]
         + ADVANCED_APPS
         + PROJECT_APPS
@@ -101,3 +102,7 @@ if DEBUG:
 if DJANGO_SILK_ENABLED:
     MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
     INSTALLED_APPS.append('silk')
+
+SILENCED_SYSTEM_CHECKS = [
+    'debug_toolbar.W006',
+]

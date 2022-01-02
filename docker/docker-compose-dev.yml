@@ -38,6 +38,17 @@ services:
     networks:
       - b2b-cloud
 
+  app-api-celery:
+    <<: *app-api
+    ports: [ ]
+    command: './docker/entry-point/entry-point.sh django-celery'
+
+  app-api-celery-beat:
+    <<: *app-api
+    ports: [ ]
+    command: './docker/entry-point/entry-point.sh django-celery-beat'
+
+
   pg:
     image: postgres:13.2
     restart: always

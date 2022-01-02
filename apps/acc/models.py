@@ -29,6 +29,8 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    backend = 'django.contrib.auth.backends.ModelBackend'
+
     UPLOAD_TO = 'user'
     username = None
     email = models.EmailField(_('email address'), unique=True)

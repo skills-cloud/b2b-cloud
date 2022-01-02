@@ -35,3 +35,8 @@ SESSION_REDIS = {
     'retry_on_timeout': True,
     'socket_timeout': 2,
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+]
