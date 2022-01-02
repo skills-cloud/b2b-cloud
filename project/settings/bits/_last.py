@@ -45,6 +45,8 @@ INSTALLED_APPS = (
             'reversion',
             'nested_admin',
             'guardian',
+            'djcelery_email',
+            'django_celery_beat',
         ]
         + ADVANCED_APPS
         + PROJECT_APPS
