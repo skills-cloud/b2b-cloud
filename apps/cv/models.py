@@ -37,19 +37,25 @@ class FileModelAbstract(DatesModelBase):
             return None
 
 
+class Gender(models.TextChoices):
+    MALE = 'M', _('Мужской')
+    FEMALE = 'F', _('Женский')
+
+
+class DaysToContact(models.TextChoices):
+    ALL = 'all', _('Все дни')
+    WORKDAYS = 'workdays', _('Будние дни')
+    WEEKENDS = 'weekends', _('Выходные дни')
+
+
 @reversion.register(follow=['contacts', 'positions', 'career', 'projects', 'education', 'certificates', 'files'])
 class CV(DatesModelBase):
-    class Gender(models.TextChoices):
-        MALE = 'M', _('Мужской')
-        FEMALE = 'F', _('Женский')
-
-    class DaysToContact(models.TextChoices):
-        ALL = 'all', _('Все дни')
-        WORKDAYS = 'workdays', _('Будние дни')
-        WEEKENDS = 'weekends', _('Выходные дни')
-
     UPLOAD_TO = 'cv'
 
+    organization_contractor = models.ForeignKey(
+        'main.OrganizationContractor', related_name='cv_list', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('организация исполнитель')
+    )
     user = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='cv_list',
         verbose_name=_('пользователь')
@@ -116,7 +122,7 @@ class CV(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
-                'info',
+                'info', 'organization_contractor',
                 'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked',
 
                 'files',

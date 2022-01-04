@@ -14,6 +14,8 @@ from acc.models import User
 
 __all__ = [
     'Organization',
+    'OrganizationCustomer',
+    'OrganizationContractor',
     'OrganizationProject',
     'OrganizationProjectCardItemTemplate',
     'OrganizationProjectCardItem',
@@ -24,7 +26,13 @@ __all__ = [
 class Organization(DatesModelBase):
     name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    is_customer = models.BooleanField(default=False, verbose_name=_('заказчик?'))
+    is_customer = models.BooleanField(default=False, verbose_name=_('это заказчик?'))
+    is_contractor = models.BooleanField(default=False, verbose_name=_('это исполнитель?'))
+    contractor = models.ForeignKey(
+        'main.OrganizationContractor', blank=True, null=True, on_delete=models.SET_NULL,
+        verbose_name=_('исполнитель для этого заказчика'),
+        help_text=_('имеет значение только для организаций заказчиков')
+    )
 
     class Meta:
         ordering = ['name']
@@ -44,11 +52,45 @@ class Organization(DatesModelBase):
         return self.name
 
 
+class OrganizationCustomer(Organization):
+    class QuerySet(Organization.QuerySet):
+        pass
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        def get_queryset(self) -> 'OrganizationCustomer.QuerySet':
+            return super().get_queryset().filter(is_customer=True)
+
+    objects = Manager()
+
+    class Meta:
+        proxy = True
+        ordering = ['name']
+        verbose_name = _('организация заказчик')
+        verbose_name_plural = _('организации заказчики')
+
+
+class OrganizationContractor(Organization):
+    class QuerySet(Organization.QuerySet):
+        pass
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        def get_queryset(self) -> 'OrganizationContractor.QuerySet':
+            return super().get_queryset().filter(is_contractor=True)
+
+    objects = Manager()
+
+    class Meta:
+        proxy = True
+        ordering = ['name']
+        verbose_name = _('организация исполнитель')
+        verbose_name_plural = _('организации исполнители')
+
+
 @reversion.register(follow=['organization'])
 class OrganizationProject(DatesModelBase):
     organization = models.ForeignKey(
-        'main.Organization', on_delete=models.RESTRICT, related_name='projects',
-        verbose_name=_('организация')
+        'main.OrganizationCustomer', on_delete=models.RESTRICT, related_name='projects',
+        verbose_name=_('заказчик')
     )
     name = models.CharField(max_length=500, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))

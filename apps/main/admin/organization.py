@@ -22,10 +22,23 @@ class OrganizationAdminFilter(ModelAutocompleteFilter):
     parameter_name = 'organization'
 
 
-@admin.register(main_models.Organization)
 class OrganizationAdmin(MainBaseAdmin):
-    list_filter = ['is_customer']
-    list_display = MainBaseAdmin.list_display + list_filter
+    class OrganizationContractorFilter(OrganizationAdminFilter):
+        model_queryset = main_models.OrganizationContractor.objects
+        title = main_models.Organization._meta.get_field('contractor').verbose_name
+        lookup_field = 'contractor'
+        parameter_name = 'contractor'
+
+    list_filter = ['is_customer', 'is_contractor',
+                   OrganizationContractorFilter
+                   ]
+    list_display = MainBaseAdmin.list_display + ['is_customer', 'is_contractor',]
+    autocomplete_fields = ['contractor']
+
+
+admin.site.register(main_models.Organization, OrganizationAdmin)
+admin.site.register(main_models.OrganizationCustomer, OrganizationAdmin)
+admin.site.register(main_models.OrganizationContractor, OrganizationAdmin)
 
 
 @admin.register(main_models.OrganizationProject)

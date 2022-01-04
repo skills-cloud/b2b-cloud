@@ -24,7 +24,10 @@ __all__ = [
 class OrganizationSerializer(ModelSerializer):
     class Meta:
         model = main_models.Organization
-        exclude = ['created_at', 'updated_at']
+        fields = [
+            'id', 'name', 'description', 'is_customer', 'is_contractor', 'contractor_id',
+            'created_at', 'updated_at',
+        ]
 
 
 class OrganizationProjectSerializer(ModelSerializer):

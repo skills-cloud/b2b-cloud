@@ -44,7 +44,7 @@ INSTALLED_APPS = (
             'adminsortable2',
             'reversion',
             'nested_admin',
-            'guardian',
+            # 'guardian',
             'djcelery_email',
             'django_celery_beat',
         ]

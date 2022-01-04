@@ -22,7 +22,7 @@ __all__ = [
 @reversion.register(follow=['difficulty_levels', 'positions_labor_estimates'])
 class FunPointType(ModelDiffMixin, DatesModelBase):
     organization = models.ForeignKey(
-        'main.Organization', related_name='fun_points_types', null=True, blank=True, on_delete=models.CASCADE,
+        'main.OrganizationCustomer', related_name='fun_points_types', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name=_('заказчик'), help_text=_('глобальный тип, если оставить это поле пустым')
     )
     name = models.CharField(max_length=500, verbose_name=_('название'))

@@ -5,6 +5,8 @@ from reversion.admin import VersionAdmin
 from admin_auto_filters.filters import AutocompleteFilter
 
 from cv import models as cv_models
+from main.admin import OrganizationAdminFilter
+from main.models import OrganizationContractor
 
 
 @admin.register(cv_models.CV)
@@ -20,6 +22,13 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     class CitizenshipFilter(AutocompleteFilter):
         title = cv_models.CV._meta.get_field('citizenship').verbose_name
         field_name = 'citizenship'
+
+    class OrganizationContractorFilter(OrganizationAdminFilter):
+        model_queryset = OrganizationContractor.objects
+        title = cv_models.CV._meta.get_field('organization_contractor').verbose_name
+        lookup_field = 'organization_contractor'
+        parameter_name = 'contractor'
+
 
     class CvContactInline(nested_admin.NestedTabularInline):
         model = cv_models.CvContact
@@ -97,9 +106,10 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     list_display = (
             ['id_verbose', 'last_name', 'first_name', 'middle_name', 'user']
             + list_display_counters +
-            ['created_at', 'updated_at']
+            ['created_at', 'updated_at', 'organization_contractor']
     )
     list_filter = [
+        OrganizationContractorFilter,
         'gender', 'is_verified', 'is_resource_owner',
         CountryFilter, CityFilter, CitizenshipFilter,
         ['birth_date', DateRangeFilter],
@@ -107,21 +117,21 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         ['updated_at', DateTimeRangeFilter],
     ]
     autocomplete_fields = [
-        'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked'
+        'organization_contractor', 'user', 'country', 'city', 'citizenship', 'physical_limitations',
+        'types_of_employment', 'linked',
     ]
     search_fields = ['first_name', 'last_name', 'middle_name']
     readonly_fields = ['created_at', 'updated_at']
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(
-            # *cv_models.CV.objects.get_queryset_prefetch_related()
+            *cv_models.CV.objects.get_queryset_prefetch_related()
         )
 
 
 class CvAdminFilter(AutocompleteFilter):
     title = cv_models.CV._meta.verbose_name.capitalize()
     field_name = 'cv'
-
 
 # @admin.register(cv_models.CvTimeSlot)
 # class CvTimeSlotAdmin(VersionAdmin, admin.ModelAdmin):
