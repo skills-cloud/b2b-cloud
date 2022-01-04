@@ -1,9 +1,19 @@
+from typing import List
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group as GroupBase
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 from project.contrib.db.upload_to import upload_to
+
+
+class Role(models.TextChoices):
+    EMPLOYEE = 'employee', _('Специалист')
+    ADMIN = 'admin', _('Администратор')
+    PFM = 'pfm', _('Руководитель портфеля проектов')
+    PM = 'pm', _('Руководитель проекта ')
+    RM = 'rm', _('Ресурсный менеджер')
 
 
 class CustomUserManager(BaseUserManager):
@@ -46,6 +56,22 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} < {self.email} >'
+
+    @property
+    def roles(self) -> List[Role]:
+        return [role.role for role in self.system_roles.all()]
+
+
+class UserSystemRole(models.Model):
+    user = models.ForeignKey('acc.User', related_name='system_roles', on_delete=models.CASCADE)
+    role = models.CharField(max_length=50, choices=Role.choices)
+
+    class Meta:
+        unique_together = [
+            ['user', 'role']
+        ]
+        verbose_name = _('системная роль')
+        verbose_name_plural = _('системные роли')
 
 
 class Group(GroupBase):

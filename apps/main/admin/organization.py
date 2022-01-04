@@ -22,6 +22,7 @@ class OrganizationAdminFilter(ModelAutocompleteFilter):
     parameter_name = 'organization'
 
 
+@admin.register(main_models.Organization, main_models.OrganizationCustomer)
 class OrganizationAdmin(MainBaseAdmin):
     class OrganizationContractorFilter(OrganizationAdminFilter):
         model_queryset = main_models.OrganizationContractor.objects
@@ -29,23 +30,36 @@ class OrganizationAdmin(MainBaseAdmin):
         lookup_field = 'contractor'
         parameter_name = 'contractor'
 
-    list_filter = ['is_customer', 'is_contractor',
-                   OrganizationContractorFilter
-                   ]
-    list_display = MainBaseAdmin.list_display + ['is_customer', 'is_contractor',]
+    list_filter = ['is_customer', 'is_contractor', OrganizationContractorFilter]
+    list_display = MainBaseAdmin.list_display + ['is_customer', 'is_contractor', ]
     autocomplete_fields = ['contractor']
 
 
-admin.site.register(main_models.Organization, OrganizationAdmin)
-admin.site.register(main_models.OrganizationCustomer, OrganizationAdmin)
-admin.site.register(main_models.OrganizationContractor, OrganizationAdmin)
+@admin.register(main_models.OrganizationContractor)
+class OrganizationContractorAdmin(OrganizationAdmin):
+    class UserRoleInline(admin.TabularInline):
+        model = main_models.OrganizationContractorUserRole
+        autocomplete_fields = ['user']
+        extra = 0
+
+    inlines = [
+        UserRoleInline
+    ]
 
 
 @admin.register(main_models.OrganizationProject)
 class OrganizationProjectAdmin(MainBaseAdmin):
+    class UserRoleInline(admin.TabularInline):
+        model = main_models.OrganizationProjectUserRole
+        autocomplete_fields = ['user']
+        extra = 0
+
+    inlines = [
+        UserRoleInline
+    ]
     list_display = ['id', 'organization', 'name']
     list_filter = ['organization', 'industry_sector']
-    autocomplete_fields = ['organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters']
+    autocomplete_fields = ['organization', 'industry_sector', 'manager', ]
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(

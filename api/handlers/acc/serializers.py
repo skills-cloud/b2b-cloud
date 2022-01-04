@@ -39,6 +39,8 @@ class UserSetPhotoSerializer(UserSerializer):
 
 
 class WhoAmISerializer(UserSerializer):
+    roles = serializers.ListSerializer(child=serializers.CharField(), read_only=True)
+
     class Meta(UserSerializer.Meta):
         exclude = ['password', 'groups', 'user_permissions']
 

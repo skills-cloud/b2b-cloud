@@ -4,19 +4,20 @@ import reversion
 from cacheops import invalidate_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.forms import model_to_dict
 from django.utils.translation import gettext_lazy as _
 from mptt import models as mptt_models
 from mptt import querysets as mptt_querysets
 
 from project.contrib.db.models import DatesModelBase
-from acc.models import User
+from acc.models import User, Role
 
 __all__ = [
     'Organization',
     'OrganizationCustomer',
     'OrganizationContractor',
+    'OrganizationContractorUserRole',
     'OrganizationProject',
+    'OrganizationProjectUserRole',
     'OrganizationProjectCardItemTemplate',
     'OrganizationProjectCardItem',
 ]
@@ -86,6 +87,25 @@ class OrganizationContractor(Organization):
         verbose_name_plural = _('организации исполнители')
 
 
+class OrganizationContractorUserRole(models.Model):
+    organization_contractor = models.ForeignKey(
+        'main.OrganizationContractor', related_name='users_roles', on_delete=models.CASCADE,
+        verbose_name=_('организация исполнитель'),
+    )
+    user = models.ForeignKey(
+        'acc.User', related_name='organizations_contractors_roles', on_delete=models.CASCADE,
+        verbose_name=_('пользователь'),
+    )
+    role = models.CharField(max_length=50, choices=Role.choices, verbose_name=_('роль'))
+
+    class Meta:
+        unique_together = [
+            ['organization_contractor', 'user', 'role']
+        ]
+        verbose_name = _('роль пользователя')
+        verbose_name_plural = _('роли пользователей')
+
+
 @reversion.register(follow=['organization'])
 class OrganizationProject(DatesModelBase):
     organization = models.ForeignKey(
@@ -106,14 +126,6 @@ class OrganizationProject(DatesModelBase):
         'acc.User', related_name='organizations_projects_as_manager', null=True, blank=True,
         on_delete=models.RESTRICT, verbose_name=_('руководитель проекта')
     )
-    resource_managers = models.ManyToManyField(
-        'acc.User', related_name='organizations_projects_as_resource_manager',
-        verbose_name=_('ресурсные менеджеры')
-    )
-    recruiters = models.ManyToManyField(
-        'acc.User', related_name='organizations_projects_as_recruiter',
-        verbose_name=_('рекрутеры')
-    )
 
     class Meta:
         ordering = ['name']
@@ -127,7 +139,7 @@ class OrganizationProject(DatesModelBase):
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
-            return ['organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters', 'modules']
+            return ['organization', 'industry_sector', 'manager', 'modules']
 
     objects = Manager()
 
@@ -137,6 +149,25 @@ class OrganizationProject(DatesModelBase):
     @property
     def modules_count(self) -> int:
         return len(self.modules.all())
+
+
+class OrganizationProjectUserRole(models.Model):
+    organization_project = models.ForeignKey(
+        'main.OrganizationProject', related_name='users_roles', on_delete=models.CASCADE,
+        verbose_name=_('проект'),
+    )
+    user = models.ForeignKey(
+        'acc.User', related_name='organizations_projects_roles', on_delete=models.CASCADE,
+        verbose_name=_('пользователь'),
+    )
+    role = models.CharField(max_length=50, choices=Role.choices, verbose_name=_('роль'))
+
+    class Meta:
+        unique_together = [
+            ['organization_project', 'user', 'role']
+        ]
+        verbose_name = _('роль пользователя')
+        verbose_name_plural = _('роли пользователей')
 
 
 class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase):

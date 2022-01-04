@@ -43,19 +43,11 @@ class OrganizationProjectSerializer(ModelSerializer):
         queryset=User.objects, allow_null=True, required=False,
         label=main_models.OrganizationProject._meta.get_field('manager').verbose_name,
     )
-    resource_managers_ids = PrimaryKeyRelatedIdField(
-        source='resource_managers', queryset=User.objects, many=True, required=False, allow_null=True,
-        label=main_models.OrganizationProject._meta.get_field('resource_managers').verbose_name,
-    )
-    recruiters_ids = PrimaryKeyRelatedIdField(
-        source='recruiters', queryset=User.objects, many=True, required=False, allow_null=True,
-        label=main_models.OrganizationProject._meta.get_field('recruiters').verbose_name,
-    )
 
     class Meta:
         model = main_models.OrganizationProject
         fields = [
-            'id', 'organization_id', 'industry_sector_id', 'manager_id', 'resource_managers_ids', 'recruiters_ids',
+            'id', 'organization_id', 'industry_sector_id', 'manager_id',
             'name', 'description', 'goals', 'plan_description', 'date_from', 'date_to', 'created_at', 'updated_at',
         ]
 
@@ -64,8 +56,6 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     organization = OrganizationSerializer(read_only=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
     manager = UserInlineSerializer(read_only=True, allow_null=True)
-    resource_managers = UserInlineSerializer(many=True, read_only=True)
-    recruiters = UserInlineSerializer(many=True, read_only=True)
 
     modules_count = serializers.IntegerField(read_only=True)
 
