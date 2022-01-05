@@ -61,8 +61,7 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
-            'organization', 'industry_sector', 'manager', 'resource_managers', 'recruiters',
-            'modules_count',
+            'organization', 'industry_sector', 'manager', 'modules_count',
         ]
 
 
