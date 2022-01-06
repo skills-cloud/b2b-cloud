@@ -22,6 +22,9 @@ class ImportFwCvJson:
     rows: List[Dict]
     rows_len: int
 
+    organization_contractor: main_models.OrganizationContractor
+    fw_skills_root: dictionary_models.Competence
+
     idents: Dict[str, int] = {}
 
     countries: Dict[str, dictionary_models.Country] = {}
@@ -36,6 +39,8 @@ class ImportFwCvJson:
         self.filepath = filepath
         self.without_skills = without_skills
         self.skip_exists = skip_exists
+        self.organization_contractor = main_models.OrganizationContractor.objects.get(id=42977)
+        self.fw_skills_root = dictionary_models.Competence.objects.get_or_create(name='FW import')[0]
 
     def do_import(self) -> None:
         logger.info('import FW .json', extra={'path': self.filepath})
@@ -74,6 +79,7 @@ class ImportFwCvJson:
             logger.info(log_msg + '\tSKIP')
             return cv
 
+        cv.organization_contractor = self.organization_contractor
         cv.last_name = row['lastName'] or None
         cv.first_name = row['firstName'] or None
         cv.middle_name = row['middleName'] or None
@@ -151,7 +157,10 @@ class ImportFwCvJson:
                 for skill in skills - (set(self.competencies.keys()) & skills):
                     competence = dictionary_models.Competence.objects.filter(name=skill).first()
                     if not competence:
-                        competence = dictionary_models.Competence.objects.create(name=skill)
+                        competence = dictionary_models.Competence.objects.create(
+                            name=skill,
+                            parent=self.fw_skills_root
+                        )
                     self.competencies[skill] = competence
                 competencies_for_create = [
                     cv_models.CvPositionCompetence(
