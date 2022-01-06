@@ -91,7 +91,7 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     _organization_project.admin_order_field = 'module__organization_project'
 
     def _organization(self, instance):
-        return instance.module.organization_project.organization.name
+        return instance.module.organization_project.organization_customer.name
 
     _organization.short_description = OrganizationAdminFilter.title
     _organization.admin_order_field = 'module__organization_project__organization_customer_id'
