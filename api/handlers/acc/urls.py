@@ -21,7 +21,7 @@ urlpatterns = [
 ]
 
 router = Router()
-router.register('user', views.UserViewSet)
+router.register('user-manage', views.UserManageViewSet)
 
 
 urlpatterns += router.urls

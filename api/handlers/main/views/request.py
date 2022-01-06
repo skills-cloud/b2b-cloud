@@ -40,9 +40,9 @@ class RequestTypeViewSet(MainBaseViewSet):
 
 class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, ModelViewSet):
     class Filter(filters.FilterSet):
-        organization_id = ModelMultipleChoiceCommaSeparatedFilter(
+        organization_customer_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.Organization.objects,
-            field_name='module__organization_project__organization',
+            field_name='module__organization_project__organization_customer',
         )
         organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationProject.objects,
@@ -79,7 +79,7 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
-                'organization_id',
+                'organization_customer_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
@@ -288,15 +288,15 @@ class TimeSheetRowViewSet(ReadCreateUpdateSerializersMixin, ViewSetFilteredByUse
             queryset=main_models.OrganizationProject.objects,
             field_name='request__module__organization_project',
         )
-        organization_id = ModelMultipleChoiceCommaSeparatedFilter(
+        organization_customer_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.Organization.objects,
-            field_name='request__module__organization_project__organization',
+            field_name='request__module__organization_project__organization_customer',
         )
 
         class Meta:
             model = main_models.TimeSheetRow
             fields = [
-                'cv_id', 'request_id', 'module_id', 'organization_project_id', 'organization_id',
+                'cv_id', 'request_id', 'module_id', 'organization_project_id', 'organization_customer_id',
             ]
 
         def get_schema_fields(self):
@@ -355,7 +355,7 @@ class TimeSheetRowViewSet(ReadCreateUpdateSerializersMixin, ViewSetFilteredByUse
                 required=False,
             ),
             openapi.Parameter(
-                'organization_id',
+                'organization_customer_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),

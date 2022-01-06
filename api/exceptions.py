@@ -11,14 +11,8 @@ from rest_framework.response import Response
 
 
 def custom_exception_handler(exc, context):
-    is_debug_mode = False
-    if request := context.get('request', None):
-        if '__debug_error__' in request.GET:
-            is_debug_mode = True
-    if is_debug_mode:
-        raise exc
-    if settings.DEBUG:
-        raise exc
+    # if settings.DEBUG:
+    #     raise exc
     response = exception_handler(exc, context)
     if not response:
         response = Response(status=status.HTTP_400_BAD_REQUEST)

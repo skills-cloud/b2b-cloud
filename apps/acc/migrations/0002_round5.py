@@ -28,4 +28,12 @@ class Migration(migrations.Migration):
                 'unique_together': {('user', 'role')},
             },
         ),
+
+        migrations.AlterField(
+            model_name='usersystemrole',
+            name='role',
+            field=models.CharField(choices=[('employee', 'Специалист'), ('admin', 'Администратор'),
+                                            ('pfm', 'Руководитель портфеля проектов'), ('pm', 'Руководитель проекта'),
+                                            ('rm', 'Ресурсный менеджер')], max_length=50),
+        ),
     ]

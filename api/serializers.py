@@ -1,5 +1,5 @@
 import copy
-from typing import Dict
+from typing import Dict, Optional
 
 from django.core.exceptions import ValidationError, FieldDoesNotExist
 from django.db.models import ManyToManyField
@@ -8,7 +8,7 @@ from rest_framework import serializers
 from api.fields import PrimaryKeyRelatedIdField
 
 __all__ = [
-    'ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer', 'EmptySerializer',
+    'ModelSerializer', 'ModelSerializerWithCallCleanMethod', 'StatusSerializer', 'EmptySerializer', 'IdSerializer',
 ]
 
 
@@ -21,6 +21,21 @@ class StatusSerializer(serializers.Serializer):
         [k, k] for k in ['ok', 'error', 'warning']
     ])
     details = serializers.CharField(allow_blank=True, allow_null=True, default=None)
+
+
+class IdSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+    _id_label: Optional[str] = None
+
+    def __init__(self, id_title: Optional[str] = None, *args, **kwargs):
+        self._id_label = id_title
+        super().__init__(*args, **kwargs)
+
+    def get_fields(self):
+        fields = super().get_fields()
+        fields['id'].label = self._id_label or fields['id'].label
+        return fields
 
 
 class ModelSerializer(serializers.ModelSerializer):

@@ -55,9 +55,9 @@ class OrganizationContractorReadSerializer(OrganizationContractorSerializer):
 
 
 class OrganizationProjectSerializer(ModelSerializer):
-    organization_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects,
-        label=main_models.OrganizationProject._meta.get_field('organization').verbose_name,
+    organization_customer_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationCustomer.objects,
+        label=main_models.OrganizationProject._meta.get_field('organization_customer').verbose_name,
     )
     industry_sector_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.IndustrySector.objects, allow_null=True, required=False,
@@ -71,13 +71,13 @@ class OrganizationProjectSerializer(ModelSerializer):
     class Meta:
         model = main_models.OrganizationProject
         fields = [
-            'id', 'organization_id', 'industry_sector_id', 'manager_id',
+            'id', 'organization_customer_id', 'industry_sector_id', 'manager_id',
             'name', 'description', 'goals', 'plan_description', 'date_from', 'date_to', 'created_at', 'updated_at',
         ]
 
 
 class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
-    organization = OrganizationSerializer(read_only=True)
+    organization_customer = OrganizationSerializer(read_only=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
     manager = UserInlineSerializer(read_only=True, allow_null=True)
 
@@ -85,7 +85,7 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
-            'organization', 'industry_sector', 'manager', 'modules_count',
+            'organization_customer', 'industry_sector', 'manager', 'modules_count',
         ]
 
 

@@ -1,5 +1,6 @@
 from typing import List
 
+import reversion
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group as GroupBase
 from django.contrib.auth.base_user import BaseUserManager
@@ -16,7 +17,12 @@ class Role(models.TextChoices):
     RM = 'rm', _('Ресурсный менеджер')
 
 
-class CustomUserManager(BaseUserManager):
+class UserQuerySet(models.QuerySet):
+    def filter_by_user(self, user: 'User') -> 'UserQuerySet':
+        return self
+
+
+class UserManager(models.Manager.from_queryset(UserQuerySet), BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError(_('The Email must be set'))
@@ -38,6 +44,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
+@reversion.register()
 class User(AbstractUser):
     backend = 'django.contrib.auth.backends.ModelBackend'
 
@@ -52,7 +59,7 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    objects = CustomUserManager()
+    objects = UserManager()
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} < {self.email} >'

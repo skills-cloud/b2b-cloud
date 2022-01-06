@@ -64,9 +64,9 @@ class ModuleViewSet(
     ModelViewSet
 ):
     class Filter(filters.FilterSet):
-        organization_id = ModelMultipleChoiceCommaSeparatedFilter(
+        organization_customer_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.Organization.objects,
-            field_name='organization_project__organization',
+            field_name='organization_project__organization_customer',
         )
         organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationProject.objects,
@@ -90,7 +90,7 @@ class ModuleViewSet(
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
-                'organization_id',
+                'organization_customer_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),

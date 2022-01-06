@@ -395,6 +395,9 @@ class CvSetPhotoSerializer(ModelSerializer):
 
 
 class CvDetailWriteSerializer(ModelSerializer):
+    organization_contractor_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationContractor.objects,
+    )
     user_id = PrimaryKeyRelatedIdField(
         queryset=User.objects,
         allow_null=True, required=False,
@@ -427,7 +430,8 @@ class CvDetailWriteSerializer(ModelSerializer):
     class Meta:
         model = cv_models.CV
         fields = [
-            'id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender', 'birth_date', 'is_resource_owner',
+            'id', 'organization_contractor_id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender',
+            'birth_date', 'is_resource_owner',
             'user_id', 'country_id', 'city_id', 'citizenship_id', 'days_to_contact', 'time_to_contact_from',
             'time_to_contact_to', 'price', 'physical_limitations_ids', 'types_of_employment_ids',
             'linked_ids',

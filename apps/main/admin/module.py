@@ -42,7 +42,7 @@ class FunPointTypeAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
 
     list_display = ['id', '_organization', 'name']
     list_display_links = ['id', 'name']
-    autocomplete_fields = ['organization']
+    autocomplete_fields = ['organization_customer']
     search_fields = ['name']
     list_filter = [
         OrganizationAdminFilter,
@@ -54,12 +54,12 @@ class FunPointTypeAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         )
 
     def _organization(self, instance):
-        if not instance.organization:
+        if not instance.organization_customer:
             return
-        return instance.organization.name
+        return instance.organization_customer.name
 
     _organization.short_description = OrganizationAdminFilter.title
-    _organization.admin_order_field = 'organization_id'
+    _organization.admin_order_field = 'organization_customer_id'
 
 
 @admin.register(main_models.Module)
@@ -88,7 +88,7 @@ class ModuleAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         OrganizationFilter,
         OrganizationProjectAdminFilter,
     ]
-    search_fields = ['name', 'organization_project__name', 'organization_project__organization__name']
+    search_fields = ['name', 'organization_project__name', 'organization_project__organization_customer__name']
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(
@@ -96,7 +96,7 @@ class ModuleAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         )
 
     def _organization(self, instance):
-        return instance.organization_project.organization.name
+        return instance.organization_project.organization_customer.name
 
     _organization.short_description = OrganizationAdminFilter.title
-    _organization.admin_order_field = 'organization_project__organization_id'
+    _organization.admin_order_field = 'organization_project__organization_customer_id'

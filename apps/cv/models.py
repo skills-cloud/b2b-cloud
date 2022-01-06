@@ -9,6 +9,7 @@ import reversion
 
 from project.contrib.db.models import DatesModelBase
 from acc.models import User
+from main.models import OrganizationContractor
 from cv import models_upload_to as upload_to
 
 if TYPE_CHECKING:
@@ -113,7 +114,9 @@ class CV(DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User) -> 'CV.QuerySet':
-            return self
+            if user.is_superuser or user.is_staff:
+                return self
+            return self.filter(organization_contractor__in=OrganizationContractor.objects.filter_by_user(user))
 
         def filter_by_position_years(self, years: int) -> 'CV.QuerySet':
             return self.filter(positions__year_started__lte=timezone.now().year - years)

@@ -1,17 +1,100 @@
 import pytz
 from django.conf import settings
+from django.db import transaction
 from rest_framework import serializers
 
+from main import models as main_models
 from acc.models import User
-from api.serializers import ModelSerializer
+from api.fields import PrimaryKeyRelatedIdField
+from api.serializers import ModelSerializer, ModelSerializerWithCallCleanMethod
 
 __all__ = [
+    'UserOrganizationContractorRoleSerializer',
+    'UserOrganizationProjectRoleSerializer',
+    'UserManageSerializer',
+    'UserManageReadSerializer',
     'UserSerializer',
     'UserInlineSerializer',
     'UserSetPhotoSerializer',
     'WhoAmISerializer',
     'LoginSerializer',
 ]
+
+
+class UserOrganizationContractorRoleSerializer(ModelSerializerWithCallCleanMethod):
+    organization_contractor_id = PrimaryKeyRelatedIdField(queryset=main_models.OrganizationContractor.objects)
+    organization_contractor_name = serializers.CharField(source='organization_contractor.name', read_only=True)
+
+    class Meta:
+        model = main_models.OrganizationContractorUserRole
+        fields = ['role', 'organization_contractor_id', 'organization_contractor_name']
+
+
+class UserOrganizationProjectRoleSerializer(ModelSerializerWithCallCleanMethod):
+    organization_project_id = PrimaryKeyRelatedIdField(queryset=main_models.OrganizationProject.objects)
+    organization_project_name = serializers.CharField(source='organization_project.name', read_only=True)
+    organization_contractor_id = serializers.IntegerField(source='organization_project.organization.id', read_only=True)
+    organization_contractor_name = serializers.CharField(
+        source='organization_project.organization.name', read_only=True)
+
+    class Meta:
+        model = main_models.OrganizationProjectUserRole
+        fields = [
+            'role', 'organization_project_id', 'organization_project_name',
+            'organization_contractor_id', 'organization_contractor_name',
+        ]
+
+
+class UserManageSerializer(ModelSerializerWithCallCleanMethod):
+    organization_contractors_roles = UserOrganizationContractorRoleSerializer(
+        source='organizations_contractors_roles', many=True, allow_null=True)
+    organization_projects_roles = UserOrganizationProjectRoleSerializer(
+        source='organizations_projects_roles', many=True, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'first_name', 'last_name',
+            'organization_contractors_roles', 'organization_projects_roles',
+        ]
+
+    @transaction.atomic
+    def save(self, **kwargs):
+        organizations_contractors_roles = self.validated_data.pop('organizations_contractors_roles', None)
+        organizations_projects_roles = self.validated_data.pop('organizations_projects_roles', None)
+        super().save(**kwargs)
+        if organizations_contractors_roles is not None:
+            for row in organizations_contractors_roles:
+                role_kwargs = {
+                    'user': self.instance,
+                    'organization_contractor_id': row['organization_contractor_id'],
+                }
+                main_models.OrganizationContractorUserRole.objects.filter(**role_kwargs).delete()
+                main_models.OrganizationContractorUserRole.objects.create(**role_kwargs, role=row['role'])
+        if organizations_projects_roles is not None:
+            for row in organizations_projects_roles:
+                role_kwargs = {
+                    'user': self.instance,
+                    'organization_project_id': row['organization_project_id'],
+                }
+                main_models.OrganizationProjectUserRole.objects.filter(**role_kwargs).delete()
+                main_models.OrganizationProjectUserRole.objects.create(**role_kwargs, role=row['role'])
+        return self.instance
+
+    def is_valid(self, raise_exception=False):
+        ModelSerializer.is_valid(self, raise_exception=raise_exception)
+        organizations_contractors_roles = self.validated_data.pop('organizations_contractors_roles', None)
+        organizations_projects_roles = self.validated_data.pop('organizations_projects_roles', None)
+        super().is_valid(raise_exception=raise_exception)
+        if organizations_contractors_roles is not None:
+            self.validated_data['organizations_contractors_roles'] = organizations_contractors_roles
+        if organizations_projects_roles is not None:
+            self.validated_data['organizations_projects_roles'] = organizations_projects_roles
+
+
+class UserManageReadSerializer(UserManageSerializer):
+    class Meta(UserManageSerializer.Meta):
+        ...
 
 
 class UserSerializer(ModelSerializer):

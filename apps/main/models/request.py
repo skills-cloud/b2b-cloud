@@ -288,7 +288,7 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
         )
         if len(cards_items_ids) != cards_items_qs.workers_count():
             raise ValidationError({
-                'attributes.organization_project_card_items': _('Неверно задана ID минимум одной карточеки')
+                'attributes.organization_project_card_items': _('Неверно задана ID минимум одной карточки')
             })
 
 

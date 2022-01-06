@@ -60,9 +60,9 @@ class OrganizationProjectAdmin(MainBaseAdmin):
     inlines = [
         UserRoleInline
     ]
-    list_display = ['id', 'organization', 'name']
-    list_filter = ['organization', 'industry_sector']
-    autocomplete_fields = ['organization', 'industry_sector', 'manager', ]
+    list_display = ['id', 'organization_customer', 'name']
+    list_filter = ['organization_customer', 'industry_sector']
+    autocomplete_fields = ['organization_customer', 'industry_sector', 'manager', ]
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(

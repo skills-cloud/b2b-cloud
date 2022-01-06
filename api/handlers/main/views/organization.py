@@ -77,7 +77,7 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
 class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     class Filter(filters.FilterSet):
-        organization_id = filters.ModelChoiceFilter(queryset=main_models.Organization.objects)
+        organization_customer_id = filters.ModelChoiceFilter(queryset=main_models.OrganizationCustomer.objects)
 
     filter_class = Filter
     queryset = main_models.OrganizationProject.objects.prefetch_related(
@@ -174,9 +174,9 @@ class OrganizationProjectCardItemViewSet(
     GenericViewSet
 ):
     class Filter(filters.FilterSet):
-        organization_id = ModelMultipleChoiceCommaSeparatedFilter(
+        organization_customer_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.Organization.objects,
-            field_name='organization_project__organization'
+            field_name='organization_project__organization_customer'
         )
         organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationProject.objects
@@ -184,7 +184,7 @@ class OrganizationProjectCardItemViewSet(
 
         class Meta:
             model = main_models.OrganizationProjectCardItem
-            fields = ['organization_project_id', 'organization_id']
+            fields = ['organization_project_id', 'organization_customer_id']
 
     filterset_class = Filter
     http_method_names = ['get', 'post', 'patch', 'delete']
@@ -204,7 +204,7 @@ class OrganizationProjectCardItemViewSet(
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
-                'organization_id',
+                'organization_customer_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),

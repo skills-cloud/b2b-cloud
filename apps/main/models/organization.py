@@ -121,7 +121,7 @@ class OrganizationContractorUserRole(models.Model):
 
 @reversion.register(follow=['organization'])
 class OrganizationProject(ModelDiffMixin, DatesModelBase):
-    organization = models.ForeignKey(
+    organization_customer = models.ForeignKey(
         'main.OrganizationCustomer', on_delete=models.RESTRICT, related_name='projects',
         verbose_name=_('заказчик')
     )
@@ -150,14 +150,14 @@ class OrganizationProject(ModelDiffMixin, DatesModelBase):
             if user.is_superuser or user.is_staff:
                 return self
             return self.filter(
-                models.Q(organization__contractor__in=OrganizationContractor.objects.filter_by_user(user))
+                models.Q(organization_customer__contractor__in=OrganizationContractor.objects.filter_by_user(user))
                 | models.Q(id__in=OrganizationProjectUserRole.objects.filter(user=user).values('organization_project'))
             )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
-            return ['organization', 'industry_sector', 'manager', 'modules']
+            return ['organization_customer', 'industry_sector', 'manager', 'modules']
 
     objects = Manager()
 

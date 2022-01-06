@@ -38,6 +38,8 @@ cv_linked_filter_cv_field = openapi.Parameter('cv_id', openapi.IN_QUERY, type=op
 class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
     class Filter(filters.FilterSet):
         id = ModelMultipleChoiceCommaSeparatedIdFilter(queryset=cv_models.CV.objects)
+        organization_contractor_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationContractor.objects)
         country_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Country.objects)
         city_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.City.objects)
         citizenship_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.Citizenship.objects)
@@ -94,6 +96,14 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         manual_parameters=[
             openapi.Parameter(
                 'id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False
+            ),
+            openapi.Parameter(
+                'organization_contractor_id ',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),

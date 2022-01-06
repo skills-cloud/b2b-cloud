@@ -1,3 +1,4 @@
+import itertools
 from functools import partial
 
 from django.conf import settings
@@ -16,12 +17,16 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from django_filters import rest_framework as filters
 
+from main import models as main_models
 from acc.models import User
+from api.backends import FilterBackend
+from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.serializers import StatusSerializer
 from api.permissions import AllowAny, IsAuthenticated
-
-from . import serializers as acc_serializers
+from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
+from api.handlers.acc import serializers as acc_serializers
 
 __all__ = [
     'openapi_response_user',
@@ -31,6 +36,7 @@ __all__ = [
     'WhoAmIView',
     'WhoAmISetPhotoView',
     'SetTimezone',
+    'UserManageViewSet',
 ]
 
 openapi_response_user = partial(openapi.Response, 'If the user is logged in')
@@ -150,12 +156,64 @@ class SetTimezone(generics.GenericAPIView):
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 
-class UserViewSet(ModelViewSet):
-    http_method_names = ['get']
-    queryset = User.objects.all()
-    serializer_class = acc_serializers.UserSerializer
-    filter_backends = [SearchFilter]
-    search_fields = ['email', 'first_name', 'first_name']
+class UserManageViewSet(ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, ModelViewSet):
+    class Filter(filters.FilterSet):
+        organization_contractor_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationContractor.objects,
+            field_name='organizations_contractors_roles__organization_contractor'
+        )
+        organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationProject.objects,
+            field_name='organizations_projects_roles__organization_project'
+        )
+
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    queryset = User.objects.prefetch_related(
+        'organizations_contractors_roles', 'organizations_contractors_roles__organization_contractor',
+        'organizations_projects_roles', 'organizations_projects_roles__organization_project',
+        'organizations_projects_roles__organization_project__organization',
+    )
+    serializer_class = acc_serializers.UserManageSerializer
+    serializer_read_class = acc_serializers.UserManageReadSerializer
+    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
+    filterset_class = Filter
+    search_fields = ['email', 'first_name', 'last_name']
+    ordering_fields = list(itertools.chain(*[
+        [k, f'-{k}']
+        for k in ['id', 'first_name', 'last_name', 'email']
+    ]))
+    ordering = ['last_name', 'first_name', 'id']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'organization_contractor_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False
+            ),
+            openapi.Parameter(
+                'organization_project_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False
+            ),
+            openapi.Parameter(
+                'ordering',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=ordering_fields),
+                default=ordering,
+                required=False,
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 ########################################################################################################################

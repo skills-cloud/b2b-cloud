@@ -21,7 +21,7 @@ class RequestTypeAdmin(MainBaseAdmin):
 @admin.register(main_models.Request)
 class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     class OrganizationFilter(OrganizationAdminFilter):
-        lookup_field = 'module__organization_project__organization'
+        lookup_field = 'module__organization_project__organization_customer'
 
     class OrganizationProjectFilter(OrganizationProjectAdminFilter):
         lookup_field = 'module__organization_project'
@@ -94,7 +94,7 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         return instance.module.organization_project.organization.name
 
     _organization.short_description = OrganizationAdminFilter.title
-    _organization.admin_order_field = 'module__organization_project__organization_id'
+    _organization.admin_order_field = 'module__organization_project__organization_customer_id'
 
 
 @admin.register(main_models.TimeSheetRow)

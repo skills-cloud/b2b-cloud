@@ -150,4 +150,33 @@ class Migration(migrations.Migration):
             model_name='organizationproject',
             name='resource_managers',
         ),
+        migrations.AlterField(
+            model_name='organizationcontractoruserrole',
+            name='role',
+            field=models.CharField(choices=[('employee', 'Специалист'), ('admin', 'Администратор'),
+                                            ('pfm', 'Руководитель портфеля проектов'), ('pm', 'Руководитель проекта'),
+                                            ('rm', 'Ресурсный менеджер')], max_length=50, verbose_name='роль'),
+        ),
+        migrations.AlterField(
+            model_name='organizationprojectuserrole',
+            name='role',
+            field=models.CharField(choices=[('employee', 'Специалист'), ('admin', 'Администратор'),
+                                            ('pfm', 'Руководитель портфеля проектов'), ('pm', 'Руководитель проекта'),
+                                            ('rm', 'Ресурсный менеджер')], max_length=50, verbose_name='роль'),
+        ),
+
+        migrations.RenameField(
+            model_name='organizationproject',
+            old_name='organization',
+            new_name='organization_customer',
+        ),
+        migrations.RenameField(
+            model_name='funpointtype',
+            old_name='organization',
+            new_name='organization_customer',
+        ),
+        migrations.AlterUniqueTogether(
+            name='funpointtype',
+            unique_together={('organization_customer', 'name')},
+        ),
     ]

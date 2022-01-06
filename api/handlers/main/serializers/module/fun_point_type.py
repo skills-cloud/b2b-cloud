@@ -65,32 +65,32 @@ class FunPointTypePositionLaborEstimateInlineSerializer(FunPointTypePositionLabo
 
 
 class FunPointTypeWriteSerializer(ModelSerializerWithCallCleanMethod):
-    organization_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects, required=False,
-        label=main_models.FunPointType._meta.get_field('organization').verbose_name,
+    organization_customer_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationCustomer.objects, required=False,
+        label=main_models.FunPointType._meta.get_field('organization_customer').verbose_name,
     )
 
     class Meta:
         model = main_models.FunPointType
         fields = [
-            'id', 'organization_id', 'name', 'description', 'created_at', 'updated_at',
+            'id', 'organization_customer_id', 'name', 'description', 'created_at', 'updated_at',
         ]
         validators = [
             UniqueTogetherValidator(
                 queryset=main_models.FunPointType.objects,
-                fields=['organization_id', 'name']
+                fields=['organization_customer_id', 'name']
             )
         ]
 
 
 class FunPointTypeReadSerializer(FunPointTypeWriteSerializer):
-    organization = OrganizationSerializer(read_only=True)
+    organization_customer = OrganizationSerializer(read_only=True)
     difficulty_levels = FunPointTypeDifficultyLevelInlineSerializer(many=True, read_only=True)
     positions_labor_estimates = FunPointTypePositionLaborEstimateInlineSerializer(many=True, read_only=True)
 
     class Meta(FunPointTypeWriteSerializer.Meta):
         fields = FunPointTypeWriteSerializer.Meta.fields + [
-            'organization', 'difficulty_levels', 'positions_labor_estimates',
+            'organization_customer', 'difficulty_levels', 'positions_labor_estimates',
         ]
 
 

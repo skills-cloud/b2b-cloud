@@ -1,4 +1,3 @@
-import random
 import reversion
 from typing import Optional, List
 
@@ -21,7 +20,7 @@ __all__ = [
 
 @reversion.register(follow=['difficulty_levels', 'positions_labor_estimates'])
 class FunPointType(ModelDiffMixin, DatesModelBase):
-    organization = models.ForeignKey(
+    organization_customer = models.ForeignKey(
         'main.OrganizationCustomer', related_name='fun_points_types', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name=_('заказчик'), help_text=_('глобальный тип, если оставить это поле пустым')
     )
@@ -31,7 +30,7 @@ class FunPointType(ModelDiffMixin, DatesModelBase):
     class Meta:
         ordering = ['name']
         unique_together = [
-            ['organization', 'name']
+            ['organization_customer', 'name']
         ]
         verbose_name = _('модули / тип функциональной точки')
         verbose_name_plural = _('модули / типы функциональных точек')
@@ -44,7 +43,7 @@ class FunPointType(ModelDiffMixin, DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
-                'organization',
+                'organization_customer',
                 'difficulty_levels', 'positions_labor_estimates', 'positions_labor_estimates__position'
             ]
 
@@ -52,8 +51,8 @@ class FunPointType(ModelDiffMixin, DatesModelBase):
 
     def __str__(self):
         name = []
-        if self.organization:
-            name.append(self.organization.name)
+        if self.organization_customer:
+            name.append(self.organization_customer.name)
         return ' / '.join([*name, self.name])
 
 
@@ -162,7 +161,7 @@ class Module(ModelDiffMixin, DatesModelBase):
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
                 'manager',
-                'organization_project', 'organization_project__organization',
+                'organization_project', 'organization_project__organization_customer',
                 'positions_labor_estimates', 'positions_labor_estimates__position',
                 *cls.get_queryset_fun_points_prefetch_related(),
             ]
@@ -225,8 +224,9 @@ class ModuleFunPoint(ModelDiffMixin, DatesModelBase):
 
     def clean(self):
         if (
-                self.fun_point_type.organization_id
-                and self.fun_point_type.organization_id != self.module.organization_project.organization_id
+                self.fun_point_type.organization_customer_id
+                and self.fun_point_type.organization_customer_id !=
+                self.module.organization_project.organization_customer_id
         ):
             raise ValidationError({'fun_point_type': _(
                 'Ф-я точка должна принадлежать компании заказчику проекта модуля или быть общеупотребимой')})
