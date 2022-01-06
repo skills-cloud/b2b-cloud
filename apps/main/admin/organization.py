@@ -31,8 +31,11 @@ class OrganizationAdmin(MainBaseAdmin):
         parameter_name = 'contractor'
 
     list_filter = ['is_customer', 'is_contractor', OrganizationContractorFilter]
-    list_display = MainBaseAdmin.list_display + ['is_customer', 'is_contractor', ]
+    list_display = MainBaseAdmin.list_display + ['contractor', 'is_customer', 'is_contractor', ]
     autocomplete_fields = ['contractor']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('contractor')
 
 
 @admin.register(main_models.OrganizationContractor)

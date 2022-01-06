@@ -5,6 +5,10 @@ from project.contrib.disable_for_loaddata import disable_for_loaddata
 from main.models._signals_receivers._base import SignalsReceiver
 from main.services.organization_project import request_requirement
 from main import models as main_models
+from main.models._signals_receivers.project import (
+    OrganizationProjectSignalsReceiver,
+    OrganizationProjectUserRoleSignalsReceiver
+)
 from main.models._signals_receivers.module import ModuleSignalsReceiver
 
 __all__ = ['setup']
@@ -47,11 +51,21 @@ class ModuleReceiver(Receiver):
     receiver_class = ModuleSignalsReceiver
 
 
+class OrganizationProjectReceiver(Receiver):
+    receiver_class = OrganizationProjectSignalsReceiver
+
+
+class OrganizationProjectUserRoleReceiver(Receiver):
+    receiver_class = OrganizationProjectUserRoleSignalsReceiver
+
+
 RECEIVER_INSTANCE = set()
 
 
 def setup():
     for model, receiver_class in [
+        [main_models.OrganizationProject, OrganizationProjectReceiver],
+        [main_models.OrganizationProjectUserRole, OrganizationProjectUserRoleReceiver],
         [main_models.RequestRequirement, RequestRequirementReceiver],
         [main_models.RequestRequirementCv, RequestRequirementCvReceiver],
         [main_models.Module, ModuleReceiver],

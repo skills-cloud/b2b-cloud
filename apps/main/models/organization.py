@@ -8,7 +8,8 @@ from django.utils.translation import gettext_lazy as _
 from mptt import models as mptt_models
 from mptt import querysets as mptt_querysets
 
-from project.contrib.db.models import DatesModelBase
+from project.contrib.db import get_sql_from_queryset
+from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User, Role
 
 __all__ = [
@@ -55,7 +56,14 @@ class Organization(DatesModelBase):
 
 class OrganizationCustomer(Organization):
     class QuerySet(Organization.QuerySet):
-        pass
+        def filter_by_user(self, user: User) -> 'OrganizationCustomer.QuerySet':
+            if user.is_superuser or user.is_staff:
+                return self
+            return self.filter(
+                contractor__in=OrganizationContractorUserRole.objects
+                    .filter(user=user)
+                    .values('organization_contractor')
+            )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         def get_queryset(self) -> 'OrganizationCustomer.QuerySet':
@@ -72,7 +80,12 @@ class OrganizationCustomer(Organization):
 
 class OrganizationContractor(Organization):
     class QuerySet(Organization.QuerySet):
-        pass
+        def filter_by_user(self, user: User) -> 'OrganizationContractor.QuerySet':
+            if user.is_superuser or user.is_staff:
+                return self
+            return self.filter(
+                id__in=OrganizationContractorUserRole.objects.filter(user=user).values('organization_contractor')
+            )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         def get_queryset(self) -> 'OrganizationContractor.QuerySet':
@@ -107,7 +120,7 @@ class OrganizationContractorUserRole(models.Model):
 
 
 @reversion.register(follow=['organization'])
-class OrganizationProject(DatesModelBase):
+class OrganizationProject(ModelDiffMixin, DatesModelBase):
     organization = models.ForeignKey(
         'main.OrganizationCustomer', on_delete=models.RESTRICT, related_name='projects',
         verbose_name=_('заказчик')
@@ -134,7 +147,12 @@ class OrganizationProject(DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User) -> 'OrganizationProject.QuerySet':
-            return self
+            if user.is_superuser or user.is_staff:
+                return self
+            return self.filter(
+                models.Q(organization__contractor__in=OrganizationContractor.objects.filter_by_user(user))
+                | models.Q(id__in=OrganizationProjectUserRole.objects.filter(user=user).values('organization_project'))
+            )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
@@ -151,7 +169,7 @@ class OrganizationProject(DatesModelBase):
         return len(self.modules.all())
 
 
-class OrganizationProjectUserRole(models.Model):
+class OrganizationProjectUserRole(ModelDiffMixin, models.Model):
     organization_project = models.ForeignKey(
         'main.OrganizationProject', related_name='users_roles', on_delete=models.CASCADE,
         verbose_name=_('проект'),
@@ -168,6 +186,10 @@ class OrganizationProjectUserRole(models.Model):
         ]
         verbose_name = _('роль пользователя')
         verbose_name_plural = _('роли пользователей')
+
+    def clean(self):
+        from main.models._signals_receivers.project import OrganizationProjectUserRoleSignalsReceiver
+        OrganizationProjectUserRoleSignalsReceiver(self).validate()
 
 
 class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase):

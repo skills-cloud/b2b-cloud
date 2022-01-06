@@ -12,6 +12,10 @@ from api.handlers.dictionary import serializers as dictionary_serializers
 
 __all__ = [
     'OrganizationSerializer',
+    'OrganizationCustomerSerializer',
+    'OrganizationCustomerReadSerializer',
+    'OrganizationContractorSerializer',
+    'OrganizationContractorReadSerializer',
     'OrganizationProjectSerializer',
     'OrganizationProjectReadSerializer',
     'OrganizationProjectInlineSerializer',
@@ -28,6 +32,26 @@ class OrganizationSerializer(ModelSerializer):
             'id', 'name', 'description', 'is_customer', 'is_contractor', 'contractor_id',
             'created_at', 'updated_at',
         ]
+
+
+class OrganizationCustomerSerializer(OrganizationSerializer):
+    class Meta(OrganizationSerializer.Meta):
+        ...
+
+
+class OrganizationCustomerReadSerializer(OrganizationCustomerSerializer):
+    class Meta(OrganizationCustomerSerializer.Meta):
+        ...
+
+
+class OrganizationContractorSerializer(OrganizationSerializer):
+    class Meta(OrganizationSerializer.Meta):
+        ...
+
+
+class OrganizationContractorReadSerializer(OrganizationContractorSerializer):
+    class Meta(OrganizationContractorSerializer.Meta):
+        ...
 
 
 class OrganizationProjectSerializer(ModelSerializer):

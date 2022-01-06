@@ -21,6 +21,8 @@ from api.handlers.main.views.base import MainBaseViewSet
 
 __all__ = [
     'OrganizationViewSet',
+    'OrganizationCustomerViewSet',
+    'OrganizationContractorViewSet',
     'OrganizationProjectViewSet',
     'OrganizationProjectCardItemTemplateViewSet',
     'OrganizationProjectCardItemViewSet',
@@ -36,10 +38,8 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
             fields = ['is_customer', 'is_contractor', 'contractor_id']
 
     filterset_class = Filter
-    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
     queryset = main_models.Organization.objects
     serializer_class = main_serializers.OrganizationSerializer
-    search_fields = ['name']
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -116,6 +116,41 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
             for row in positions_estimates
         ], many=True)
         return Response(serializer.initial_data, status=status.HTTP_200_OK)
+
+
+class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    queryset = main_models.OrganizationCustomer.objects
+    serializer_class = main_serializers.OrganizationCustomerSerializer
+    serializer_read_class = main_serializers.OrganizationCustomerReadSerializer
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'contractor_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'ordering',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=MainBaseViewSet.ordering_fields),
+                default=MainBaseViewSet.ordering
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class OrganizationContractorViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
+    http_method_names = ['get', 'post', 'patch']
+    queryset = main_models.OrganizationContractor.objects
+    serializer_class = main_serializers.OrganizationContractorSerializer
+    serializer_read_class = main_serializers.OrganizationContractorReadSerializer
 
 
 class OrganizationProjectCardItemTemplateViewSet(

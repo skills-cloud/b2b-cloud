@@ -10,6 +10,9 @@ class SignalsReceiver:
     def __init__(self, instance: Model):
         self.instance = instance
 
+    def validate(self) -> None:
+        self._log_signal('validate')
+
     def pre_save(self, **kwargs) -> None:
         self._log_signal('pre_save', **kwargs)
 

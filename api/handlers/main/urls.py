@@ -9,6 +9,8 @@ class Router(routers.DefaultRouter):
 
 router = Router()
 router.register('organization', views.OrganizationViewSet)
+router.register('organization-customer', views.OrganizationCustomerViewSet)
+router.register('organization-contractor', views.OrganizationContractorViewSet)
 router.register('organization-project', views.OrganizationProjectViewSet)
 router.register('organization-project-card-item-template', views.OrganizationProjectCardItemTemplateViewSet)
 router.register('organization-project-card-item', views.OrganizationProjectCardItemViewSet)
