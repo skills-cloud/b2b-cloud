@@ -27,6 +27,7 @@ _base_settings = (
     'bits/email.py',
     'bits/api.py',
     'bits/log.py',
+    'bits/test_users.py',
     optional('settings_local.py'),
     'bits/_last.py',
 )
