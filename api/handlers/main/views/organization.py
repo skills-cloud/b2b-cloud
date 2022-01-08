@@ -119,7 +119,6 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
 
 class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = main_models.OrganizationCustomer.objects
     serializer_class = main_serializers.OrganizationCustomerSerializer
     serializer_read_class = main_serializers.OrganizationCustomerReadSerializer
@@ -147,7 +146,6 @@ class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
 
 class OrganizationContractorViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
-    http_method_names = ['get', 'post', 'patch']
     queryset = main_models.OrganizationContractor.objects
     serializer_class = main_serializers.OrganizationContractorSerializer
     serializer_read_class = main_serializers.OrganizationContractorReadSerializer

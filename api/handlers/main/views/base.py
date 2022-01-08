@@ -15,7 +15,7 @@ __all__ = [
 
 
 class MainBaseViewSet(ReadWriteSerializersMixin, ModelViewSet):
-    http_method_names = ['get', 'post', 'patch']
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
     search_fields = ['name']
     ordering_fields = list(itertools.chain(*[

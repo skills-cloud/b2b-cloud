@@ -119,7 +119,7 @@ class OrganizationContractorUserRole(models.Model):
         verbose_name_plural = _('роли пользователей')
 
 
-@reversion.register(follow=['organization'])
+@reversion.register(follow=['organization_customer'])
 class OrganizationProject(ModelDiffMixin, DatesModelBase):
     organization_customer = models.ForeignKey(
         'main.OrganizationCustomer', on_delete=models.RESTRICT, related_name='projects',

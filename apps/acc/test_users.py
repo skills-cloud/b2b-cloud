@@ -32,5 +32,7 @@ def test_users_create() -> List[User]:
 
 def test_user_get_or_create(**kwargs) -> User:
     user, created = User.objects.get_or_create(**kwargs)
+    user.set_password(kwargs['password'])
+    user.save()
     logger.info(f'<< {user} >> {"created" if created else "already exists"}')
     return user
