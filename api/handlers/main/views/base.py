@@ -5,7 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-from api.views_mixins import ReadWriteSerializersMixin
+from api.views import ReadWriteSerializersMixin
 from api.backends import FilterBackend
 from api.filters import OrderingFilterNullsLast
 

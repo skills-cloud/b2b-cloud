@@ -25,7 +25,7 @@ from api.backends import FilterBackend
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.serializers import StatusSerializer
 from api.permissions import AllowAny, IsAuthenticated
-from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
+from api.views import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.handlers.acc import serializers as acc_serializers
 
 __all__ = [
@@ -57,7 +57,7 @@ class LoginView(generics.GenericAPIView):
         request_serializer = self.get_serializer(data=request.data)
         request_serializer.is_valid(raise_exception=False)
         if settings.DEBUG:
-            user = User.objects.filter(email=request_serializer.validated_data.get('email')).first()
+            user = User.objects.filter(email=request_serializer.data.get('email')).first()
         else:
             user = authenticate(
                 request,

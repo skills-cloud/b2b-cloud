@@ -25,18 +25,31 @@ __all__ = [
 ]
 
 
-class OrganizationSerializer(ModelSerializer):
+class OrganizationSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.Organization
         fields = [
-            'id', 'name', 'description', 'is_customer', 'is_contractor', 'contractor_id',
+            'id', 'contractor_id', 'name', 'description', 'is_customer', 'is_contractor',
             'created_at', 'updated_at',
         ]
+        read_only_fields = ['contractor_id']
 
 
 class OrganizationCustomerSerializer(OrganizationSerializer):
+    contractor_id = PrimaryKeyRelatedIdField(
+        queryset=main_models.OrganizationContractor.objects,
+        label=main_models.Organization._meta.get_field('contractor').verbose_name,
+    )
+
     class Meta(OrganizationSerializer.Meta):
-        ...
+        model = main_models.OrganizationCustomer
+        fields = [f for f in OrganizationSerializer.Meta.fields if f not in [
+            'is_customer', 'is_contractor',
+        ]]
+        read_only_fields = None
+
+    def save(self, **kwargs):
+        return super().save(is_customer=True, **kwargs)
 
 
 class OrganizationCustomerReadSerializer(OrganizationCustomerSerializer):
@@ -46,7 +59,13 @@ class OrganizationCustomerReadSerializer(OrganizationCustomerSerializer):
 
 class OrganizationContractorSerializer(OrganizationSerializer):
     class Meta(OrganizationSerializer.Meta):
-        ...
+        model = main_models.OrganizationContractor
+        fields = [f for f in OrganizationSerializer.Meta.fields if f not in [
+            'contractor_id', 'is_contractor',
+        ]]
+
+    def save(self, **kwargs):
+        return super().save(is_contractor=True, **kwargs)
 
 
 class OrganizationContractorReadSerializer(OrganizationContractorSerializer):

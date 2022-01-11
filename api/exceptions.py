@@ -11,8 +11,8 @@ from rest_framework.response import Response
 
 
 def custom_exception_handler(exc, context):
-    if settings.DEBUG:
-        raise exc
+    # if settings.DEBUG and not isinstance(exc, (PermissionDenied, Http404)):
+    #     raise exc
     response = exception_handler(exc, context)
     if not response:
         response = Response(status=status.HTTP_400_BAD_REQUEST)

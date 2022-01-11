@@ -12,10 +12,10 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 
 from main import models as main_models
-from main.services.organization_project import ProjectLaborEstimateService
+from main.services.labor_estimate import ProjectLaborEstimateService
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.backends import FilterBackend
-from api.views_mixins import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
+from api.views import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
 from api.handlers.main.views.base import MainBaseViewSet
 

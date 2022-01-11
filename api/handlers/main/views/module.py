@@ -13,8 +13,8 @@ from django_filters import rest_framework as filters
 
 from acc.models import User
 from main import models as main_models
-from main.services.organization_project.module import ModuleLaborEstimateService
-from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, ViewSetQuerySetPrefetchRelatedMixin
+from main.services.module import ModuleLaborEstimateService
+from api.views import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, ViewSetQuerySetPrefetchRelatedMixin
 from api.backends import FilterBackend
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.handlers.main import serializers as main_serializers

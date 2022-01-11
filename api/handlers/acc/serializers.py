@@ -1,7 +1,9 @@
 import pytz
 from django.conf import settings
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from main import models as main_models
 from acc.models import User
@@ -47,9 +49,9 @@ class UserOrganizationProjectRoleSerializer(ModelSerializerWithCallCleanMethod):
 
 class UserManageSerializer(ModelSerializerWithCallCleanMethod):
     organization_contractors_roles = UserOrganizationContractorRoleSerializer(
-        source='organizations_contractors_roles', many=True, allow_null=True)
+        source='organizations_contractors_roles', many=True, allow_null=True, required=False)
     organization_projects_roles = UserOrganizationProjectRoleSerializer(
-        source='organizations_projects_roles', many=True, allow_null=True)
+        source='organizations_projects_roles', many=True, allow_null=True, required=False)
 
     class Meta:
         model = User
@@ -85,6 +87,8 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
         ModelSerializer.is_valid(self, raise_exception=raise_exception)
         organizations_contractors_roles = self.validated_data.pop('organizations_contractors_roles', None)
         organizations_projects_roles = self.validated_data.pop('organizations_projects_roles', None)
+        if not self.context['request'].user.is_superuser and not organizations_contractors_roles:
+            raise ValidationError({'organizations_contractors_roles': _('Это поле обязательно')})
         super().is_valid(raise_exception=raise_exception)
         if organizations_contractors_roles is not None:
             self.validated_data['organizations_contractors_roles'] = organizations_contractors_roles

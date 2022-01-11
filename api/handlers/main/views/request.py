@@ -20,7 +20,7 @@ from dictionary import models as dictionary_models
 from cv import models as cv_models
 from main import models as main_models
 from api.backends import FilterBackend
-from api.views_mixins import ReadWriteSerializersMixin, ReadCreateUpdateSerializersMixin, ViewSetFilteredByUserMixin
+from api.views import ReadWriteSerializersMixin, ReadCreateUpdateSerializersMixin, ViewSetFilteredByUserMixin
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.handlers.main import serializers as main_serializers
 from api.handlers.main.views.base import MainBaseViewSet

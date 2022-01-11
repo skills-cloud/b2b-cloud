@@ -27,7 +27,7 @@ from api.filters import (
     DateRangeWidget, ModelMultipleChoiceCommaSeparatedIdFilter,
 )
 from api.serializers import StatusSerializer
-from api.views_mixins import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
+from api.views import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
 from api.backends import FilterBackend
 from api.handlers.cv import serializers as cv_serializers
 
