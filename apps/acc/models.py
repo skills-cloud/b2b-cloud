@@ -10,7 +10,7 @@ from project.contrib.db.upload_to import upload_to
 
 
 class Role(models.TextChoices):
-    EMPLOYEE = 'employee', _('Специалист')
+    # EMPLOYEE = 'employee', _('Специалист')
     ADMIN = 'admin', _('Администратор')
     PFM = 'pfm', _('Руководитель портфеля проектов')
     PM = 'pm', _('Руководитель проекта')
