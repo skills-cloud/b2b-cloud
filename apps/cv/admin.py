@@ -29,7 +29,6 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         lookup_field = 'organization_contractor'
         parameter_name = 'contractor'
 
-
     class CvContactInline(nested_admin.NestedTabularInline):
         model = cv_models.CvContact
         autocomplete_fields = ['contact_type']
@@ -120,7 +119,10 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         'organization_contractor', 'user', 'country', 'city', 'citizenship', 'physical_limitations',
         'types_of_employment', 'linked',
     ]
-    search_fields = ['first_name', 'last_name', 'middle_name']
+    search_fields = [
+        'first_name', 'last_name', 'middle_name',
+        'contacts__value'
+    ]
     readonly_fields = ['created_at', 'updated_at']
 
     def get_queryset(self, request):
