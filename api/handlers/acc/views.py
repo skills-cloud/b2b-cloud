@@ -174,7 +174,7 @@ class UserManageViewSet(ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, M
     queryset = User.objects.prefetch_related(
         'organizations_contractors_roles', 'organizations_contractors_roles__organization_contractor',
         'organizations_projects_roles', 'organizations_projects_roles__organization_project',
-        'organizations_projects_roles__organization_project__organization',
+        'organizations_projects_roles__organization_project__organization_customer',
     )
     serializer_class = acc_serializers.UserManageSerializer
     serializer_read_class = acc_serializers.UserManageReadSerializer
