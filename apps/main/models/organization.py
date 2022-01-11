@@ -107,8 +107,10 @@ class OrganizationContractor(Organization):
         from main.models._signals_receivers.organization import OrganizationContractorSignalsReceiver
         OrganizationContractorSignalsReceiver(self).validate()
 
-    def get_user_role(self, user: User) -> Optional[Role]:
-        if role := OrganizationContractorUserRole.objects.filter(user=user).first():
+    def get_user_role(self, user: User) -> Optional[str]:
+        if user.is_superuser:
+            return Role.ADMIN.value
+        if role := self.users_roles.filter(user=user).first():
             return role.role
 
 
@@ -179,6 +181,13 @@ class OrganizationProject(ModelDiffMixin, DatesModelBase):
     @property
     def modules_count(self) -> int:
         return len(self.modules.all())
+
+    def get_user_role(self, user: User) -> Optional[str]:
+        if user.is_superuser:
+            return Role.ADMIN.value
+        if role := self.users_roles.filter(user=user).first():
+            return role.role
+        return self.organization_customer.contractor.get_user_role(user)
 
 
 class OrganizationProjectUserRole(ModelDiffMixin, models.Model):

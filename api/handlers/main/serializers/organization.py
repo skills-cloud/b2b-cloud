@@ -1,3 +1,5 @@
+from typing import Optional
+
 from rest_framework import serializers
 from rest_framework.relations import RelatedField
 from rest_framework_recursive.fields import RecursiveField
@@ -69,8 +71,13 @@ class OrganizationContractorSerializer(OrganizationSerializer):
 
 
 class OrganizationContractorReadSerializer(OrganizationContractorSerializer):
+    current_user_role = serializers.SerializerMethodField()
+
     class Meta(OrganizationContractorSerializer.Meta):
-        ...
+        fields = OrganizationContractorSerializer.Meta.fields + ['current_user_role']
+
+    def get_current_user_role(self, instance: main_models.OrganizationContractor) -> Optional[str]:
+        return instance.get_user_role(self.context['request'].user)
 
 
 class OrganizationProjectSerializer(ModelSerializer):
@@ -101,11 +108,15 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     manager = UserInlineSerializer(read_only=True, allow_null=True)
 
     modules_count = serializers.IntegerField(read_only=True)
+    current_user_role = serializers.SerializerMethodField()
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
-            'organization_customer', 'industry_sector', 'manager', 'modules_count',
+            'organization_customer', 'industry_sector', 'manager', 'modules_count', 'current_user_role',
         ]
+
+    def get_current_user_role(self, instance: main_models.OrganizationProject) -> Optional[str]:
+        return instance.get_user_role(self.context['request'].user)
 
 
 class OrganizationProjectInlineSerializer(OrganizationProjectReadSerializer):
