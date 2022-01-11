@@ -1,8 +1,9 @@
-from dataclasses import dataclass
 from typing import Optional
 
+from dataclasses import dataclass
+
 from main import models as main_models
-from main.services.organization_project.module import ModuleLaborEstimateService, LaborEstimate, PositionLaborEstimate
+from main.services.module import ModuleLaborEstimateService, LaborEstimate
 
 
 @dataclass

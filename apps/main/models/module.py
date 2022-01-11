@@ -183,7 +183,7 @@ class Module(ModelDiffMixin, DatesModelBase):
 
     @property
     def difficulty_factor(self) -> Optional[float]:
-        from main.services.organization_project.module import get_module_difficulty_factor
+        from main.services.module import get_module_difficulty_factor
         return get_module_difficulty_factor(self)
 
 

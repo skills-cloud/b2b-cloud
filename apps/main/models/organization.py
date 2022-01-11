@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import reversion
 from cacheops import invalidate_model
@@ -25,7 +25,7 @@ __all__ = [
 
 
 @reversion.register(follow=['projects'])
-class Organization(DatesModelBase):
+class Organization(ModelDiffMixin, DatesModelBase):
     name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     is_customer = models.BooleanField(default=False, verbose_name=_('это заказчик?'))
@@ -77,6 +77,10 @@ class OrganizationCustomer(Organization):
         verbose_name = _('организация заказчик')
         verbose_name_plural = _('организации заказчики')
 
+    def clean(self):
+        from main.models._signals_receivers.organization import OrganizationCustomerSignalsReceiver
+        OrganizationCustomerSignalsReceiver(self).validate()
+
 
 class OrganizationContractor(Organization):
     class QuerySet(Organization.QuerySet):
@@ -98,6 +102,14 @@ class OrganizationContractor(Organization):
         ordering = ['name']
         verbose_name = _('организация исполнитель')
         verbose_name_plural = _('организации исполнители')
+
+    def clean(self):
+        from main.models._signals_receivers.organization import OrganizationContractorSignalsReceiver
+        OrganizationContractorSignalsReceiver(self).validate()
+
+    def get_user_role(self, user: User) -> Optional[Role]:
+        if role := OrganizationContractorUserRole.objects.filter(user=user).first():
+            return role.role
 
 
 class OrganizationContractorUserRole(models.Model):
@@ -122,7 +134,7 @@ class OrganizationContractorUserRole(models.Model):
 @reversion.register(follow=['organization_customer'])
 class OrganizationProject(ModelDiffMixin, DatesModelBase):
     organization_customer = models.ForeignKey(
-        'main.OrganizationCustomer', on_delete=models.RESTRICT, related_name='projects',
+        'main.OrganizationCustomer', on_delete=models.CASCADE, related_name='projects',
         verbose_name=_('заказчик')
     )
     name = models.CharField(max_length=500, verbose_name=_('название'))

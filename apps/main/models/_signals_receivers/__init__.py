@@ -3,8 +3,12 @@ from django.db.models import signals, Model
 
 from project.contrib.disable_for_loaddata import disable_for_loaddata
 from main.models._signals_receivers._base import SignalsReceiver
-from main.services.organization_project import request_requirement
+from main.services import request_requirement
 from main import models as main_models
+from main.models._signals_receivers.organization import (
+    OrganizationContractorSignalsReceiver,
+    OrganizationCustomerSignalsReceiver
+)
 from main.models._signals_receivers.project import (
     OrganizationProjectSignalsReceiver,
     OrganizationProjectUserRoleSignalsReceiver
@@ -37,6 +41,22 @@ class Receiver:
         return self.receiver_class(instance)
 
 
+class OrganizationCustomerReceiver(Receiver):
+    receiver_class = OrganizationCustomerSignalsReceiver
+
+
+class OrganizationContractorReceiver(Receiver):
+    receiver_class = OrganizationContractorSignalsReceiver
+
+
+class OrganizationProjectReceiver(Receiver):
+    receiver_class = OrganizationProjectSignalsReceiver
+
+
+class OrganizationProjectUserRoleReceiver(Receiver):
+    receiver_class = OrganizationProjectUserRoleSignalsReceiver
+
+
 class RequestRequirementReceiver:
     def post_save(self, sender, instance: main_models.RequestRequirement, **kwargs) -> None:
         request_requirement.request_requirement_time_slots_setup(instance)
@@ -51,19 +71,13 @@ class ModuleReceiver(Receiver):
     receiver_class = ModuleSignalsReceiver
 
 
-class OrganizationProjectReceiver(Receiver):
-    receiver_class = OrganizationProjectSignalsReceiver
-
-
-class OrganizationProjectUserRoleReceiver(Receiver):
-    receiver_class = OrganizationProjectUserRoleSignalsReceiver
-
-
 RECEIVER_INSTANCE = set()
 
 
 def setup():
     for model, receiver_class in [
+        [main_models.OrganizationContractor, OrganizationContractorReceiver],
+        [main_models.OrganizationCustomer, OrganizationCustomerReceiver],
         [main_models.OrganizationProject, OrganizationProjectReceiver],
         [main_models.OrganizationProjectUserRole, OrganizationProjectUserRoleReceiver],
         [main_models.RequestRequirement, RequestRequirementReceiver],
