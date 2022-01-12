@@ -78,6 +78,10 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     class Filter(filters.FilterSet):
         organization_customer_id = filters.ModelChoiceFilter(queryset=main_models.OrganizationCustomer.objects)
+        organization_contractor_id = filters.ModelChoiceFilter(
+            queryset=main_models.OrganizationContractor.objects,
+            field_name='organization_customer__contractor'
+        )
 
     filter_class = Filter
     queryset = main_models.OrganizationProject.objects.prefetch_related(
@@ -85,6 +89,34 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     )
     serializer_class = main_serializers.OrganizationProjectSerializer
     serializer_read_class = main_serializers.OrganizationProjectReadSerializer
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'organization_customer_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'organization_contractor_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'ordering',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=MainBaseViewSet.ordering_fields),
+                default=MainBaseViewSet.ordering
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
         responses={
