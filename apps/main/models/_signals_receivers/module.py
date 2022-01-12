@@ -17,3 +17,11 @@ class ModuleSignalsReceiver(SignalsReceiver):
                 self.instance.start_date,
                 self.instance.deadline_date,
             )
+
+
+class FunPointTypeSignalsReceiver(SignalsReceiver):
+    instance: main_models.FunPointType
+
+
+class FunPointTypeDifficultyLevelSignalsReceiver(SignalsReceiver):
+    instance: main_models.FunPointTypeDifficultyLevel

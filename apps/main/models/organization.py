@@ -2,15 +2,15 @@ from typing import List, Optional
 
 import reversion
 from cacheops import invalidate_model
-from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 from mptt import models as mptt_models
 from mptt import querysets as mptt_querysets
 
-from project.contrib.db import get_sql_from_queryset
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User, Role
+from main.models import permissions as main_permissions
 
 __all__ = [
     'Organization',
@@ -25,7 +25,7 @@ __all__ = [
 
 
 @reversion.register(follow=['projects'])
-class Organization(ModelDiffMixin, DatesModelBase):
+class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
     name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     is_customer = models.BooleanField(default=False, verbose_name=_('это заказчик?'))
@@ -55,6 +55,9 @@ class Organization(ModelDiffMixin, DatesModelBase):
 
 
 class OrganizationCustomer(Organization):
+    permission_save = main_permissions.organization_customer_save
+    permission_delete = main_permissions.organization_customer_delete
+
     class QuerySet(Organization.QuerySet):
         def filter_by_user(self, user: User) -> 'OrganizationCustomer.QuerySet':
             if user.is_superuser or user.is_staff:
@@ -69,20 +72,19 @@ class OrganizationCustomer(Organization):
         def get_queryset(self) -> 'OrganizationCustomer.QuerySet':
             return super().get_queryset().filter(is_customer=True)
 
-    objects = Manager()
-
     class Meta:
         proxy = True
         ordering = ['name']
         verbose_name = _('организация заказчик')
         verbose_name_plural = _('организации заказчики')
 
-    def clean(self):
-        from main.models._signals_receivers.organization import OrganizationCustomerSignalsReceiver
-        OrganizationCustomerSignalsReceiver(self).validate()
+    objects = Manager()
 
 
 class OrganizationContractor(Organization):
+    permission_save = main_permissions.organization_contractor_save
+    permission_delete = main_permissions.organization_contractor_delete
+
     class QuerySet(Organization.QuerySet):
         def filter_by_user(self, user: User) -> 'OrganizationContractor.QuerySet':
             if user.is_superuser or user.is_staff:
@@ -95,17 +97,13 @@ class OrganizationContractor(Organization):
         def get_queryset(self) -> 'OrganizationContractor.QuerySet':
             return super().get_queryset().filter(is_contractor=True)
 
-    objects = Manager()
-
     class Meta:
         proxy = True
         ordering = ['name']
         verbose_name = _('организация исполнитель')
         verbose_name_plural = _('организации исполнители')
 
-    def clean(self):
-        from main.models._signals_receivers.organization import OrganizationContractorSignalsReceiver
-        OrganizationContractorSignalsReceiver(self).validate()
+    objects = Manager()
 
     def get_user_role(self, user: User) -> Optional[str]:
         if user.is_superuser:
@@ -114,7 +112,10 @@ class OrganizationContractor(Organization):
             return role.role
 
 
-class OrganizationContractorUserRole(models.Model):
+class OrganizationContractorUserRole(main_permissions.MainModelPermissionsMixin, models.Model):
+    permission_save = main_permissions.organization_contractor_user_role_save
+    permission_delete = main_permissions.organization_contractor_user_role_delete
+
     organization_contractor = models.ForeignKey(
         'main.OrganizationContractor', related_name='users_roles', on_delete=models.CASCADE,
         verbose_name=_('организация исполнитель'),
@@ -134,7 +135,10 @@ class OrganizationContractorUserRole(models.Model):
 
 
 @reversion.register(follow=['organization_customer'])
-class OrganizationProject(ModelDiffMixin, DatesModelBase):
+class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
+    permission_save = main_permissions.organization_project_save
+    permission_delete = main_permissions.organization_project_delete
+
     organization_customer = models.ForeignKey(
         'main.OrganizationCustomer', on_delete=models.CASCADE, related_name='projects',
         verbose_name=_('заказчик')
@@ -190,7 +194,10 @@ class OrganizationProject(ModelDiffMixin, DatesModelBase):
         return self.organization_customer.contractor.get_user_role(user)
 
 
-class OrganizationProjectUserRole(ModelDiffMixin, models.Model):
+class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, models.Model):
+    permission_save = main_permissions.organization_project_user_role_save
+    permission_delete = main_permissions.organization_project_user_role_delete
+
     organization_project = models.ForeignKey(
         'main.OrganizationProject', related_name='users_roles', on_delete=models.CASCADE,
         verbose_name=_('проект'),
@@ -209,8 +216,9 @@ class OrganizationProjectUserRole(ModelDiffMixin, models.Model):
         verbose_name_plural = _('роли пользователей')
 
     def clean(self):
-        from main.models._signals_receivers.project import OrganizationProjectUserRoleSignalsReceiver
-        OrganizationProjectUserRoleSignalsReceiver(self).validate()
+        if not OrganizationContractorUserRole.objects.filter(user=self.user).exists():
+            raise ValidationError(_('Пользователю не назначена роль в организации исполнителе'))
+        super().clean()
 
 
 class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase):

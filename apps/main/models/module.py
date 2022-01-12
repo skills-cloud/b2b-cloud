@@ -1,12 +1,13 @@
 import reversion
 from typing import Optional, List
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from acc.models import User
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
+from main.models.organization import OrganizationCustomer
 
 __all__ = [
     'FunPointType',
@@ -16,6 +17,8 @@ __all__ = [
     'Module',
     'ModulePositionLaborEstimate',
 ]
+
+from project.contrib.middleware.request import get_current_user
 
 
 @reversion.register(follow=['difficulty_levels', 'positions_labor_estimates'])
@@ -37,7 +40,12 @@ class FunPointType(ModelDiffMixin, DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User) -> 'FunPointType.QuerySet':
-            return self
+            if user.is_superuser:
+                return self
+            return self.filter(
+                models.Q(organization_customer__isnull=True)
+                | models.Q(organization_customer__in=OrganizationCustomer.objects.filter_by_user(user))
+            )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
@@ -54,6 +62,18 @@ class FunPointType(ModelDiffMixin, DatesModelBase):
         if self.organization_customer:
             name.append(self.organization_customer.name)
         return ' / '.join([*name, self.name])
+
+    def clean(self):
+        if not self.check_update_delete_perms():
+            raise PermissionDenied(_('У вас нет прав'))
+
+    def delete(self, **kwargs):
+        if not self.check_update_delete_perms():
+            raise PermissionDenied(_('У вас нет прав'))
+        return super().delete(**kwargs)
+
+    def check_update_delete_perms(self, user: Optional[User] = None) -> bool:
+        return self.organization_customer.contractor.check_update_delete_nested_objects_perms(user)
 
 
 @reversion.register()
@@ -76,7 +96,7 @@ class FunPointTypeDifficultyLevel(ModelDiffMixin, DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
-            return self
+            return self.filter(fun_point_type__in=FunPointType.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         ...
@@ -88,6 +108,18 @@ class FunPointTypeDifficultyLevel(ModelDiffMixin, DatesModelBase):
             self.fun_point_type.name,
             self.name,
         ])
+
+    def clean(self):
+        if not self.check_update_delete_perms():
+            raise PermissionDenied(_('У вас нет прав'))
+
+    def delete(self, **kwargs):
+        if not self.check_update_delete_perms():
+            raise PermissionDenied(_('У вас нет прав'))
+        return super().delete(**kwargs)
+
+    def check_update_delete_perms(self, user: Optional[User] = None) -> bool:
+        return self.fun_point_type.check_update_delete_perms(user)
 
 
 @reversion.register()

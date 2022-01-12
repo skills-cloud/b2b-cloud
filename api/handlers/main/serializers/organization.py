@@ -80,7 +80,7 @@ class OrganizationContractorReadSerializer(OrganizationContractorSerializer):
         return instance.get_user_role(self.context['request'].user)
 
 
-class OrganizationProjectSerializer(ModelSerializer):
+class OrganizationProjectSerializer(ModelSerializerWithCallCleanMethod):
     organization_customer_id = PrimaryKeyRelatedIdField(
         queryset=main_models.OrganizationCustomer.objects,
         label=main_models.OrganizationProject._meta.get_field('organization_customer').verbose_name,

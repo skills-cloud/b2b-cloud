@@ -72,7 +72,9 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
                     'organization_contractor_id': row['organization_contractor_id'],
                 }
                 main_models.OrganizationContractorUserRole.objects.filter(**role_kwargs).delete()
-                main_models.OrganizationContractorUserRole.objects.create(**role_kwargs, role=row['role'])
+                role_instance = main_models.OrganizationContractorUserRole(**role_kwargs, role=row['role'])
+                role_instance.clean()
+                role_instance.save()
         if organizations_projects_roles is not None:
             for row in organizations_projects_roles:
                 role_kwargs = {
@@ -80,7 +82,9 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
                     'organization_project_id': row['organization_project_id'],
                 }
                 main_models.OrganizationProjectUserRole.objects.filter(**role_kwargs).delete()
-                main_models.OrganizationProjectUserRole.objects.create(**role_kwargs, role=row['role'])
+                role_instance = main_models.OrganizationProjectUserRole(**role_kwargs, role=row['role'])
+                role_instance.clean()
+                role_instance.save()
         return self.instance
 
     def is_valid(self, raise_exception=False):
@@ -88,7 +92,7 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
         organizations_contractors_roles = self.validated_data.pop('organizations_contractors_roles', None)
         organizations_projects_roles = self.validated_data.pop('organizations_projects_roles', None)
         if not self.context['request'].user.is_superuser and not organizations_contractors_roles:
-            raise ValidationError({'organizations_contractors_roles': _('Это поле обязательно')})
+            raise ValidationError({'organizations_contractors_roles': _('Обязательное поле.')})
         super().is_valid(raise_exception=raise_exception)
         if organizations_contractors_roles is not None:
             self.validated_data['organizations_contractors_roles'] = organizations_contractors_roles

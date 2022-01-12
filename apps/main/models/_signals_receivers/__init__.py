@@ -13,7 +13,10 @@ from main.models._signals_receivers.project import (
     OrganizationProjectSignalsReceiver,
     OrganizationProjectUserRoleSignalsReceiver
 )
-from main.models._signals_receivers.module import ModuleSignalsReceiver
+from main.models._signals_receivers.module import (
+    ModuleSignalsReceiver,
+    FunPointTypeSignalsReceiver
+)
 
 __all__ = ['setup']
 
@@ -57,6 +60,10 @@ class OrganizationProjectUserRoleReceiver(Receiver):
     receiver_class = OrganizationProjectUserRoleSignalsReceiver
 
 
+class FunPointTypeReceiver(Receiver):
+    receiver_class = FunPointTypeSignalsReceiver
+
+
 class RequestRequirementReceiver:
     def post_save(self, sender, instance: main_models.RequestRequirement, **kwargs) -> None:
         request_requirement.request_requirement_time_slots_setup(instance)
@@ -80,6 +87,8 @@ def setup():
         [main_models.OrganizationCustomer, OrganizationCustomerReceiver],
         [main_models.OrganizationProject, OrganizationProjectReceiver],
         [main_models.OrganizationProjectUserRole, OrganizationProjectUserRoleReceiver],
+        [main_models.FunPointType, FunPointTypeReceiver],
+
         [main_models.RequestRequirement, RequestRequirementReceiver],
         [main_models.RequestRequirementCv, RequestRequirementCvReceiver],
         [main_models.Module, ModuleReceiver],
