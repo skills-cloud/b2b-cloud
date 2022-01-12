@@ -5,9 +5,10 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from acc.models import User
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
+from acc.models import User
 from main.models.organization import OrganizationCustomer
+from main.models import permissions as main_permissions
 
 __all__ = [
     'FunPointType',
@@ -22,7 +23,10 @@ from project.contrib.middleware.request import get_current_user
 
 
 @reversion.register(follow=['difficulty_levels', 'positions_labor_estimates'])
-class FunPointType(ModelDiffMixin, DatesModelBase):
+class FunPointType(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
+    permission_save = main_permissions.fun_point_type_save
+    permission_delete = main_permissions.fun_point_type_delete
+
     organization_customer = models.ForeignKey(
         'main.OrganizationCustomer', related_name='fun_points_types', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name=_('заказчик'), help_text=_('глобальный тип, если оставить это поле пустым')
@@ -63,21 +67,12 @@ class FunPointType(ModelDiffMixin, DatesModelBase):
             name.append(self.organization_customer.name)
         return ' / '.join([*name, self.name])
 
-    def clean(self):
-        if not self.check_update_delete_perms():
-            raise PermissionDenied(_('У вас нет прав'))
-
-    def delete(self, **kwargs):
-        if not self.check_update_delete_perms():
-            raise PermissionDenied(_('У вас нет прав'))
-        return super().delete(**kwargs)
-
-    def check_update_delete_perms(self, user: Optional[User] = None) -> bool:
-        return self.organization_customer.contractor.check_update_delete_nested_objects_perms(user)
-
 
 @reversion.register()
-class FunPointTypeDifficultyLevel(ModelDiffMixin, DatesModelBase):
+class FunPointTypeDifficultyLevel(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
+    permission_save = main_permissions.fun_point_type_difficulty_level_save
+    permission_delete = main_permissions.fun_point_type_difficulty_level_delete
+
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='difficulty_levels', on_delete=models.CASCADE,
         verbose_name=_('уровень сложности')
@@ -109,21 +104,12 @@ class FunPointTypeDifficultyLevel(ModelDiffMixin, DatesModelBase):
             self.name,
         ])
 
-    def clean(self):
-        if not self.check_update_delete_perms():
-            raise PermissionDenied(_('У вас нет прав'))
-
-    def delete(self, **kwargs):
-        if not self.check_update_delete_perms():
-            raise PermissionDenied(_('У вас нет прав'))
-        return super().delete(**kwargs)
-
-    def check_update_delete_perms(self, user: Optional[User] = None) -> bool:
-        return self.fun_point_type.check_update_delete_perms(user)
-
 
 @reversion.register()
-class FunPointTypePositionLaborEstimate(ModelDiffMixin, DatesModelBase):
+class FunPointTypePositionLaborEstimate(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
+    permission_save = main_permissions.fun_point_type_difficulty_level_save
+    permission_delete = main_permissions.fun_point_type_difficulty_level_delete
+
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='positions_labor_estimates', on_delete=models.CASCADE,
         verbose_name=_('уровень сложности')

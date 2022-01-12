@@ -29,7 +29,7 @@ def _get_user(user: User):
 
 
 ########################################################################################################################
-# OrganizationContractor
+# Organization Contractor
 ########################################################################################################################
 def organization_contractor_save(instance: 'main_models.OrganizationContractor', user: Optional[User] = None) -> bool:
     user = _get_user(user)
@@ -83,7 +83,7 @@ def organization_contractor_user_role_delete(
 
 
 ########################################################################################################################
-# OrganizationCustomer
+# Organization Customer
 ########################################################################################################################
 def organization_customer_save(instance: 'main_models.OrganizationCustomer', user: Optional[User] = None) -> bool:
     return organization_contractor_nested_objects_save(instance.contractor, user)
@@ -94,17 +94,10 @@ def organization_customer_delete(instance: 'main_models.OrganizationCustomer', u
 
 
 ########################################################################################################################
-# OrganizationProject
+# Organization Project
 ########################################################################################################################
 def organization_project_save(instance: 'main_models.OrganizationProject', user: Optional[User] = None) -> bool:
-    user = _get_user(user)
-    if user.is_superuser or instance.get_user_role(user) in [
-        Role.ADMIN,
-        Role.PFM,
-        Role.PM,
-    ]:
-        return True
-    return False
+    return organization_customer_save(instance.organization_customer, user)
 
 
 def organization_project_delete(instance: 'main_models.OrganizationProject', user: Optional[User] = None) -> bool:
@@ -137,3 +130,43 @@ def organization_project_user_role_delete(
         user: Optional[User] = None
 ) -> bool:
     return organization_project_nested_objects_delete(instance.organization_project, user)
+
+
+########################################################################################################################
+# Fun Point
+########################################################################################################################
+
+def fun_point_type_save(instance: 'main_models.FunPointType', user: Optional[User] = None) -> bool:
+    return organization_customer_save(instance.organization_customer, user)
+
+
+def fun_point_type_delete(instance: 'main_models.FunPointType', user: Optional[User] = None) -> bool:
+    return fun_point_type_save(instance, user)
+
+
+def fun_point_type_difficulty_level_save(
+        instance: 'main_models.FunPointTypeDifficultyLevel',
+        user: Optional[User] = None
+) -> bool:
+    return fun_point_type_save(instance.fun_point_type, user)
+
+
+def fun_point_type_difficulty_level_delete(
+        instance: 'main_models.FunPointTypeDifficultyLevel',
+        user: Optional[User] = None
+) -> bool:
+    return fun_point_type_difficulty_level_save(instance, user)
+
+
+def fun_point_type_position_labor_estimate_save(
+        instance: 'main_models.FunPointTypePositionLaborEstimate',
+        user: Optional[User] = None
+) -> bool:
+    return fun_point_type_save(instance.fun_point_type, user)
+
+
+def fun_point_type_position_labor_estimate_delete(
+        instance: 'main_models.FunPointTypePositionLaborEstimate',
+        user: Optional[User] = None
+) -> bool:
+    return fun_point_type_position_labor_estimate_save(instance, user)
