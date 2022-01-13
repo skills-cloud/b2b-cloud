@@ -367,7 +367,7 @@ class CvPositionCompetence(DatesModelBase):
         'cv.CvPosition', on_delete=models.CASCADE, related_name='competencies',
         verbose_name=_('должность / роль')
     )
-    competence = models.ForeignKey('dictionary.Competence', on_delete=models.RESTRICT, verbose_name=_('компетенция'))
+    competence = models.ForeignKey('dictionary.Competence', on_delete=models.CASCADE, verbose_name=_('компетенция'))
     year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
 
     class Meta:

@@ -298,7 +298,7 @@ class RequestRequirementCompetence(DatesModelBase):
         'main.RequestRequirement', on_delete=models.CASCADE, related_name='competencies',
         verbose_name=_('требование проектного запроса')
     )
-    competence = models.ForeignKey('dictionary.Competence', on_delete=models.RESTRICT, verbose_name=_('компетенция'))
+    competence = models.ForeignKey('dictionary.Competence', on_delete=models.CASCADE, verbose_name=_('компетенция'))
     experience_years = models.IntegerField(
         null=True, blank=True, choices=ExperienceYears.choices,
         verbose_name=_('опыт лет')
