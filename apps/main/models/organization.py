@@ -30,11 +30,6 @@ class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, D
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     is_customer = models.BooleanField(default=False, verbose_name=_('это заказчик?'))
     is_contractor = models.BooleanField(default=False, verbose_name=_('это исполнитель?'))
-    contractor = models.ForeignKey(
-        'main.OrganizationContractor', blank=True, null=True, on_delete=models.SET_NULL,
-        verbose_name=_('исполнитель для этого заказчика'),
-        help_text=_('имеет значение только для организаций заказчиков')
-    )
 
     class Meta:
         ordering = ['name']
@@ -59,17 +54,15 @@ class OrganizationCustomer(Organization):
     permission_delete = main_permissions.organization_customer_delete
 
     class QuerySet(Organization.QuerySet):
-        def filter_by_user(self, user: User) -> 'OrganizationCustomer.QuerySet':
+        def filter_by_user(self, user: User):
+            return self
+            # TODO OrganizationCustomer.QuerySet.filter_by_user
             if user.is_superuser or user.is_staff:
                 return self
-            return self.filter(
-                contractor__in=OrganizationContractorUserRole.objects
-                    .filter(user=user)
-                    .values('organization_contractor')
-            )
+            return self.filter(projects_as_customer__in=OrganizationProject.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
-        def get_queryset(self) -> 'OrganizationCustomer.QuerySet':
+        def get_queryset(self):
             return super().get_queryset().filter(is_customer=True)
 
     class Meta:
@@ -86,7 +79,7 @@ class OrganizationContractor(Organization):
     permission_delete = main_permissions.organization_contractor_delete
 
     class QuerySet(Organization.QuerySet):
-        def filter_by_user(self, user: User) -> 'OrganizationContractor.QuerySet':
+        def filter_by_user(self, user: User):
             if user.is_superuser or user.is_staff:
                 return self
             return self.filter(
@@ -94,7 +87,7 @@ class OrganizationContractor(Organization):
             )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
-        def get_queryset(self) -> 'OrganizationContractor.QuerySet':
+        def get_queryset(self):
             return super().get_queryset().filter(is_contractor=True)
 
     class Meta:
@@ -106,7 +99,7 @@ class OrganizationContractor(Organization):
     objects = Manager()
 
     def get_user_role(self, user: User) -> Optional[str]:
-        if user.is_superuser:
+        if user.is_superuser or user.is_staff:
             return Role.ADMIN.value
         if role := self.users_roles.filter(user=user).first():
             return role.role
@@ -133,6 +126,11 @@ class OrganizationContractorUserRole(main_permissions.MainModelPermissionsMixin,
         verbose_name = _('роль пользователя')
         verbose_name_plural = _('роли пользователей')
 
+    def clean(self):
+        if self.role == Role.ADMIN:
+            raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
+        super().clean()
+
 
 @reversion.register(follow=['organization_customer'])
 class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
@@ -140,9 +138,14 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
     permission_delete = main_permissions.organization_project_delete
 
     organization_customer = models.ForeignKey(
-        'main.OrganizationCustomer', on_delete=models.CASCADE, related_name='projects',
+        'main.OrganizationCustomer', on_delete=models.CASCADE, related_name='projects_as_customer',
         verbose_name=_('заказчик')
     )
+    organization_contractor = models.ForeignKey(
+        'main.OrganizationContractor', on_delete=models.CASCADE, related_name='projects_as_contractor',
+        verbose_name=_('исполнитель')
+    )
+
     name = models.CharField(max_length=500, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     goals = models.TextField(null=True, blank=True, verbose_name=_('цели'))
@@ -164,18 +167,18 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         verbose_name_plural = _('проекты')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'OrganizationProject.QuerySet':
+        def filter_by_user(self, user: User):
             if user.is_superuser or user.is_staff:
                 return self
             return self.filter(
-                models.Q(organization_customer__contractor__in=OrganizationContractor.objects.filter_by_user(user))
+                models.Q(organization_contractor__in=OrganizationContractor.objects.filter_by_user(user))
                 | models.Q(id__in=OrganizationProjectUserRole.objects.filter(user=user).values('organization_project'))
             )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
-            return ['organization_customer', 'industry_sector', 'manager', 'modules']
+            return ['organization_customer', 'organization_contractor', 'industry_sector', 'manager', 'modules']
 
     objects = Manager()
 
@@ -187,11 +190,11 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         return len(self.modules.all())
 
     def get_user_role(self, user: User) -> Optional[str]:
-        if user.is_superuser:
+        if user.is_superuser or user.is_staff:
             return Role.ADMIN.value
         if role := self.users_roles.filter(user=user).first():
             return role.role
-        return self.organization_customer.contractor.get_user_role(user)
+        return self.organization_contractor.get_user_role(user)
 
 
 class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, models.Model):
@@ -216,7 +219,12 @@ class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, Mo
         verbose_name_plural = _('роли пользователей')
 
     def clean(self):
-        if not OrganizationContractorUserRole.objects.filter(user=self.user).exists():
+        if self.role == Role.ADMIN:
+            raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
+        if not OrganizationContractorUserRole.objects.filter(
+                organization_contractor=self.organization_project.organization_contractor,
+                user=self.user
+        ).exists():
             raise ValidationError(_('Пользователю не назначена роль в организации исполнителе'))
         super().clean()
 

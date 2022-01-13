@@ -1,13 +1,12 @@
 import reversion
 from typing import Optional, List
 
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User
-from main.models.organization import OrganizationCustomer
 from main.models import permissions as main_permissions
 
 __all__ = [
@@ -43,9 +42,8 @@ class FunPointType(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, D
         verbose_name_plural = _('модули / типы функциональных точек')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'FunPointType.QuerySet':
-            if user.is_superuser:
-                return self
+        def filter_by_user(self, user: User):
+            from main.models.organization import OrganizationCustomer
             return self.filter(
                 models.Q(organization_customer__isnull=True)
                 | models.Q(organization_customer__in=OrganizationCustomer.objects.filter_by_user(user))
@@ -131,7 +129,7 @@ class FunPointTypePositionLaborEstimate(main_permissions.MainModelPermissionsMix
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
-            return self
+            return self.filter(fun_point_type__in=FunPointType.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         ...
@@ -140,7 +138,10 @@ class FunPointTypePositionLaborEstimate(main_permissions.MainModelPermissionsMix
 
 
 @reversion.register(follow=['fun_points', 'positions_labor_estimates'])
-class Module(ModelDiffMixin, DatesModelBase):
+class Module(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
+    permission_save = main_permissions.module_save
+    permission_delete = main_permissions.module_delete
+
     organization_project = models.ForeignKey(
         'main.OrganizationProject', related_name='modules', on_delete=models.CASCADE,
         verbose_name=_('проект')
@@ -171,8 +172,9 @@ class Module(ModelDiffMixin, DatesModelBase):
         verbose_name_plural = _('модули')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'Module.QuerySet':
-            return self
+        def filter_by_user(self, user: User):
+            from main.models.organization import OrganizationProject
+            return self.filter(organization_project__in=OrganizationProject.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
@@ -206,7 +208,10 @@ class Module(ModelDiffMixin, DatesModelBase):
 
 
 @reversion.register()
-class ModuleFunPoint(ModelDiffMixin, DatesModelBase):
+class ModuleFunPoint(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
+    permission_save = main_permissions.module_fun_point_save
+    permission_delete = main_permissions.module_fun_point_delete
+
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='fun_points', on_delete=models.RESTRICT,
         verbose_name=_('тип')
@@ -233,7 +238,7 @@ class ModuleFunPoint(ModelDiffMixin, DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
-            return self
+            return self.filter(module__in=Module.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         ...
@@ -250,6 +255,7 @@ class ModuleFunPoint(ModelDiffMixin, DatesModelBase):
                 'Ф-я точка должна принадлежать компании заказчику проекта модуля или быть общеупотребимой')})
         if self.difficulty_level and self.fun_point_type_id != self.difficulty_level.fun_point_type_id:
             raise ValidationError({'difficulty_level': _('Уровень сложности должен принадлежать этому типу ф-й точки')})
+        super().clean()
 
     @property
     def difficulty_factor(self) -> float:
@@ -259,7 +265,10 @@ class ModuleFunPoint(ModelDiffMixin, DatesModelBase):
 
 
 @reversion.register()
-class ModulePositionLaborEstimate(DatesModelBase):
+class ModulePositionLaborEstimate(main_permissions.MainModelPermissionsMixin, DatesModelBase):
+    permission_save = main_permissions.module_position_labor_estimate_save
+    permission_delete = main_permissions.module_position_labor_estimate_delete
+
     module = models.ForeignKey(
         'main.Module', related_name='positions_labor_estimates', on_delete=models.CASCADE,
         verbose_name=_('модуль')
@@ -282,7 +291,7 @@ class ModulePositionLaborEstimate(DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
-            return self
+            return self.filter(module__in=Module.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         ...

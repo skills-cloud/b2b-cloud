@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -9,10 +10,12 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 
+logger = logging.getLogger(__name__)
+
 
 def custom_exception_handler(exc, context):
-    if settings.DEBUG and not isinstance(exc, (PermissionDenied, Http404)):
-        raise exc
+    # if settings.DEBUG and not isinstance(exc, (PermissionDenied, Http404)):
+    #     raise exc
     response = exception_handler(exc, context)
     if not response:
         response = Response(status=status.HTTP_400_BAD_REQUEST)
@@ -20,6 +23,12 @@ def custom_exception_handler(exc, context):
         'status': 'error',
         'details': response.data,
     }
+    if req := context.get('request'):
+        response.data['request'] = {
+            'data': req.data,
+            'method': req.method,
+            'url': req.get_full_path(),
+        }
     if isinstance(exc, (exceptions.APIException, Http404, PermissionDenied, RestrictedError)):
         if isinstance(exc, PermissionDenied):
             response.status_code = status.HTTP_403_FORBIDDEN
@@ -36,4 +45,6 @@ def custom_exception_handler(exc, context):
         else:
             details = str(details)
     response.data['details'] = details
+    response.data['response'] = {'status_code': response.status_code}
+    logger.error('API Exception', extra=response.data)
     return response

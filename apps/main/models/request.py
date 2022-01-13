@@ -99,7 +99,7 @@ class Request(DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
-            return self
+            return self.filter(module__in=Module.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
@@ -266,6 +266,15 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
         verbose_name = _('анкета')
         verbose_name_plural = _('анкеты')
 
+    class QuerySet(models.QuerySet):
+        def filter_by_user(self, user: User):
+            return self.filter(request_requirement__in=RequestRequirement.objects.filter_by_user(user))
+
+    class Manager(models.Manager.from_queryset(QuerySet)):
+        ...
+
+    objects = Manager()
+
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
@@ -357,7 +366,7 @@ class TimeSheetRow(DatesModelBase):
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
-            return self
+            return self.filter(request__in=Request.objects.filter_by_user(user))
 
     class Manager(models.Manager.from_queryset(QuerySet)):
         @transaction.atomic

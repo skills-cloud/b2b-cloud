@@ -24,18 +24,8 @@ class OrganizationAdminFilter(ModelAutocompleteFilter):
 
 @admin.register(main_models.Organization, main_models.OrganizationCustomer)
 class OrganizationAdmin(MainBaseAdmin):
-    class OrganizationContractorFilter(OrganizationAdminFilter):
-        model_queryset = main_models.OrganizationContractor.objects
-        title = main_models.Organization._meta.get_field('contractor').verbose_name
-        lookup_field = 'contractor'
-        parameter_name = 'contractor'
-
-    list_filter = ['is_customer', 'is_contractor', OrganizationContractorFilter]
-    list_display = MainBaseAdmin.list_display + ['contractor', 'is_customer', 'is_contractor', ]
-    autocomplete_fields = ['contractor']
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).prefetch_related('contractor')
+    list_filter = ['is_customer', 'is_contractor']
+    list_display = MainBaseAdmin.list_display + ['is_customer', 'is_contractor']
 
 
 @admin.register(main_models.OrganizationContractor)
@@ -52,6 +42,12 @@ class OrganizationContractorAdmin(OrganizationAdmin):
 
 @admin.register(main_models.OrganizationProject)
 class OrganizationProjectAdmin(MainBaseAdmin):
+    class OrganizationContractorFilter(OrganizationAdminFilter):
+        model_queryset = main_models.OrganizationContractor.objects
+        title = main_models.OrganizationProject._meta.get_field('organization_contractor').verbose_name
+        lookup_field = 'organization_contractor'
+        parameter_name = 'contractor'
+
     class UserRoleInline(admin.TabularInline):
         model = main_models.OrganizationProjectUserRole
         autocomplete_fields = ['user']
@@ -60,8 +56,8 @@ class OrganizationProjectAdmin(MainBaseAdmin):
     inlines = [
         UserRoleInline
     ]
-    list_display = ['id', 'organization_customer', 'name']
-    list_filter = ['organization_customer', 'industry_sector']
+    list_display = ['id', 'organization_customer', 'organization_contractor', 'name']
+    list_filter = ['organization_customer', OrganizationContractorFilter, 'industry_sector']
     autocomplete_fields = ['organization_customer', 'industry_sector', 'manager', ]
 
     def get_queryset(self, request):
