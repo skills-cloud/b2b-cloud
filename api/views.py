@@ -3,6 +3,8 @@ from rest_framework.permissions import SAFE_METHODS
 
 class ViewSetFilteredByUserMixin:
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return super().get_queryset().none()
         return super().get_queryset().filter_by_user(self.request.user)
 
 
