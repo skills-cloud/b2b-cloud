@@ -44,17 +44,29 @@ class UserManager(models.Manager.from_queryset(UserQuerySet), BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
+class Gender(models.TextChoices):
+    MALE = 'M', _('Мужской')
+    FEMALE = 'F', _('Женский')
+    OTHER = '-', _('Другой')
+
+
 @reversion.register()
 class User(AbstractUser):
     backend = 'django.contrib.auth.backends.ModelBackend'
 
     UPLOAD_TO = 'user'
     username = None
+
     email = models.EmailField(_('email address'), unique=True)
-    first_name = models.CharField(_('first name'), max_length=150)
-    last_name = models.CharField(_('last name'), max_length=150)
+    first_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('имя'))
+    middle_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('отчество'))
+    last_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('фамилия'))
 
     photo = models.ImageField(null=True, blank=True, upload_to=upload_to)
+
+    gender = models.CharField(max_length=1, null=True, blank=True, choices=Gender.choices, verbose_name=_('пол'))
+    birth_date = models.DateField(null=True, blank=True, verbose_name=_('дата рождения'))
+    phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('телефон'))
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

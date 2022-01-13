@@ -56,7 +56,7 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name',
+            'id', 'email', 'first_name', 'middle_name', 'last_name', 'gender', 'birth_date', 'phone',
             'organization_contractors_roles', 'organization_projects_roles',
         ]
 
