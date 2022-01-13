@@ -77,8 +77,10 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
 class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     class Filter(filters.FilterSet):
-        organization_customer_id = filters.ModelChoiceFilter(queryset=main_models.OrganizationCustomer.objects)
-        organization_contractor_id = filters.ModelChoiceFilter(
+        organization_customer_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationCustomer.objects
+        )
+        organization_contractor_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationContractor.objects,
             field_name='organization_customer__contractor'
         )
