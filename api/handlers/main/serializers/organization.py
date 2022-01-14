@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from rest_framework import serializers
 from rest_framework.relations import RelatedField
 from rest_framework_recursive.fields import RecursiveField
+from drf_yasg.utils import swagger_serializer_method
 
 from acc.models import User
 from dictionary import models as dictionary_models
@@ -108,15 +109,27 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
 
     modules_count = serializers.IntegerField(read_only=True)
     current_user_role = serializers.SerializerMethodField()
+    requests_count_total = serializers.SerializerMethodField()
+    requests_count_by_status = serializers.SerializerMethodField()
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
             'organization_customer', 'organization_contractor', 'industry_sector', 'manager', 'modules_count',
-            'current_user_role',
+            'current_user_role', 'requests_count_total', 'requests_count_by_status',
         ]
 
     def get_current_user_role(self, instance: main_models.OrganizationProject) -> Optional[str]:
         return instance.get_user_role(self.context['request'].user)
+
+    @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
+    def get_requests_count_total(self, instance: main_models.OrganizationProject) -> int:
+        return instance.get_requests_count()
+
+    @swagger_serializer_method(serializer_or_field=serializers.DictField)
+    def get_requests_count_by_status(self, instance: main_models.OrganizationProject) -> Dict[str, int]:
+        return {
+            c: instance.get_requests_count(c) for c in main_models.RequestStatus.values
+        }
 
 
 class OrganizationProjectInlineSerializer(OrganizationProjectReadSerializer):
