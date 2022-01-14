@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 import reversion
 from cacheops import invalidate_model
@@ -11,6 +11,9 @@ from mptt import querysets as mptt_querysets
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User, Role
 from main.models import permissions as main_permissions
+
+if TYPE_CHECKING:
+    from main.models.request import Request, RequestStatus
 
 __all__ = [
     'Organization',
@@ -195,6 +198,17 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         if role := self.users_roles.filter(user=user).first():
             return role.role
         return self.organization_contractor.get_user_role(user)
+
+    def get_requests(self, status: Optional['RequestStatus'] = None) -> List['Request']:
+        requests = []
+        for module in self.modules.all():
+            for request in module.requests.all():
+                if not status or status == request.status:
+                    requests.append(request)
+        return requests
+
+    def get_requests_count(self, status: Optional['RequestStatus'] = None) -> int:
+        return len(self.get_requests(status))
 
 
 class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, models.Model):
