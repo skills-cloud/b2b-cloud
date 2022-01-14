@@ -56,7 +56,7 @@ class LoginView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         request_serializer = self.get_serializer(data=request.data)
         request_serializer.is_valid(raise_exception=False)
-        if settings.DEBUG:
+        if settings.DEBUG or settings.DJANGO_TEST:
             user = User.objects.filter(email=request_serializer.data.get('email')).first()
         else:
             user = authenticate(

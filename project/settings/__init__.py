@@ -11,6 +11,9 @@ DJANGO_SILK_ENABLED = False
 environ.setdefault('DJANGO_ENV', 'dev')
 DJANGO_ENV = environ['DJANGO_ENV']
 
+environ.setdefault('DJANGO_TEST', '')
+DJANGO_TEST = environ['DJANGO_TEST']
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = 'django-insecure-2mw(kwl1g&-t28nvir)jby8mk%%64ad$@v4_mnkgz&m=$-92kn'
