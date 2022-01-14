@@ -133,7 +133,11 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
 
 
 class OrganizationProjectInlineSerializer(OrganizationProjectReadSerializer):
-    pass
+    class Meta(OrganizationProjectReadSerializer.Meta):
+        fields = [
+            f for f in OrganizationProjectReadSerializer.Meta.fields
+            if f not in ['current_user_role', 'modules_count', 'requests_count_total', 'requests_count_by_status']
+        ]
 
 
 class OrganizationProjectCardItemBaseSerializer(ModelSerializerWithCallCleanMethod):
