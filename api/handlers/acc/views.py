@@ -19,10 +19,14 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from django_filters import rest_framework as filters
 
+from acc.models import User, Role
 from main import models as main_models
-from acc.models import User
 from api.backends import FilterBackend
-from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
+from api.filters import (
+    OrderingFilterNullsLast,
+    ModelMultipleChoiceCommaSeparatedFilter,
+    MultipleChoiceCommaSeparatedFilter,
+)
 from api.serializers import StatusSerializer
 from api.permissions import AllowAny, IsAuthenticated
 from api.views import ViewSetFilteredByUserMixin, ReadWriteSerializersMixin
@@ -169,6 +173,10 @@ class UserManageViewSet(ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, M
             queryset=main_models.OrganizationProject.objects,
             field_name='organizations_projects_roles__organization_project'
         )
+        role = MultipleChoiceCommaSeparatedFilter(
+            choices=Role.choices,
+            field_name='organizations_contractors_roles__role'
+        )
 
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = User.objects.prefetch_related(
@@ -202,6 +210,14 @@ class UserManageViewSet(ViewSetFilteredByUserMixin, ReadWriteSerializersMixin, M
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
+                required=False
+            ),
+            openapi.Parameter(
+                'role',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING),
                 description='`ANY`',
                 required=False
             ),
