@@ -1,3 +1,9 @@
+import random
+
+import datetime
+
+import hashlib
+
 from typing import List
 
 import reversion
@@ -7,6 +13,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 from project.contrib.db.upload_to import upload_to
+from project.msg import get_email_message_by_template
 
 
 class Role(models.TextChoices):
@@ -79,6 +86,18 @@ class User(AbstractUser):
     @property
     def roles(self) -> List[Role]:
         return [role.role for role in self.system_roles.all()]
+
+    def generate_password(self) -> str:
+        password = hashlib.md5(str(datetime.datetime.now()).encode()).hexdigest()[:random.randint(8, 12)]
+        self.set_password(password)
+        self.save()
+        return password
+
+    def generate_password_and_send_invite(self):
+        password = self.generate_password()
+        msg = get_email_message_by_template('registration_invite', user=self, password=password)
+        msg.to = [self.email]
+        msg.send()
 
 
 class UserSystemRole(models.Model):

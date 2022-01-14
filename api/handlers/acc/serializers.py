@@ -62,6 +62,7 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
 
     @transaction.atomic
     def save(self, **kwargs):
+        is_new = self.instance is None
         organizations_contractors_roles = self.validated_data.pop('organizations_contractors_roles', None)
         organizations_projects_roles = self.validated_data.pop('organizations_projects_roles', None)
         super().save(**kwargs)
@@ -85,6 +86,8 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
                 role_instance = main_models.OrganizationProjectUserRole(**role_kwargs, role=row['role'])
                 role_instance.clean()
                 role_instance.save()
+        if is_new:
+            self.instance.generate_password_and_send_invite()
         return self.instance
 
     def is_valid(self, raise_exception=False):
