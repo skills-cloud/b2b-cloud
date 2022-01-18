@@ -41,7 +41,7 @@ class OrganizationCustomerSerializer(OrganizationSerializer):
     class Meta(OrganizationSerializer.Meta):
         model = main_models.OrganizationCustomer
         fields = [f for f in OrganizationSerializer.Meta.fields if f not in [
-            'is_customer', 'is_contractor',
+            'is_contractor',
         ]]
         read_only_fields = None
 
