@@ -33,10 +33,6 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     class Filter(filters.FilterSet):
         contractor_id = filters.ModelChoiceFilter(queryset=main_models.OrganizationContractor.objects)
 
-        class Meta:
-            model = main_models.Organization
-            fields = ['is_customer', 'is_contractor', 'contractor_id']
-
     filterset_class = Filter
     queryset = main_models.Organization.objects
     serializer_class = main_serializers.OrganizationSerializer
@@ -152,6 +148,10 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
 
 class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
+    class Filter(OrganizationViewSet.Filter):
+        is_contractor = filters.BooleanFilter()
+
+    filter_class = Filter
     queryset = main_models.OrganizationCustomer.objects
     serializer_class = main_serializers.OrganizationCustomerSerializer
     serializer_read_class = main_serializers.OrganizationCustomerReadSerializer
@@ -163,6 +163,12 @@ class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'is_contractor',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
                 required=False,
             ),
             openapi.Parameter(
