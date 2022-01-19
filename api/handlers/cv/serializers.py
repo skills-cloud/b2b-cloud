@@ -13,7 +13,7 @@ from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 from api.handlers.acc.serializers import UserInlineSerializer
-from api.handlers.main.serializers.organization import OrganizationSerializer, OrganizationProjectSerializer
+from api.handlers.main.serializers.organization import OrganizationProjectSerializer
 
 if TYPE_CHECKING:
     from api.handlers.main.serializers.request import RequestRequirementReadSerializer
@@ -213,7 +213,7 @@ class CvCareerFileReadSerializer(CvCareerFileSerializer):
 
 class CvCareerSerializer(CvLinkedObjectBaseSerializer):
     organization_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects
+        queryset=dictionary_models.Organization.objects
     )
     position_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Position.objects,
@@ -237,7 +237,7 @@ class CvCareerSerializer(CvLinkedObjectBaseSerializer):
 
 
 class CvCareerReadSerializer(CvCareerSerializer):
-    organization = OrganizationSerializer(read_only=True)
+    organization = dictionary_serializers.OrganizationSerializer(read_only=True)
     position = dictionary_serializers.PositionSerializer(read_only=True)
     projects = OrganizationProjectSerializer(read_only=True, many=True)
     files = CvCareerFileReadSerializer(read_only=True, many=True)
@@ -254,7 +254,7 @@ class CvCareerReadSerializer(CvCareerSerializer):
 
 class CvProjectSerializer(CvLinkedObjectBaseSerializer):
     organization_id = PrimaryKeyRelatedIdField(
-        queryset=main_models.Organization.objects
+        queryset=dictionary_models.Organization.objects
     )
     position_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Position.objects
@@ -277,7 +277,7 @@ class CvProjectSerializer(CvLinkedObjectBaseSerializer):
 
 
 class CvProjectReadSerializer(CvProjectSerializer):
-    organization = OrganizationSerializer(read_only=True)
+    organization = dictionary_serializers.OrganizationSerializer(read_only=True)
     position = dictionary_serializers.PositionSerializer(read_only=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True)
     competencies = dictionary_serializers.CompetenceInlineSerializer(many=True, read_only=True)

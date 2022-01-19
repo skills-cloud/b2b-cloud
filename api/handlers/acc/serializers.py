@@ -50,14 +50,16 @@ class UserOrganizationProjectRoleSerializer(ModelSerializerWithCallCleanMethod):
 class UserManageSerializer(ModelSerializerWithCallCleanMethod):
     organization_contractors_roles = UserOrganizationContractorRoleSerializer(
         source='organizations_contractors_roles', many=True, allow_null=True, required=False)
-    organization_projects_roles = UserOrganizationProjectRoleSerializer(
-        source='organizations_projects_roles', many=True, allow_null=True, required=False)
+
+    # organization_projects_roles = UserOrganizationProjectRoleSerializer(
+    #     source='organizations_projects_roles', many=True, allow_null=True, required=False)
 
     class Meta:
         model = User
         fields = [
             'id', 'email', 'first_name', 'middle_name', 'last_name', 'gender', 'birth_date', 'phone',
-            'organization_contractors_roles', 'organization_projects_roles',
+            'is_active', 'password', 'organization_contractors_roles',
+            # 'organization_projects_roles',
         ]
 
     @transaction.atomic
@@ -66,6 +68,9 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
         organizations_contractors_roles = self.validated_data.pop('organizations_contractors_roles', None)
         organizations_projects_roles = self.validated_data.pop('organizations_projects_roles', None)
         super().save(**kwargs)
+        if password := self.validated_data.pop('password', None):
+            self.instance.set_password(password)
+            self.instance.save()
         if organizations_contractors_roles is not None:
             for row in organizations_contractors_roles:
                 role_kwargs = {
@@ -101,6 +106,11 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
             self.validated_data['organizations_contractors_roles'] = organizations_contractors_roles
         if organizations_projects_roles is not None:
             self.validated_data['organizations_projects_roles'] = organizations_projects_roles
+
+    def to_representation(self, instance: User):
+        ret = super().to_representation(instance)
+        ret['password'] = None
+        return ret
 
 
 class UserManageReadSerializer(UserManageSerializer):

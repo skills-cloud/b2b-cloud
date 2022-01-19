@@ -40,7 +40,7 @@ class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, D
         verbose_name_plural = _('организации')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'Organization.QuerySet':
+        def filter_by_user(self, user: User):
             return self
 
     class Manager(models.Manager.from_queryset(QuerySet)):

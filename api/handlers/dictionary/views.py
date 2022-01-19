@@ -90,6 +90,11 @@ class IndustrySectorViewSet(DictionaryBaseViewSet):
     serializer_class = dictionary_serializers.IndustrySectorSerializer
 
 
+class OrganizationViewSet(DictionaryBaseViewSet):
+    queryset = dictionary_models.Organization.objects
+    serializer_class = dictionary_serializers.OrganizationSerializer
+
+
 class PhysicalLimitationViewSet(DictionaryBaseViewSet):
     queryset = dictionary_models.PhysicalLimitation.objects
     serializer_class = dictionary_serializers.PhysicalLimitationSerializer

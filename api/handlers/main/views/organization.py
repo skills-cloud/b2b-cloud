@@ -35,7 +35,7 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
     filterset_class = Filter
     queryset = main_models.Organization.objects
-    serializer_class = main_serializers.OrganizationSerializer
+    serializer_class = main_serializers.MainOrganizationSerializer
 
     @swagger_auto_schema(
         manual_parameters=[

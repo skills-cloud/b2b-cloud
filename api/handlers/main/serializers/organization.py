@@ -14,7 +14,7 @@ from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 
 __all__ = [
-    'OrganizationSerializer',
+    'MainOrganizationSerializer',
     'OrganizationCustomerSerializer',
     'OrganizationCustomerReadSerializer',
     'OrganizationContractorSerializer',
@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 
-class OrganizationSerializer(ModelSerializerWithCallCleanMethod):
+class MainOrganizationSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.Organization
         fields = [
@@ -37,10 +37,10 @@ class OrganizationSerializer(ModelSerializerWithCallCleanMethod):
         ]
 
 
-class OrganizationCustomerSerializer(OrganizationSerializer):
-    class Meta(OrganizationSerializer.Meta):
+class OrganizationCustomerSerializer(MainOrganizationSerializer):
+    class Meta(MainOrganizationSerializer.Meta):
         model = main_models.OrganizationCustomer
-        fields = [f for f in OrganizationSerializer.Meta.fields if f not in [
+        fields = [f for f in MainOrganizationSerializer.Meta.fields if f not in [
             'is_contractor',
         ]]
         read_only_fields = None
@@ -54,10 +54,10 @@ class OrganizationCustomerReadSerializer(OrganizationCustomerSerializer):
         ...
 
 
-class OrganizationContractorSerializer(OrganizationSerializer):
-    class Meta(OrganizationSerializer.Meta):
+class OrganizationContractorSerializer(MainOrganizationSerializer):
+    class Meta(MainOrganizationSerializer.Meta):
         model = main_models.OrganizationContractor
-        fields = [f for f in OrganizationSerializer.Meta.fields if f not in [
+        fields = [f for f in MainOrganizationSerializer.Meta.fields if f not in [
             'is_contractor',
         ]]
 
@@ -102,8 +102,8 @@ class OrganizationProjectSerializer(ModelSerializerWithCallCleanMethod):
 
 
 class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
-    organization_customer = OrganizationSerializer(read_only=True)
-    organization_contractor = OrganizationSerializer(read_only=True)
+    organization_customer = MainOrganizationSerializer(read_only=True)
+    organization_contractor = MainOrganizationSerializer(read_only=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
     manager = UserInlineSerializer(read_only=True, allow_null=True)
 

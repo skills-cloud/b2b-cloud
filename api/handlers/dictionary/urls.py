@@ -19,6 +19,7 @@ router.register('education-graduate', views.EducationGraduateViewSet)
 router.register('position', views.PositionViewSet)
 router.register('physical-limitation', views.PhysicalLimitationViewSet)
 router.register('industry-sector', views.IndustrySectorViewSet)
+router.register('organization', views.OrganizationViewSet)
 router.register('competence-tree', views.CompetenceTreeViewSet)
 router.register('competence', views.CompetenceViewSet)
 

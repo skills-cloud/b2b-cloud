@@ -5,7 +5,7 @@ from main import models as main_models
 from api.fields import PrimaryKeyRelatedIdField
 from api.serializers import ModelSerializerWithCallCleanMethod
 from api.handlers.dictionary import serializers as dictionary_serializers
-from api.handlers.main.serializers.organization import OrganizationSerializer
+from api.handlers.main.serializers.organization import MainOrganizationSerializer
 
 __all__ = [
     'FunPointTypeDifficultyLevelWriteSerializer',
@@ -84,7 +84,7 @@ class FunPointTypeWriteSerializer(ModelSerializerWithCallCleanMethod):
 
 
 class FunPointTypeReadSerializer(FunPointTypeWriteSerializer):
-    organization_customer = OrganizationSerializer(read_only=True)
+    organization_customer = MainOrganizationSerializer(read_only=True)
     difficulty_levels = FunPointTypeDifficultyLevelInlineSerializer(many=True, read_only=True)
     positions_labor_estimates = FunPointTypePositionLaborEstimateInlineSerializer(many=True, read_only=True)
 

@@ -15,7 +15,7 @@ class UserAdmin(UserAdminBase):
         extra = 0
 
     inlines = [UserRoleInline]
-    list_display = ('id', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser')
     search_fields = ('first_name', 'last_name', 'email')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
 

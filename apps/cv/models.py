@@ -113,7 +113,7 @@ class CV(DatesModelBase):
         verbose_name_plural = _('анкеты')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'CV.QuerySet':
+        def filter_by_user(self, user: User):
             if user.is_superuser or user.is_staff:
                 return self
             return self.filter(organization_contractor__in=OrganizationContractor.objects.filter_by_user(user))
@@ -424,7 +424,10 @@ class CvCareer(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='career', verbose_name=_('анкета'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
-    organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    organization = models.ForeignKey(
+        'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('заказчик')
+    )
     title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
@@ -478,7 +481,9 @@ class CvProject(DatesModelBase):
     name = models.CharField(max_length=1000, verbose_name=_('название'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
-    organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    organization = models.ForeignKey(
+        'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('заказчик'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT,
         verbose_name=_('должность / роль')
