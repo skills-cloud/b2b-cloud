@@ -155,25 +155,16 @@ class RequestSerializer(ModelSerializerWithCallCleanMethod):
         queryset=main_models.Module.objects,
         label=main_models.Request._meta.get_field('module').verbose_name,
     )
-    manager_id = PrimaryKeyRelatedIdField(
+    manager_rm_id = PrimaryKeyRelatedIdField(
         queryset=User.objects, allow_null=True, required=False,
-        label=main_models.Request._meta.get_field('manager').verbose_name,
-    )
-    resource_manager_id = PrimaryKeyRelatedIdField(
-        queryset=User.objects, allow_null=True, required=False,
-        label=main_models.Request._meta.get_field('resource_manager').verbose_name,
-    )
-    recruiter_id = PrimaryKeyRelatedIdField(
-        queryset=User.objects, allow_null=True, required=False,
-        label=main_models.Request._meta.get_field('recruiter').verbose_name,
+        label=main_models.Request._meta.get_field('manager_rm').verbose_name,
     )
 
     class Meta:
         model = main_models.Request
         fields = [
             'id', 'module_id', 'type_id', 'industry_sector_id',
-            'manager_id', 'resource_manager_id', 'recruiter_id', 'title', 'description', 'status', 'priority',
-            'start_date', 'deadline_date',
+            'manager_rm_id', 'title', 'description', 'status', 'priority', 'start_date', 'deadline_date',
         ]
 
 
@@ -181,9 +172,7 @@ class RequestReadSerializer(RequestSerializer):
     module = ModuleInlineSerializer(read_only=True)
     type = RequestTypeSerializer(read_only=True, allow_null=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
-    manager = UserInlineSerializer(read_only=True, allow_null=True)
-    resource_manager = UserInlineSerializer(read_only=True, allow_null=True)
-    recruiter = UserInlineSerializer(read_only=True, allow_null=True)
+    manager_rm = UserInlineSerializer(read_only=True, allow_null=True)
 
     requirements = RequestRequirementReadSerializer(many=True, read_only=True)
 
@@ -191,9 +180,7 @@ class RequestReadSerializer(RequestSerializer):
 
     class Meta(RequestSerializer.Meta):
         fields = RequestSerializer.Meta.fields + [
-            'module', 'type', 'industry_sector',
-            'manager', 'resource_manager', 'recruiter',
-            'requirements_count_sum', 'requirements',
+            'module', 'type', 'industry_sector', 'manager_rm', 'requirements_count_sum', 'requirements',
         ]
 
     def get_requirements_count_sum(self, instance: main_models.Request) -> int:

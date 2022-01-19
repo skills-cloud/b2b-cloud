@@ -4,17 +4,19 @@ from django.utils.translation import gettext, gettext_lazy as _
 from django.contrib.auth.models import Group as GroupBase
 
 from acc import models as acc_models
+from main.models.organization import OrganizationContractorUserRole
 
 admin.site.unregister(GroupBase)
 
 
 @admin.register(acc_models.User)
 class UserAdmin(UserAdminBase):
-    class UserRoleInline(admin.TabularInline):
-        model = acc_models.UserSystemRole
+    class OrganizationContractorUserRoleInline(admin.TabularInline):
+        model = OrganizationContractorUserRole
+        autocomplete_fields = ['organization_contractor']
         extra = 0
 
-    inlines = [UserRoleInline]
+    inlines = [OrganizationContractorUserRoleInline]
     list_display = ('id', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser')
     search_fields = ('first_name', 'last_name', 'email')
     list_filter = ('is_active', 'is_staff', 'is_superuser')

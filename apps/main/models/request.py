@@ -79,17 +79,9 @@ class Request(DatesModelBase):
     )
     start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
     deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
-    manager = models.ForeignKey(
-        'acc.User', related_name='requests_as_manager', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('руководитель проекта')
-    )
-    resource_manager = models.ForeignKey(
-        'acc.User', null=True, blank=True, on_delete=models.RESTRICT,
-        related_name='requests_as_resource_manager', verbose_name=_('рес. менеджер')
-    )
-    recruiter = models.ForeignKey(
-        'acc.User', null=True, blank=True, on_delete=models.RESTRICT,
-        related_name='requests_as_recruiter', verbose_name=_('отв. рекрутер')
+    manager_rm = models.ForeignKey(
+        'acc.User', related_name='requests_as_rm', null=True, blank=True,
+        on_delete=models.RESTRICT, verbose_name=_('РМ')
     )
 
     class Meta:
@@ -113,7 +105,7 @@ class Request(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related_self(cls) -> List[str]:
             return [
-                'type', 'industry_sector', 'resource_manager', 'recruiter',
+                'type', 'industry_sector', 'manager_rm',
             ]
 
         @classmethod
@@ -138,12 +130,19 @@ class Request(DatesModelBase):
 
     objects = Manager()
 
+    def clean(self):
+        if self.manager_rm:
+            if not self.module.organization_project.organization_contractor.get_user_role(self.manager_rm):
+                raise ValidationError({
+                    'manager_rm_id': _('Этот пользователь не может быть РМ для этого запроса')
+                })
+
     def __str__(self):
         return f'{self.id_verbose} < {self.id} / {self.module_id} >'
 
     @property
     def id_verbose(self) -> str:
-        return str(self.id).zfill(7)
+        return str(self.id).zfill(7) if self.id else None
 
     @property
     def requirements_count(self) -> int:

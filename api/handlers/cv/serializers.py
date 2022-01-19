@@ -10,7 +10,7 @@ from main import models as main_models
 from dictionary import models as dictionary_models
 from cv import models as cv_models
 from api.fields import PrimaryKeyRelatedIdField
-from api.serializers import ModelSerializer
+from api.serializers import ModelSerializer, ModelSerializerWithCallCleanMethod
 from api.handlers.dictionary import serializers as dictionary_serializers
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.main.serializers.organization import OrganizationProjectSerializer
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from api.handlers.main.serializers.request import RequestRequirementReadSerializer
 
 
-class FileModelBaseSerializer(ModelSerializer):
+class FileModelBaseSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         fields = ['id', 'file', 'file_name']
 
@@ -30,7 +30,7 @@ class FileModelBaseSerializer(ModelSerializer):
         return data
 
 
-class CvLinkedObjectBaseSerializer(ModelSerializer):
+class CvLinkedObjectBaseSerializer(ModelSerializerWithCallCleanMethod):
     cv_id = PrimaryKeyRelatedIdField(queryset=cv_models.CV.objects)
 
     class Meta:
@@ -128,7 +128,7 @@ class CvPositionFileReadSerializer(CvPositionFileSerializer):
         fields = CvPositionFileSerializer.Meta.fields + ['file_name', 'file_ext', 'file_size']
 
 
-class CvPositionCompetenceSerializer(ModelSerializer):
+class CvPositionCompetenceSerializer(ModelSerializerWithCallCleanMethod):
     competence_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Competence.objects,
     )
@@ -394,9 +394,12 @@ class CvSetPhotoSerializer(ModelSerializer):
         fields = ['id', 'photo']
 
 
-class CvDetailWriteSerializer(ModelSerializer):
+class CvDetailWriteSerializer(ModelSerializerWithCallCleanMethod):
     organization_contractor_id = PrimaryKeyRelatedIdField(
         queryset=main_models.OrganizationContractor.objects,
+    )
+    manager_rm_id = PrimaryKeyRelatedIdField(
+        queryset=User.objects, allow_null=True, required=False,
     )
     user_id = PrimaryKeyRelatedIdField(
         queryset=User.objects,
@@ -430,11 +433,10 @@ class CvDetailWriteSerializer(ModelSerializer):
     class Meta:
         model = cv_models.CV
         fields = [
-            'id', 'organization_contractor_id', 'first_name', 'middle_name', 'last_name', 'photo', 'gender',
-            'birth_date', 'is_resource_owner',
-            'user_id', 'country_id', 'city_id', 'citizenship_id', 'days_to_contact', 'time_to_contact_from',
-            'time_to_contact_to', 'price', 'physical_limitations_ids', 'types_of_employment_ids',
-            'linked_ids',
+            'id', 'organization_contractor_id', 'manager_rm_id', 'first_name', 'middle_name', 'last_name', 'photo',
+            'gender', 'birth_date', 'user_id', 'country_id', 'city_id', 'citizenship_id', 'days_to_contact',
+            'time_to_contact_from', 'time_to_contact_to', 'price', 'physical_limitations_ids',
+            'types_of_employment_ids', 'linked_ids',
         ]
 
 
@@ -443,6 +445,7 @@ class CvDetailReadBaseSerializer(CvDetailWriteSerializer):
 
 
 class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
+    manager_rm = UserInlineSerializer(read_only=True, allow_null=True)
     user = UserInlineSerializer(read_only=True, allow_null=True)
     country = dictionary_serializers.CountrySerializer(read_only=True, allow_null=True)
     city = dictionary_serializers.CitySerializer(read_only=True, allow_null=True)
@@ -464,7 +467,7 @@ class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
 
     class Meta(CvDetailReadBaseSerializer.Meta):
         fields = CvDetailReadBaseSerializer.Meta.fields + [
-            'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
+            'manager_rm', 'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment',
             'contacts', 'time_slots', 'positions', 'career', 'projects', 'education', 'certificates', 'files',
             'rating',
         ]

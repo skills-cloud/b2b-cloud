@@ -97,7 +97,7 @@ class ModuleWriteSerializer(ModelSerializerWithCallCleanMethod):
     )
     manager_id = PrimaryKeyRelatedIdField(
         queryset=User.objects, allow_null=True, required=False,
-        label=main_models.Request._meta.get_field('manager').verbose_name,
+        label=main_models.Module._meta.get_field('manager').verbose_name,
     )
 
     class Meta:

@@ -109,14 +109,14 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     )
     list_filter = [
         OrganizationContractorFilter,
-        'gender', 'is_verified', 'is_resource_owner',
+        'gender', 'is_verified',
         CountryFilter, CityFilter, CitizenshipFilter,
         ['birth_date', DateRangeFilter],
         ['created_at', DateTimeRangeFilter],
         ['updated_at', DateTimeRangeFilter],
     ]
     autocomplete_fields = [
-        'organization_contractor', 'user', 'country', 'city', 'citizenship', 'physical_limitations',
+        'organization_contractor', 'manager_rm', 'user', 'country', 'city', 'citizenship', 'physical_limitations',
         'types_of_employment', 'linked',
     ]
     search_fields = [

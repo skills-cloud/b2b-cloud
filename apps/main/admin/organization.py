@@ -58,7 +58,7 @@ class OrganizationProjectAdmin(MainBaseAdmin):
     ]
     list_display = ['id', 'organization_customer', 'organization_contractor', 'name']
     list_filter = ['organization_customer', OrganizationContractorFilter, 'industry_sector']
-    autocomplete_fields = ['organization_customer', 'industry_sector', 'manager', ]
+    autocomplete_fields = ['organization_customer', 'industry_sector', 'manager_pfm', 'manager_pm', ]
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related(
