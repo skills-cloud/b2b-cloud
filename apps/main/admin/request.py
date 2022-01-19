@@ -59,7 +59,7 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
     ]
     list_display = [
         'id_verbose', '_organization', '_organization_project', 'module', 'requirements_count', 'status', 'priority',
-        'type',     'deadline_date', 'created_at', 'updated_at',
+        'type', 'deadline_date', 'created_at', 'updated_at',
     ]
     list_filter = [
         'priority',
@@ -74,7 +74,7 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         ['updated_at', DateTimeRangeFilter],
     ]
     autocomplete_fields = [
-        'type', 'industry_sector', 'module', 'resource_manager', 'recruiter', 'manager',
+        'type', 'industry_sector', 'module', 'manager_rm',
     ]
     search_fields = ['id', 'description']
     readonly_fields = ['created_at', 'updated_at']

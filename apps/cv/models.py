@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from typing import TYPE_CHECKING, Optional, List, Dict
 from pathlib import Path
 
@@ -57,6 +58,10 @@ class CV(DatesModelBase):
         'main.OrganizationContractor', related_name='cv_list', null=True, blank=True, on_delete=models.SET_NULL,
         verbose_name=_('организация исполнитель')
     )
+    manager_rm = models.ForeignKey(
+        'acc.User', related_name='cv_list_as_rm', null=True, blank=True,
+        on_delete=models.RESTRICT, verbose_name=_('РМ')
+    )
     user = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='cv_list',
         verbose_name=_('пользователь')
@@ -89,7 +94,6 @@ class CV(DatesModelBase):
     )
     time_to_contact_from = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / с'))
     time_to_contact_to = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / по'))
-    is_resource_owner = models.BooleanField(default=False, verbose_name=_('владелец ресурса'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
     about = models.TextField(null=True, blank=True, verbose_name=_('доп. информация'))
     price = models.FloatField(null=True, blank=True, verbose_name=_('ставка'))
@@ -113,7 +117,7 @@ class CV(DatesModelBase):
         verbose_name_plural = _('анкеты')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'CV.QuerySet':
+        def filter_by_user(self, user: User):
             if user.is_superuser or user.is_staff:
                 return self
             return self.filter(organization_contractor__in=OrganizationContractor.objects.filter_by_user(user))
@@ -125,7 +129,7 @@ class CV(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
-                'info', 'organization_contractor',
+                'info', 'organization_contractor', 'manager_rm',
                 'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked',
 
                 'files',
@@ -171,6 +175,17 @@ class CV(DatesModelBase):
 
     objects = Manager()
 
+    def clean(self):
+        if self.manager_rm:
+            if not self.organization_contractor:
+                raise ValidationError({
+                    'organization_contractor_id': _('Чтобы задать РМа необходимо задать организацию исполнителя')
+                })
+            if self.organization_contractor.get_user_role(self.manager_rm) is None:
+                raise ValidationError({
+                    'manager_rm_id': _('Этот пользователь не может быть РМ для этой анкеты')
+                })
+
     def __str__(self):
         return f'%s < {self.id_verbose} >' % ' '.join(
             getattr(self, k)
@@ -180,7 +195,7 @@ class CV(DatesModelBase):
 
     @property
     def id_verbose(self) -> str:
-        return str(self.id).zfill(7)
+        return str(self.id).zfill(7) if self.id else None
 
     @property
     def contact_count(self) -> int:
@@ -424,7 +439,10 @@ class CvCareer(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='career', verbose_name=_('анкета'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
-    organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    organization = models.ForeignKey(
+        'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('заказчик')
+    )
     title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
@@ -478,7 +496,9 @@ class CvProject(DatesModelBase):
     name = models.CharField(max_length=1000, verbose_name=_('название'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
-    organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    organization = models.ForeignKey(
+        'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('заказчик'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT,
         verbose_name=_('должность / роль')

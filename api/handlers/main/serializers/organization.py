@@ -14,7 +14,7 @@ from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 
 __all__ = [
-    'OrganizationSerializer',
+    'MainOrganizationSerializer',
     'OrganizationCustomerSerializer',
     'OrganizationCustomerReadSerializer',
     'OrganizationContractorSerializer',
@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 
-class OrganizationSerializer(ModelSerializerWithCallCleanMethod):
+class MainOrganizationSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.Organization
         fields = [
@@ -37,10 +37,10 @@ class OrganizationSerializer(ModelSerializerWithCallCleanMethod):
         ]
 
 
-class OrganizationCustomerSerializer(OrganizationSerializer):
-    class Meta(OrganizationSerializer.Meta):
+class OrganizationCustomerSerializer(MainOrganizationSerializer):
+    class Meta(MainOrganizationSerializer.Meta):
         model = main_models.OrganizationCustomer
-        fields = [f for f in OrganizationSerializer.Meta.fields if f not in [
+        fields = [f for f in MainOrganizationSerializer.Meta.fields if f not in [
             'is_contractor',
         ]]
         read_only_fields = None
@@ -54,10 +54,10 @@ class OrganizationCustomerReadSerializer(OrganizationCustomerSerializer):
         ...
 
 
-class OrganizationContractorSerializer(OrganizationSerializer):
-    class Meta(OrganizationSerializer.Meta):
+class OrganizationContractorSerializer(MainOrganizationSerializer):
+    class Meta(MainOrganizationSerializer.Meta):
         model = main_models.OrganizationContractor
-        fields = [f for f in OrganizationSerializer.Meta.fields if f not in [
+        fields = [f for f in MainOrganizationSerializer.Meta.fields if f not in [
             'is_contractor',
         ]]
 
@@ -88,24 +88,30 @@ class OrganizationProjectSerializer(ModelSerializerWithCallCleanMethod):
         queryset=dictionary_models.IndustrySector.objects, allow_null=True, required=False,
         label=main_models.OrganizationProject._meta.get_field('industry_sector').verbose_name,
     )
-    manager_id = PrimaryKeyRelatedIdField(
+    manager_pfm_id = PrimaryKeyRelatedIdField(
         queryset=User.objects, allow_null=True, required=False,
-        label=main_models.OrganizationProject._meta.get_field('manager').verbose_name,
+        label=main_models.OrganizationProject._meta.get_field('manager_pfm').verbose_name,
+    )
+    manager_pm_id = PrimaryKeyRelatedIdField(
+        queryset=User.objects, allow_null=True, required=False,
+        label=main_models.OrganizationProject._meta.get_field('manager_pm').verbose_name,
     )
 
     class Meta:
         model = main_models.OrganizationProject
         fields = [
-            'id', 'organization_customer_id', 'organization_contractor_id', 'industry_sector_id', 'manager_id',
-            'name', 'description', 'goals', 'plan_description', 'date_from', 'date_to', 'created_at', 'updated_at',
+            'id', 'organization_customer_id', 'organization_contractor_id', 'industry_sector_id',
+            'manager_pfm_id', 'manager_pm_id', 'name', 'description', 'goals', 'plan_description', 'date_from',
+            'date_to', 'created_at', 'updated_at',
         ]
 
 
 class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
-    organization_customer = OrganizationSerializer(read_only=True)
-    organization_contractor = OrganizationSerializer(read_only=True)
+    organization_customer = MainOrganizationSerializer(read_only=True)
+    organization_contractor = MainOrganizationSerializer(read_only=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
-    manager = UserInlineSerializer(read_only=True, allow_null=True)
+    manager_pfm_id = UserInlineSerializer(read_only=True, allow_null=True)
+    manager_pm_id = UserInlineSerializer(read_only=True, allow_null=True)
 
     modules_count = serializers.IntegerField(read_only=True)
     current_user_role = serializers.SerializerMethodField()
@@ -114,8 +120,8 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
-            'organization_customer', 'organization_contractor', 'industry_sector', 'manager', 'modules_count',
-            'current_user_role', 'requests_count_total', 'requests_count_by_status',
+            'organization_customer', 'organization_contractor', 'industry_sector', 'manager_pfm_id', 'manager_pm_id',
+            'modules_count', 'current_user_role', 'requests_count_total', 'requests_count_by_status',
         ]
 
     def get_current_user_role(self, instance: main_models.OrganizationProject) -> Optional[str]:

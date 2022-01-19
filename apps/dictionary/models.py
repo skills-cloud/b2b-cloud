@@ -123,3 +123,10 @@ class IndustrySector(DictionaryModelBase):
         ordering = ['sorting', 'name']
         verbose_name = _('отрасль')
         verbose_name_plural = _('отрасли')
+
+
+class Organization(DictionaryModelBase):
+    class Meta:
+        ordering = ['sorting', 'name']
+        verbose_name = _('компания')
+        verbose_name_plural = _('компании')

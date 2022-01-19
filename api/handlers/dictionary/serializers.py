@@ -76,6 +76,11 @@ class IndustrySectorSerializer(DictionaryBaseSerializer):
         model = dictionary_models.IndustrySector
 
 
+class OrganizationSerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.Organization
+
+
 class CompetenceInlineSerializer(CompetenceSerializer):
     class Meta(CompetenceSerializer.Meta):
         fields = ['id', 'parent_id', 'name', 'description', 'is_verified']

@@ -73,6 +73,11 @@ class IndustrySectorAdmin(DictionaryBaseAdmin):
     pass
 
 
+@admin.register(dictionary_models.Organization)
+class OrganizationAdmin(DictionaryBaseAdmin):
+    pass
+
+
 @admin.register(dictionary_models.Competence)
 class CompetenceAdmin(DraggableMPTTAdmin):
     search_fields = ['name']

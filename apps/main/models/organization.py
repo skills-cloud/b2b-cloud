@@ -40,7 +40,7 @@ class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, D
         verbose_name_plural = _('организации')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'Organization.QuerySet':
+        def filter_by_user(self, user: User):
             return self
 
     class Manager(models.Manager.from_queryset(QuerySet)):
@@ -129,10 +129,10 @@ class OrganizationContractorUserRole(main_permissions.MainModelPermissionsMixin,
         verbose_name = _('роль пользователя')
         verbose_name_plural = _('роли пользователей')
 
-    def clean(self):
-        if self.role == Role.ADMIN:
-            raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
-        super().clean()
+    # def clean(self):
+    #     if self.role == Role.ADMIN:
+    #         raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
+    #     super().clean()
 
 
 @reversion.register(follow=['organization_customer'])
@@ -159,9 +159,13 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         'dictionary.IndustrySector', related_name='organizations_projects', null=True, blank=True,
         on_delete=models.RESTRICT, verbose_name=_('отрасль')
     )
-    manager = models.ForeignKey(
-        'acc.User', related_name='organizations_projects_as_manager', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('руководитель проекта')
+    manager_pfm = models.ForeignKey(
+        'acc.User', related_name='organizations_projects_as_pfm', null=True, blank=True,
+        on_delete=models.RESTRICT, verbose_name=_('РПП')
+    )
+    manager_pm = models.ForeignKey(
+        'acc.User', related_name='organizations_projects_as_pm', null=True, blank=True,
+        on_delete=models.RESTRICT, verbose_name=_('РП')
     )
 
     class Meta:
@@ -181,12 +185,21 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
     class Manager(models.Manager.from_queryset(QuerySet)):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
-            return ['organization_customer', 'organization_contractor', 'industry_sector', 'manager', 'modules']
+            return [
+                'organization_customer', 'organization_contractor', 'industry_sector', 'manager_pfm', 'manager_pm',
+                'users_roles', 'modules', 'modules__requests',
+            ]
 
     objects = Manager()
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.manager_pfm and self.organization_contractor.get_user_role(self.manager_pfm) != Role.PFM:
+            raise ValidationError({'manager_pfm_id': _('Этот пользователь не может быть РПП на этом проекте')})
+        if self.manager_pm and self.organization_contractor.get_user_role(self.manager_pm) != Role.PM:
+            raise ValidationError({'manager_pm_id': _('Этот пользователь не может быть РП на этом проекте')})
 
     @property
     def modules_count(self) -> int:
@@ -233,8 +246,8 @@ class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, Mo
         verbose_name_plural = _('роли пользователей')
 
     def clean(self):
-        if self.role == Role.ADMIN:
-            raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
+        # if self.role == Role.ADMIN:
+        #     raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
         if not OrganizationContractorUserRole.objects.filter(
                 organization_contractor=self.organization_project.organization_contractor,
                 user=self.user

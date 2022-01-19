@@ -25,7 +25,7 @@ class Role(models.TextChoices):
 
 
 class UserQuerySet(models.QuerySet):
-    def filter_by_user(self, user: 'User') -> 'UserQuerySet':
+    def filter_by_user(self, user: 'User'):
         return self
 
 
