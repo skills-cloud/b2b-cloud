@@ -92,6 +92,7 @@ django-reversion = "^4.0.0"
 django-admin-autocomplete-filter = "^0.7"
 django-nested-admin = "^3.3.3"
 django-silk = "^4.1.0"
+sentry-sdk = "^1.5.2"
 
 
 [build-system]

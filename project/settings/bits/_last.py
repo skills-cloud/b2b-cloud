@@ -1,4 +1,6 @@
-from project.settings import BASE_DIR
+from project.settings import BASE_DIR, SENTRY_DSN
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -108,3 +110,14 @@ if DJANGO_SILK_ENABLED:
 SILENCED_SYSTEM_CHECKS = [
     'debug_toolbar.W006',
 ]
+
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )

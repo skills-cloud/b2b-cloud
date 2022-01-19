@@ -1,3 +1,8 @@
+from os import environ
+
+environ.setdefault('SENTRY_DSN', '')
+SENTRY_DSN = environ['SENTRY_DSN']
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
