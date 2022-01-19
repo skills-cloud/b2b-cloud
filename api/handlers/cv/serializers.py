@@ -1,3 +1,5 @@
+import datetime
+
 from typing import TYPE_CHECKING, Type
 from pathlib import Path
 from typing import Dict
@@ -174,8 +176,9 @@ class CvPositionSerializer(CvLinkedObjectBaseSerializer):
         ]
 
     def to_internal_value(self, data: Dict):
-        if 'year_started' not in data and data.get('years'):
+        if 'year_started' not in data and data.get('years', None):
             data['year_started'] = timezone.now().year - data['years']
+        if 'years' in data:
             del data['years']
         return data
 
