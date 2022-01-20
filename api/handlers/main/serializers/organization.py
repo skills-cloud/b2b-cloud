@@ -117,14 +117,17 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     manager_pm = UserInlineSerializer(read_only=True, allow_null=True)
 
     modules_count = serializers.IntegerField(read_only=True)
-    current_user_role = serializers.SerializerMethodField()
-    requests_count_total = serializers.SerializerMethodField()
-    requests_count_by_status = serializers.SerializerMethodField()
+    current_user_role = serializers.SerializerMethodField(read_only=True)
+    requests_count_total = serializers.SerializerMethodField(read_only=True)
+    requests_count_by_status = serializers.SerializerMethodField(read_only=True)
+    requests_requirements_count_total = serializers.SerializerMethodField(read_only=True)
+    requests_requirements_count_by_status = serializers.SerializerMethodField(read_only=True)
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
             'organization_customer', 'organization_contractor', 'industry_sector', 'manager_pfm', 'manager_pm',
             'modules_count', 'current_user_role', 'requests_count_total', 'requests_count_by_status',
+            'requests_requirements_count_total', 'requests_requirements_count_by_status',
         ]
 
     def get_current_user_role(self, instance: main_models.OrganizationProject) -> Optional[str]:
@@ -137,7 +140,19 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     @swagger_serializer_method(serializer_or_field=serializers.DictField)
     def get_requests_count_by_status(self, instance: main_models.OrganizationProject) -> Dict[str, int]:
         return {
-            c: instance.get_requests_count(c) for c in main_models.RequestStatus.values
+            c: instance.get_requests_count(c)
+            for c in main_models.RequestStatus.values
+        }
+
+    @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
+    def get_requests_requirements_count_total(self, instance: main_models.OrganizationProject) -> int:
+        return instance.get_requests_requirements_count()
+
+    @swagger_serializer_method(serializer_or_field=serializers.DictField)
+    def get_requests_requirements_count_by_status(self, instance: main_models.OrganizationProject) -> Dict[str, int]:
+        return {
+            c: instance.get_requests_requirements_count(c)
+            for c in main_models.RequestRequirementStatus.values
         }
 
 
