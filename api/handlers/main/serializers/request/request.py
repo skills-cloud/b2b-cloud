@@ -126,14 +126,14 @@ class RequestRequirementReadSerializer(RequestRequirementSerializer):
 
     competencies = RequestRequirementCompetenceReadSerializer(many=True, read_only=True)
 
+    status = serializers.CharField(read_only=True)
+
     cv_list_ids = serializers.ListField(read_only=True)
     cv_list = RequestRequirementCvReadSerializer(source='cv_links', many=True, read_only=True)
 
     class Meta(RequestRequirementSerializer.Meta):
         fields = RequestRequirementSerializer.Meta.fields + [
-            'position', 'type_of_employment', 'work_location_city',
-            'competencies',
-            'cv_list_ids', 'cv_list',
+            'position', 'status', 'type_of_employment', 'work_location_city', 'competencies', 'cv_list_ids', 'cv_list',
         ]
 
 
