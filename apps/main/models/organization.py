@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 
-@reversion.register(follow=['projects'])
+@reversion.register()
 class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
     name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
@@ -52,6 +52,7 @@ class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, D
         return self.name
 
 
+@reversion.register(follow=['projects_as_customer'])
 class OrganizationCustomer(Organization):
     permission_save = main_permissions.organization_customer_save
     permission_delete = main_permissions.organization_customer_delete
@@ -77,6 +78,7 @@ class OrganizationCustomer(Organization):
     objects = Manager()
 
 
+@reversion.register(follow=['projects_as_contractor'])
 class OrganizationContractor(Organization):
     permission_save = main_permissions.organization_contractor_save
     permission_delete = main_permissions.organization_contractor_delete

@@ -1,5 +1,6 @@
 from typing import Optional, Dict
 
+from django.forms import model_to_dict
 from rest_framework import serializers
 from rest_framework.relations import RelatedField
 from rest_framework_recursive.fields import RecursiveField
@@ -29,19 +30,26 @@ __all__ = [
 
 
 class MainOrganizationSerializer(ModelSerializerWithCallCleanMethod):
+    current_user_role = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = main_models.Organization
         fields = [
             'id', 'name', 'description', 'is_customer', 'is_contractor',
-            'created_at', 'updated_at',
+            'created_at', 'updated_at', 'current_user_role',
         ]
+
+    def get_current_user_role(self, instance: main_models.Organization) -> Optional[str]:
+        if not instance.is_contractor:
+            return None
+        return main_models.OrganizationContractor(**model_to_dict(instance)).get_user_role(self.context['request'].user)
 
 
 class OrganizationCustomerSerializer(MainOrganizationSerializer):
     class Meta(MainOrganizationSerializer.Meta):
         model = main_models.OrganizationCustomer
         fields = [f for f in MainOrganizationSerializer.Meta.fields if f not in [
-            'is_contractor',
+            'is_customer',
         ]]
         read_only_fields = None
 
@@ -66,13 +74,8 @@ class OrganizationContractorSerializer(MainOrganizationSerializer):
 
 
 class OrganizationContractorReadSerializer(OrganizationContractorSerializer):
-    current_user_role = serializers.SerializerMethodField()
-
     class Meta(OrganizationContractorSerializer.Meta):
-        fields = OrganizationContractorSerializer.Meta.fields + ['current_user_role']
-
-    def get_current_user_role(self, instance: main_models.OrganizationContractor) -> Optional[str]:
-        return instance.get_user_role(self.context['request'].user)
+        fields = OrganizationContractorSerializer.Meta.fields
 
 
 class OrganizationProjectSerializer(ModelSerializerWithCallCleanMethod):
@@ -110,8 +113,8 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     organization_customer = MainOrganizationSerializer(read_only=True)
     organization_contractor = MainOrganizationSerializer(read_only=True)
     industry_sector = dictionary_serializers.IndustrySectorSerializer(read_only=True, allow_null=True)
-    manager_pfm_id = UserInlineSerializer(read_only=True, allow_null=True)
-    manager_pm_id = UserInlineSerializer(read_only=True, allow_null=True)
+    manager_pfm = UserInlineSerializer(read_only=True, allow_null=True)
+    manager_pm = UserInlineSerializer(read_only=True, allow_null=True)
 
     modules_count = serializers.IntegerField(read_only=True)
     current_user_role = serializers.SerializerMethodField()
@@ -120,7 +123,7 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
 
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
-            'organization_customer', 'organization_contractor', 'industry_sector', 'manager_pfm_id', 'manager_pm_id',
+            'organization_customer', 'organization_contractor', 'industry_sector', 'manager_pfm', 'manager_pm',
             'modules_count', 'current_user_role', 'requests_count_total', 'requests_count_by_status',
         ]
 
