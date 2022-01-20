@@ -13,7 +13,7 @@ from acc.models import User, Role
 from main.models import permissions as main_permissions
 
 if TYPE_CHECKING:
-    from main.models.request import Request, RequestStatus
+    from main.models.request import Request, RequestStatus, RequestRequirement, RequestRequirementStatus
 
 __all__ = [
     'Organization',
@@ -224,6 +224,21 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
 
     def get_requests_count(self, status: Optional['RequestStatus'] = None) -> int:
         return len(self.get_requests(status))
+
+    def get_requests_requirements(
+            self,
+            status: Optional['RequestRequirementStatus'] = None
+    ) -> List['RequestRequirement']:
+        requirements = []
+        for module in self.modules.all():
+            for request in module.requests.all():
+                for requirement in request.requirements.all():
+                    if not status or status == requirement.status:
+                        requirements.append(request)
+        return requirements
+
+    def get_requests_requirements_count(self, status: Optional['RequestRequirementStatus'] = None) -> int:
+        return len(self.get_requests_requirements(status))
 
 
 class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, models.Model):

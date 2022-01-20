@@ -19,6 +19,7 @@ __all__ = [
     'RequestStatus',
     'RequestPriority',
     'Request',
+    'RequestRequirementStatus',
     'RequestRequirement',
     'RequestRequirementCvStatus',
     'RequestRequirementCv',
@@ -149,6 +150,11 @@ class Request(DatesModelBase):
         return len(self.requirements.all())
 
 
+class RequestRequirementStatus(models.TextChoices):
+    IN_PROGRESS = 'in_progress', _('В работе')
+    DONE = 'done', _('Успешно завершен')
+
+
 @reversion.register(follow=['request', 'competencies', 'cv_links'])
 class RequestRequirement(DatesModelBase):
     request = models.ForeignKey(
@@ -219,6 +225,16 @@ class RequestRequirement(DatesModelBase):
     @property
     def cv_list_ids(self) -> List[int]:
         return [cv_link.cv_id for cv_link in self.cv_links.all()]
+
+    def status(self) -> RequestRequirementStatus:
+        cv_done_count = sum([
+            1
+            for self_cv in self.cv_links.all()
+            if self_cv.status == RequestRequirementCvStatus.WORKER
+        ])
+        if self.count <= cv_done_count:
+            return RequestRequirementStatus.DONE
+        return RequestRequirementStatus.IN_PROGRESS
 
 
 class RequestRequirementCvStatus(models.TextChoices):
