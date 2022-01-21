@@ -4,7 +4,7 @@ import datetime
 
 import hashlib
 
-from typing import List
+from typing import List, Dict
 
 import reversion
 from django.db import models
@@ -49,6 +49,13 @@ class UserManager(models.Manager.from_queryset(UserQuerySet), BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
+
+    @classmethod
+    def get_queryset_prefetch_related_roles(cls) -> List[str]:
+        return [
+            'organizations_contractors_roles',
+            'organizations_contractors_roles__organization_contractor',
+        ]
 
 
 class Gender(models.TextChoices):

@@ -102,7 +102,7 @@ class LogoutView(generics.GenericAPIView):
 
 class WhoAmIView(generics.RetrieveAPIView, mixins.UpdateModelMixin):
     http_method_names = ['get', 'patch']
-    queryset = User.objects.all()
+    queryset = User.objects.prefetch_related(*User.objects.get_queryset_prefetch_related_roles())
     serializer_class = acc_serializers.WhoAmISerializer
     permission_classes = [IsAuthenticated]
 
