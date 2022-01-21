@@ -24,7 +24,7 @@ class MainModelPermissionsMixin:
         return super().delete(**kwargs)
 
 
-def _get_user(user: User):
+def _get_user(user: User) -> User:
     return user or get_current_user()
 
 
