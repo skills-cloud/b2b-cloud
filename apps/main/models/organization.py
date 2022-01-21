@@ -88,7 +88,10 @@ class OrganizationContractor(Organization):
             if user.is_superuser or user.is_staff:
                 return self
             return self.filter(
-                id__in=OrganizationContractorUserRole.objects.filter(user=user).values('organization_contractor')
+                id__in=[
+                    row.organization_contractor.id
+                    for row in OrganizationContractorUserRole.objects.filter(user=user)
+                ]
             )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
