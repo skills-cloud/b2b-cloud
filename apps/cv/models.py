@@ -60,7 +60,7 @@ class CV(DatesModelBase):
     )
     manager_rm = models.ForeignKey(
         'acc.User', related_name='cv_list_as_rm', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('РМ')
+        on_delete=models.SET_NULL, verbose_name=_('РМ')
     )
     user = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='cv_list',
