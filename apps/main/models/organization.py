@@ -184,7 +184,10 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
                 return self
             return self.filter(
                 models.Q(organization_contractor__in=OrganizationContractor.objects.filter_by_user(user))
-                | models.Q(id__in=OrganizationProjectUserRole.objects.filter(user=user).values('organization_project'))
+                | models.Q(id__in=[
+                    row.organization_project.id
+                    for row in OrganizationProjectUserRole.objects.filter(user=user)
+                ])
             )
 
     class Manager(models.Manager.from_queryset(QuerySet)):
