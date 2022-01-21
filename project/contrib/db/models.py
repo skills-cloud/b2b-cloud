@@ -1,5 +1,8 @@
+from typing import Optional, Callable
+
 from django.db import models
 from django.forms.models import model_to_dict
+from django.core.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
 
 
@@ -43,3 +46,18 @@ class ModelDiffMixin:
     @property
     def _dict(self):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])
+
+
+class ModelPermissionsMixin:
+    permission_save: Optional[Callable] = None
+    permission_delete: Optional[Callable] = None
+
+    def clean(self):
+        if self.permission_save and not self.permission_save():
+            raise PermissionDenied(_('У вас нет прав'))
+        return super().clean()
+
+    def delete(self, **kwargs):
+        if self.permission_delete and not self.permission_delete():
+            raise PermissionDenied(_('У вас нет прав'))
+        return super().delete(**kwargs)

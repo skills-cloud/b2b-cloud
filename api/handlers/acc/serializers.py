@@ -50,6 +50,7 @@ class UserOrganizationProjectRoleSerializer(ModelSerializerWithCallCleanMethod):
 class UserManageSerializer(ModelSerializerWithCallCleanMethod):
     organization_contractors_roles = UserOrganizationContractorRoleSerializer(
         source='organizations_contractors_roles', many=True, allow_null=True, required=False)
+    password = serializers.CharField(required=False)
 
     # organization_projects_roles = UserOrganizationProjectRoleSerializer(
     #     source='organizations_projects_roles', many=True, allow_null=True, required=False)
@@ -99,8 +100,8 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
         ModelSerializer.is_valid(self, raise_exception=raise_exception)
         organizations_contractors_roles = self.validated_data.pop('organizations_contractors_roles', None)
         organizations_projects_roles = self.validated_data.pop('organizations_projects_roles', None)
-        if not self.context['request'].user.is_superuser and not organizations_contractors_roles:
-            raise ValidationError({'organizations_contractors_roles': _('Обязательное поле.')})
+        # if not self.context['request'].user.is_superuser and not organizations_contractors_roles:
+        #     raise ValidationError({'organizations_contractors_roles': _('Обязательное поле.')})
         super().is_valid(raise_exception=raise_exception)
         if organizations_contractors_roles is not None:
             self.validated_data['organizations_contractors_roles'] = organizations_contractors_roles

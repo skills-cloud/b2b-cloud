@@ -12,8 +12,11 @@ from django.contrib.auth.models import AbstractUser, Group as GroupBase
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
+from project.contrib.db.models import ModelPermissionsMixin
 from project.contrib.db.upload_to import upload_to
 from project.msg import get_email_message_by_template
+
+from acc import permissions as acc_permissions
 
 
 class Role(models.TextChoices):
@@ -26,7 +29,15 @@ class Role(models.TextChoices):
 
 class UserQuerySet(models.QuerySet):
     def filter_by_user(self, user: 'User'):
-        return self
+        qs = self.exclude(id=user.id)
+        if user.is_superuser or user.is_staff:
+            return self
+        return qs.filter(
+            organizations_contractors_roles__organization_contractor__in=[
+                row.organization_contractor
+                for row in user.organizations_contractors_roles.all()
+            ]
+        ).distinct()
 
 
 class UserManager(models.Manager.from_queryset(UserQuerySet), BaseUserManager):
@@ -65,8 +76,11 @@ class Gender(models.TextChoices):
 
 
 @reversion.register()
-class User(AbstractUser):
+class User(ModelPermissionsMixin, AbstractUser):
     backend = 'django.contrib.auth.backends.ModelBackend'
+
+    permission_save = acc_permissions.user_save
+    permission_delete = acc_permissions.user_delete
 
     UPLOAD_TO = 'user'
     username = None
