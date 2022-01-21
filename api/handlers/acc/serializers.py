@@ -143,7 +143,16 @@ class UserSetPhotoSerializer(UserSerializer):
 
 
 class WhoAmISerializer(UserSerializer):
-    roles = serializers.ListSerializer(child=serializers.CharField(), read_only=True)
+    class WhoAmIContractorRoleSerializer(serializers.ModelSerializer):
+        organization_contractor_name = serializers.CharField(source='organization_contractor.name', required=False)
+
+        class Meta:
+            model = main_models.OrganizationContractorUserRole
+            fields = [
+                'role', 'organization_contractor_id', 'organization_contractor_name',
+            ]
+
+    organizations_contractors_roles = WhoAmIContractorRoleSerializer(many=True, read_only=True)
 
     class Meta(UserSerializer.Meta):
         exclude = ['password', 'groups', 'user_permissions']
