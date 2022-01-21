@@ -157,7 +157,7 @@ class Module(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesMo
     work_days_hours_count = models.IntegerField(default=8, verbose_name=_('кол-во рабочих часов в рабочем дне'))
     manager = models.ForeignKey(
         'acc.User', related_name='modules', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('руководитель')
+        on_delete=models.SET_NULL, verbose_name=_('руководитель')
     )
     goals = models.TextField(null=True, blank=True, verbose_name=_('цели'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))

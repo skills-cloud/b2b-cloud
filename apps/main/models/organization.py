@@ -166,11 +166,11 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
     )
     manager_pfm = models.ForeignKey(
         'acc.User', related_name='organizations_projects_as_pfm', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('РПП')
+        on_delete=models.SET_NULL, verbose_name=_('РПП')
     )
     manager_pm = models.ForeignKey(
         'acc.User', related_name='organizations_projects_as_pm', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('РП')
+        on_delete=models.SET_NULL, verbose_name=_('РП')
     )
 
     class Meta:

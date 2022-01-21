@@ -82,7 +82,7 @@ class Request(DatesModelBase):
     deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
     manager_rm = models.ForeignKey(
         'acc.User', related_name='requests_as_rm', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('РМ')
+        on_delete=models.SET_NULL, verbose_name=_('РМ')
     )
 
     class Meta:
