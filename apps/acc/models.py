@@ -30,8 +30,9 @@ class Role(models.TextChoices):
 class UserQuerySet(models.QuerySet):
     def filter_by_user(self, user: 'User'):
         qs = self.exclude(id=user.id)
+        qs = qs.exclude(email='AnonymousUser')
         if user.is_superuser or user.is_staff:
-            return self
+            return qs
         return qs.filter(
             organizations_contractors_roles__organization_contractor__in=[
                 row.organization_contractor
