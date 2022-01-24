@@ -155,7 +155,6 @@ class CV(DatesModelBase):
 
                 'certificates', 'certificates__education_place', 'certificates__education_graduate',
                 'certificates__education_speciality', 'certificates__competencies',
-
             ]
 
         @classmethod
