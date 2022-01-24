@@ -33,9 +33,7 @@ def _get_user(user: User) -> User:
 ########################################################################################################################
 def organization_contractor_save(instance: 'main_models.OrganizationContractor', user: Optional[User] = None) -> bool:
     user = _get_user(user)
-    if instance.get_user_role(user) in [
-        Role.ADMIN,
-    ]:
+    if set(instance.get_user_roles(user)) & set([Role.ADMIN]):
         return True
     return False
 
@@ -49,11 +47,11 @@ def organization_contractor_nested_objects_save(
         user: Optional[User] = None
 ) -> bool:
     user = _get_user(user)
-    if instance.get_user_role(user) in [
+    if set(instance.get_user_roles(user)) & set([
         Role.ADMIN,
         Role.PFM,
         Role.PM,
-    ]:
+    ]):
         return True
     return False
 
@@ -136,9 +134,9 @@ def fun_point_type_position_labor_estimate_delete(
 ########################################################################################################################
 def organization_project_save(instance: 'main_models.OrganizationProject', user: Optional[User] = None) -> bool:
     user = _get_user(user)
-    if instance.get_user_role(user) in [
+    if set(instance.get_user_roles(user)) & set([
         Role.ADMIN
-    ]:
+    ]):
         return True
     return False
 
@@ -152,11 +150,11 @@ def organization_project_nested_objects_save(
         user: Optional[User] = None
 ) -> bool:
     user = _get_user(user)
-    if instance.get_user_role(user) in [
+    if set(instance.get_user_roles(user)) & set([
         Role.ADMIN,
         Role.PFM,
         Role.PM
-    ]:
+    ]):
         return True
     return False
 
@@ -184,9 +182,9 @@ def organization_project_user_role_delete(
 
 def organization_project_save(instance: 'main_models.OrganizationProject', user: Optional[User] = None) -> bool:
     user = _get_user(user)
-    if instance.get_user_role(user) in [
+    if set(instance.get_user_roles(user)) & set([
         Role.ADMIN
-    ]:
+    ]):
         return True
     return False
 

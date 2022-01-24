@@ -51,6 +51,7 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
     organization_contractors_roles = UserOrganizationContractorRoleSerializer(
         source='organizations_contractors_roles', many=True, allow_null=True, required=False)
     password = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
 
     # organization_projects_roles = UserOrganizationProjectRoleSerializer(
     #     source='organizations_projects_roles', many=True, allow_null=True, required=False)
@@ -73,13 +74,21 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
             self.instance.set_password(password)
             self.instance.save()
         if organizations_contractors_roles is not None:
+            organizations_contractors_ids = set([
+                row['organization_contractor_id']
+                for row in organizations_contractors_roles
+            ])
+            if organizations_contractors_ids:
+                main_models.OrganizationContractorUserRole.objects.filter(
+                    user=self.instance,
+                    organization_contractor_id__in=organizations_contractors_ids
+                ).delete()
             for row in organizations_contractors_roles:
-                role_kwargs = {
-                    'user': self.instance,
-                    'organization_contractor_id': row['organization_contractor_id'],
-                }
-                main_models.OrganizationContractorUserRole.objects.filter(**role_kwargs).delete()
-                role_instance = main_models.OrganizationContractorUserRole(**role_kwargs, role=row['role'])
+                role_instance = main_models.OrganizationContractorUserRole(
+                    user=self.instance,
+                    organization_contractor_id=row['organization_contractor_id'],
+                    role=row['role']
+                )
                 role_instance.clean()
                 role_instance.save()
         if organizations_projects_roles is not None:

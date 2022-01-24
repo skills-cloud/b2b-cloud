@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from django.forms import model_to_dict
 from rest_framework import serializers
@@ -6,7 +6,7 @@ from rest_framework.relations import RelatedField
 from rest_framework_recursive.fields import RecursiveField
 from drf_yasg.utils import swagger_serializer_method
 
-from acc.models import User
+from acc.models import User, Role
 from dictionary import models as dictionary_models
 from main import models as main_models
 from api.fields import PrimaryKeyRelatedIdField
@@ -30,19 +30,21 @@ __all__ = [
 
 
 class MainOrganizationSerializer(ModelSerializerWithCallCleanMethod):
-    current_user_role = serializers.SerializerMethodField(read_only=True)
+    current_user_roles = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = main_models.Organization
         fields = [
             'id', 'name', 'description', 'is_customer', 'is_contractor',
-            'created_at', 'updated_at', 'current_user_role',
+            'created_at', 'updated_at', 'current_user_roles',
         ]
 
-    def get_current_user_role(self, instance: main_models.Organization) -> Optional[str]:
+    @swagger_serializer_method(serializer_or_field=serializers.MultipleChoiceField(choices=Role.choices))
+    def get_current_user_roles(self, instance: main_models.Organization) -> List[str]:
         if not instance.is_contractor:
-            return None
-        return main_models.OrganizationContractor(**model_to_dict(instance)).get_user_role(self.context['request'].user)
+            return []
+        return main_models.OrganizationContractor(**model_to_dict(instance)).get_user_roles(
+            self.context['request'].user)
 
 
 class OrganizationCustomerSerializer(MainOrganizationSerializer):
@@ -117,7 +119,7 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     manager_pm = UserInlineSerializer(read_only=True, allow_null=True)
 
     modules_count = serializers.IntegerField(read_only=True)
-    current_user_role = serializers.SerializerMethodField(read_only=True)
+    current_user_roles = serializers.SerializerMethodField(read_only=True)
     requests_count_total = serializers.SerializerMethodField(read_only=True)
     requests_count_by_status = serializers.SerializerMethodField(read_only=True)
     requests_requirements_count_total = serializers.SerializerMethodField(read_only=True)
@@ -126,12 +128,13 @@ class OrganizationProjectReadSerializer(OrganizationProjectSerializer):
     class Meta(OrganizationProjectSerializer.Meta):
         fields = OrganizationProjectSerializer.Meta.fields + [
             'organization_customer', 'organization_contractor', 'industry_sector', 'manager_pfm', 'manager_pm',
-            'modules_count', 'current_user_role', 'requests_count_total', 'requests_count_by_status',
+            'modules_count', 'current_user_roles', 'requests_count_total', 'requests_count_by_status',
             'requests_requirements_count_total', 'requests_requirements_count_by_status',
         ]
 
-    def get_current_user_role(self, instance: main_models.OrganizationProject) -> Optional[str]:
-        return instance.get_user_role(self.context['request'].user)
+    @swagger_serializer_method(serializer_or_field=serializers.MultipleChoiceField(choices=Role.choices))
+    def get_current_user_roles(self, instance: main_models.OrganizationProject) -> List[str]:
+        return instance.get_user_roles(self.context['request'].user)
 
     @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
     def get_requests_count_total(self, instance: main_models.OrganizationProject) -> int:

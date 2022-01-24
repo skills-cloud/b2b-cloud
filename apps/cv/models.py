@@ -181,7 +181,7 @@ class CV(DatesModelBase):
                 raise ValidationError({
                     'organization_contractor_id': _('Чтобы задать РМа необходимо задать организацию исполнителя')
                 })
-            if self.organization_contractor.get_user_role(self.manager_rm) is None:
+            if self.organization_contractor.get_user_roles(self.manager_rm):
                 raise ValidationError({
                     'manager_rm_id': _('Этот пользователь не может быть РМ для этой анкеты')
                 })

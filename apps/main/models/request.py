@@ -133,7 +133,7 @@ class Request(DatesModelBase):
 
     def clean(self):
         if self.manager_rm:
-            if not self.module.organization_project.organization_contractor.get_user_role(self.manager_rm):
+            if not self.module.organization_project.organization_contractor.get_user_roles(self.manager_rm):
                 raise ValidationError({
                     'manager_rm_id': _('Этот пользователь не может быть РМ для этого запроса')
                 })
