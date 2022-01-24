@@ -106,11 +106,10 @@ class OrganizationContractor(Organization):
 
     objects = Manager()
 
-    def get_user_role(self, user: User) -> Optional[str]:
+    def get_user_roles(self, user: User) -> List[str]:
         if user.is_superuser or user.is_staff:
-            return Role.ADMIN.value
-        if role := self.users_roles.filter(user=user).first():
-            return role.role
+            return [Role.ADMIN.value]
+        return [row.role for row in self.users_roles.filter(user=user)]
 
 
 class OrganizationContractorUserRole(main_permissions.MainModelPermissionsMixin, models.Model):
@@ -204,21 +203,21 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         return self.name
 
     def clean(self):
-        if self.manager_pfm and self.organization_contractor.get_user_role(self.manager_pfm) != Role.PFM:
+        if self.manager_pfm and Role.PFM not in self.organization_contractor.get_user_roles(self.manager_pfm):
             raise ValidationError({'manager_pfm_id': _('Этот пользователь не может быть РПП на этом проекте')})
-        if self.manager_pm and self.organization_contractor.get_user_role(self.manager_pm) != Role.PM:
+        if self.manager_pm and Role.PM not in self.organization_contractor.get_user_roles(self.manager_pm):
             raise ValidationError({'manager_pm_id': _('Этот пользователь не может быть РП на этом проекте')})
 
     @property
     def modules_count(self) -> int:
         return len(self.modules.all())
 
-    def get_user_role(self, user: User) -> Optional[str]:
+    def get_user_roles(self, user: User) -> List[str]:
         if user.is_superuser or user.is_staff:
-            return Role.ADMIN.value
+            return [Role.ADMIN.value]
         if role := self.users_roles.filter(user=user).first():
-            return role.role
-        return self.organization_contractor.get_user_role(user)
+            return [role.role]
+        return self.organization_contractor.get_user_roles(user)
 
     def get_requests(self, status: Optional['RequestStatus'] = None) -> List['Request']:
         requests = []
