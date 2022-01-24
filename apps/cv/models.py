@@ -155,7 +155,6 @@ class CV(DatesModelBase):
 
                 'certificates', 'certificates__education_place', 'certificates__education_graduate',
                 'certificates__education_speciality', 'certificates__competencies',
-
             ]
 
         @classmethod
@@ -181,7 +180,7 @@ class CV(DatesModelBase):
                 raise ValidationError({
                     'organization_contractor_id': _('Чтобы задать РМа необходимо задать организацию исполнителя')
                 })
-            if self.organization_contractor.get_user_roles(self.manager_rm):
+            if not self.organization_contractor.get_user_roles(self.manager_rm):
                 raise ValidationError({
                     'manager_rm_id': _('Этот пользователь не может быть РМ для этой анкеты')
                 })
