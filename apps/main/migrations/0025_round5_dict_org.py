@@ -6,9 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dictionary', '0006_round5_dict_org'),
-        ('cv', '0015_round5_dict_org'),
-        ('main', '0020_round5_permissions'),
+        ('main', '0024_round5_fk_2_user_set_null'),
     ]
 
     operations = [

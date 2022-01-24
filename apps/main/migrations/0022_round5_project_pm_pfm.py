@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0021_round5_dict_org'),
+        ('main', '0020_round5_permissions'),
     ]
 
     operations = [
