@@ -200,7 +200,7 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
     objects = Manager()
 
     def __str__(self):
-        return self.name
+        return f'{self.name} ({self.organization_customer.name} <{self.organization_customer_id}>)'
 
     def clean(self):
         if self.manager_pfm and Role.PFM not in self.organization_contractor.get_user_roles(self.manager_pfm):
@@ -404,3 +404,6 @@ class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
             raise ValidationError({
                 'organization_project': _('Для карточки верхнего уровня необходимо указать проект организации')
             })
+
+    def __str__(self):
+        return f'{self.name} ({self.organization_project.name} <{self.organization_project_id} >)'
