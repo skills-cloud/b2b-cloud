@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def custom_exception_handler(exc, context):
+    raise exc
     if settings.DEBUG and not isinstance(exc, (PermissionDenied, Http404)):
         raise exc
     response = exception_handler(exc, context)
