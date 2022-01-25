@@ -62,6 +62,14 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
             queryset=dictionary_models.Competence.objects,
         )
         years = filters.NumberFilter()
+        request_id = ModelMultipleChoiceCommaSeparatedIdFilter(
+            queryset=main_models.Request.objects,
+            field_name='requests_requirements_links__request_requirement__request_id',
+        )
+        request_requirement_id = ModelMultipleChoiceCommaSeparatedIdFilter(
+            queryset=main_models.Request.objects,
+            field_name='requests_requirements_links__request_requirement_id',
+        )
 
         def filter_queryset(self, queryset):
             if years := self.form.cleaned_data.pop('years'):
@@ -164,6 +172,14 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
                 description='`ALL`',
+                required=False,
+            ),
+            openapi.Parameter(
+                'request_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='`ANY`',
                 required=False,
             ),
             openapi.Parameter(

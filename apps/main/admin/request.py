@@ -42,7 +42,8 @@ class RequestAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
 
         class RequestRequirementCvInline(nested_admin.NestedTabularInline):
             model = main_models.RequestRequirementCv
-            readonly_fields = ['created_at', 'updated_at']
+            readonly_fields = ['cv_id', 'created_at', 'updated_at']
+            exclude = ['attributes']
             extra = 0
             autocomplete_fields = ['cv']
 

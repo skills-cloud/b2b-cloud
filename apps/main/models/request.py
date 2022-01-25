@@ -140,7 +140,7 @@ class Request(DatesModelBase):
                 })
 
     def __str__(self):
-        return f'{self.id_verbose} < {self.id} / {self.module_id} >'
+        return f'{self.title} <{self.id}> / {self.module.name} /  {self.module.organization_project.name}'
 
     @property
     def id_verbose(self) -> str:
@@ -228,11 +228,13 @@ class RequestRequirement(DatesModelBase):
         return [cv_link.cv_id for cv_link in self.cv_links.all()]
 
     def status(self) -> RequestRequirementStatus:
+        if not self.count:
+            return RequestRequirementStatus.IN_PROGRESS
         cv_done_count = sum([
             1
             for self_cv in self.cv_links.all()
             if self_cv.status == RequestRequirementCvStatus.WORKER
-        ])
+        ]) or 0
         if self.count <= cv_done_count:
             return RequestRequirementStatus.DONE
         return RequestRequirementStatus.IN_PROGRESS
