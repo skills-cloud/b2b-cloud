@@ -104,7 +104,7 @@ class CV(DatesModelBase):
     linked = models.ManyToManyField('self', blank=True, symmetrical=True, verbose_name=_('связанные анкеты'))
 
     attributes = models.JSONField(
-        default=dict, verbose_name=_('доп. атрибуты'),
+        default=dict, verbose_name=_('доп. атрибуты'), editable=False,
         help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
     )
 
@@ -147,7 +147,9 @@ class CV(DatesModelBase):
                 'career', 'career__files', 'career__organization', 'career__projects',
                 'career__projects__organization_customer', 'career__position', 'career__competencies',
 
-                'projects', 'projects__organization', 'projects__position', 'projects__industry_sector',
+                'projects',
+                'projects__organization',
+                'projects__position', 'projects__industry_sector',
                 'projects__competencies',
 
                 'education', 'education__education_place', 'education__education_graduate',
