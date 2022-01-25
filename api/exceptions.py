@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -14,9 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def custom_exception_handler(exc, context):
-    raise exc
-    if settings.DEBUG and not isinstance(exc, (PermissionDenied, Http404)):
-        raise exc
+    # if settings.DEBUG and not isinstance(exc, (PermissionDenied, Http404)):
+    #     raise exc
     response = exception_handler(exc, context)
     if not response:
         response = Response(status=status.HTTP_400_BAD_REQUEST)
@@ -45,6 +45,8 @@ def custom_exception_handler(exc, context):
             details = list(map(str, details))
         else:
             details = str(details)
+    response.data['error_type'] = exc.__class__.__name__
+    response.data['error_trace'] = ''.join(traceback.format_tb(exc.__traceback__))
     response.data['details'] = details
     response.data['response'] = {'status_code': response.status_code}
     logger.error('API Exception', extra=response.data)
