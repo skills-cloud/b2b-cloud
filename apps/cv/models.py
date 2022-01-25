@@ -144,8 +144,8 @@ class CV(DatesModelBase):
                 'positions', 'positions__position', 'positions__files', 'positions__competencies',
                 'positions__competencies__competence',
 
-                'career', 'career__files', 'career__organization', 'career__projects', 'career__projects__organization',
-                'career__position', 'career__competencies',
+                'career', 'career__files', 'career__organization', 'career__projects',
+                'career__projects__organization_customer', 'career__position', 'career__competencies',
 
                 'projects', 'projects__organization', 'projects__position', 'projects__industry_sector',
                 'projects__competencies',
