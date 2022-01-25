@@ -79,6 +79,7 @@ class OrganizationProjectCardItemTemplateAdmin(DraggableMPTTAdmin):
 class OrganizationProjectCardItemAdmin(OrganizationProjectCardItemTemplateAdmin):
     list_display = OrganizationProjectCardItemTemplateAdmin.list_display + ['organization_project']
     list_filter = [OrganizationProjectAdminFilter]
+    autocomplete_fields = OrganizationProjectCardItemTemplateAdmin.autocomplete_fields + ['organization_project']
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('organization_project')

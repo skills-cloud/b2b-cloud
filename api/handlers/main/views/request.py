@@ -189,6 +189,7 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
         instance = main_models.RequestRequirementCv(
             request_requirement=self.get_object(),
             cv=get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id),
+            context={'request': request}
         )
         instance = self._save_cv_linked(instance, request.data)
         instance.save()
@@ -214,7 +215,10 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     def cv_set_details(self, request, pk: int, cv_id: int, *args, **kwargs):
         instance = self._save_cv_linked(self._get_cv_linked_or_404(request, cv_id), request.data)
         return Response(
-            main_serializers.RequestRequirementCvSerializer(instance=instance).data,
+            main_serializers.RequestRequirementCvSerializer(
+                instance=instance,
+                context={'request': request}
+            ).data,
             status=status.HTTP_200_OK
         )
 
@@ -227,15 +231,19 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
     @action(detail=True, methods=['post'], url_path='competencies-set')
     @transaction.atomic
     def competencies_set(self, request, pk: int, *args, **kwargs):
-        request_serializer = main_serializers.RequestRequirementCompetenceReplaceSerializer(data=request.data,
-                                                                                            many=True)
+        request_serializer = main_serializers.RequestRequirementCompetenceReplaceSerializer(
+            data=request.data,
+            many=True,
+            context={'request': request}
+        )
         request_serializer.is_valid(raise_exception=True)
         response_serializer = main_serializers.RequestRequirementCompetenceSerializer(
             main_models.RequestRequirementCompetence.objects.set_for_request_requirement(
                 self.get_object(),
                 request_serializer.to_internal_value(request_serializer.data)
             ),
-            many=True
+            many=True,
+            context={'request': request}
         )
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -381,7 +389,7 @@ class TimeSheetRowViewSet(ReadCreateUpdateSerializersMixin, ViewSetFilteredByUse
         }
     )
     def create(self, request, *args, **kwargs):
-        request_serializer = self.get_serializer(data=request.data)
+        request_serializer = self.get_serializer(data=request.data, context={'request': request})
         request_serializer.is_valid(raise_exception=True)
         request_serializer_data = request_serializer.validated_data
         cv_ids = request_serializer_data.pop('cv_ids')

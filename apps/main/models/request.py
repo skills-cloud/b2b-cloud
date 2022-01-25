@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from project.contrib.db import get_sql_from_queryset
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User
 from cv.models import CV
@@ -308,9 +309,9 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
         cards_items_ids = [row['id'] for row in organization_project_card_items]
         cards_items_qs = OrganizationProjectCardItem.objects_flat.filter(
             id__in=cards_items_ids,
-            module__organization_project_id=self.request_requirement.request.module.organization_project_id
+            organization_project_id=self.request_requirement.request.module.organization_project_id
         )
-        if len(cards_items_ids) != cards_items_qs.workers_count():
+        if len(cards_items_ids) != cards_items_qs.count():
             raise ValidationError({
                 'attributes.organization_project_card_items': _('Неверно задана ID минимум одной карточки')
             })
