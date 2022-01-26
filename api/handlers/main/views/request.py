@@ -189,7 +189,6 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
         instance = main_models.RequestRequirementCv(
             request_requirement=self.get_object(),
             cv=get_object_or_404(cv_models.CV.objects.filter_by_user(request.user), id=cv_id),
-            context={'request': request}
         )
         instance = self._save_cv_linked(instance, request.data)
         instance.save()

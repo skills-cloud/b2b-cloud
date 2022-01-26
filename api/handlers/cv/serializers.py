@@ -487,7 +487,9 @@ class CvDetailReadFullSerializer(CvDetailReadBaseSerializer):
                 row.request_requirement
                 for row in instance.requests_requirements_links.all()
             ],
-            many=True, read_only=True, context=self.context
+            many=True,
+            read_only=True,
+            context=self.context,
         ).data
         return result
 
