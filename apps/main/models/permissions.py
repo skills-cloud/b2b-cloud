@@ -1,3 +1,5 @@
+import logging
+
 from typing import TYPE_CHECKING, Optional, Callable
 from django.core.exceptions import PermissionDenied
 from django.utils.translation import gettext_lazy as _
@@ -7,6 +9,8 @@ from acc.models import User, Role
 
 if TYPE_CHECKING:
     from main import models as main_models
+
+logger = logging.getLogger(__name__)
 
 
 class MainModelPermissionsMixin:
@@ -135,7 +139,9 @@ def fun_point_type_position_labor_estimate_delete(
 def organization_project_save(instance: 'main_models.OrganizationProject', user: Optional[User] = None) -> bool:
     user = _get_user(user)
     if set(instance.get_user_roles(user)) & set([
-        Role.ADMIN
+        Role.ADMIN,
+        Role.PFM,
+        Role.PM,
     ]):
         return True
     return False
@@ -180,15 +186,6 @@ def organization_project_user_role_delete(
     return organization_project_nested_objects_delete(instance.organization_project, user)
 
 
-def organization_project_save(instance: 'main_models.OrganizationProject', user: Optional[User] = None) -> bool:
-    user = _get_user(user)
-    if set(instance.get_user_roles(user)) & set([
-        Role.ADMIN
-    ]):
-        return True
-    return False
-
-
 ########################################################################################################################
 # Organization Project / Module
 ########################################################################################################################
@@ -198,7 +195,7 @@ def module_save(instance: 'main_models.Module', user: Optional[User] = None) -> 
 
 
 def module_delete(instance: 'main_models.Module', user: Optional[User] = None) -> bool:
-    return module_save(instance, user)
+    return organization_project_nested_objects_delete(instance.organization_project, user)
 
 
 def module_fun_point_save(instance: 'main_models.ModuleFunPoint', user: Optional[User] = None) -> bool:
@@ -206,7 +203,7 @@ def module_fun_point_save(instance: 'main_models.ModuleFunPoint', user: Optional
 
 
 def module_fun_point_delete(instance: 'main_models.ModuleFunPoint', user: Optional[User] = None) -> bool:
-    return module_fun_point_save(instance, user)
+    return organization_project_nested_objects_delete(instance.module.organization_project, user)
 
 
 def module_position_labor_estimate_save(
@@ -220,4 +217,82 @@ def module_position_labor_estimate_delete(
         instance: 'main_models.ModulePositionLaborEstimate',
         user: Optional[User] = None
 ) -> bool:
-    return module_position_labor_estimate_save(instance, user)
+    return organization_project_nested_objects_delete(instance.module.organization_project, user)
+
+
+########################################################################################################################
+# Organization Project / Module / Request
+########################################################################################################################
+
+def request_save(instance: 'main_models.Request', user: Optional[User] = None) -> bool:
+    return organization_project_nested_objects_save(instance.module.organization_project, user)
+
+
+def request_delete(instance: 'main_models.Request', user: Optional[User] = None) -> bool:
+    return organization_project_nested_objects_delete(instance.module.organization_project, user)
+
+
+########################################################################################################################
+# Organization Project / Module / Request / TimeSheetRow
+########################################################################################################################
+
+def request_time_sheet_row_save(instance: 'main_models.TimeSheetRow', user: Optional[User] = None) -> bool:
+    user = _get_user(user)
+    if set(instance.request.module.organization_project.get_user_roles(user)) & set([
+        Role.ADMIN,
+        Role.PFM,
+        Role.PM,
+        Role.RM,
+    ]):
+        return True
+    return False
+
+
+def request_time_sheet_row_delete(instance: 'main_models.TimeSheetRow', user: Optional[User] = None) -> bool:
+    return request_time_sheet_row_save(instance, user)
+
+
+########################################################################################################################
+# Organization Project / Module / Request / Requirement
+########################################################################################################################
+
+def request_requirement_save(instance: 'main_models.RequestRequirement', user: Optional[User] = None) -> bool:
+    return organization_project_nested_objects_save(instance.request.module.organization_project, user)
+
+
+def request_requirement_delete(instance: 'main_models.RequestRequirement', user: Optional[User] = None) -> bool:
+    return organization_project_nested_objects_delete(instance.request.module.organization_project, user)
+
+
+def request_requirement_competence_save(
+        instance: 'main_models.RequestRequirementCompetence',
+        user: Optional[User] = None
+) -> bool:
+    return request_requirement_save(instance.request_requirement, user)
+
+
+def request_requirement_competence_delete(
+        instance: 'main_models.RequestRequirementCompetence',
+        user: Optional[User] = None
+) -> bool:
+    return request_requirement_cv_delete(instance.request_requirement, user)
+
+
+########################################################################################################################
+# Organization Project / Module / Request / Requirement / CV
+########################################################################################################################
+
+def request_requirement_cv_save(instance: 'main_models.RequestRequirement', user: Optional[User] = None) -> bool:
+    user = _get_user(user)
+    if set(instance.request.module.organization_project.get_user_roles(user)) & set([
+        Role.ADMIN,
+        Role.PFM,
+        Role.PM,
+        Role.RM,
+    ]):
+        return True
+    return False
+
+
+def request_requirement_cv_delete(instance: 'main_models.RequestRequirement', user: Optional[User] = None) -> bool:
+    return request_requirement_cv_save(instance, user)

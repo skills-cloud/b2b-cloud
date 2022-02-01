@@ -11,6 +11,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 
+from project.contrib.middleware.request import get_current_user
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,6 +31,13 @@ def custom_exception_handler(exc, context):
             'data': req.data,
             'method': req.method,
             'url': req.get_full_path(),
+            'user': None,
+        }
+    user = get_current_user()
+    if user:
+        response.data['request']['user'] = {
+            'id': user.id,
+            'email': user.email,
         }
     if isinstance(exc, (exceptions.APIException, Http404, PermissionDenied, RestrictedError)):
         if isinstance(exc, PermissionDenied):

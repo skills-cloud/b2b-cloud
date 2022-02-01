@@ -7,13 +7,13 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from project.contrib.db import get_sql_from_queryset
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from acc.models import User
 from cv.models import CV
 from main.models.base import ExperienceYears
-from main.models.organization import OrganizationProjectCardItem
 from main.models.module import Module
+from main.models.organization import OrganizationProjectCardItem
+from main.models import permissions as main_permissions
 
 __all__ = [
     'RequestType',
@@ -56,7 +56,10 @@ class RequestPriority(models.IntegerChoices):
 
 
 @reversion.register(follow=['requirements'])
-class Request(DatesModelBase):
+class Request(main_permissions.MainModelPermissionsMixin, DatesModelBase):
+    permission_save = main_permissions.request_save
+    permission_delete = main_permissions.request_delete
+
     module = models.ForeignKey(
         'main.Module', related_name='requests', on_delete=models.CASCADE,
         verbose_name=_('модуль')
@@ -133,6 +136,7 @@ class Request(DatesModelBase):
     objects = Manager()
 
     def clean(self):
+        super().clean()
         if self.manager_rm:
             if not self.module.organization_project.organization_contractor.get_user_roles(self.manager_rm):
                 raise ValidationError({
@@ -157,7 +161,10 @@ class RequestRequirementStatus(models.TextChoices):
 
 
 @reversion.register(follow=['request', 'competencies', 'cv_links'])
-class RequestRequirement(DatesModelBase):
+class RequestRequirement(main_permissions.MainModelPermissionsMixin, DatesModelBase):
+    permission_save = main_permissions.request_requirement_save
+    permission_delete = main_permissions.request_requirement_delete
+
     request = models.ForeignKey(
         'main.Request', on_delete=models.CASCADE, related_name='requirements',
         verbose_name=_('проектный запрос')
@@ -248,7 +255,10 @@ class RequestRequirementCvStatus(models.TextChoices):
 
 
 @reversion.register(follow=['request_requirement'])
-class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
+class RequestRequirementCv(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
+    permission_save = main_permissions.request_requirement_cv_save
+    permission_delete = main_permissions.request_requirement_cv_delete
+
     """
     Есть сигналы
     """
@@ -305,6 +315,7 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
         return self.attributes.get('organization_project_card_items') or []
 
     def clean(self):
+        super().clean()
         organization_project_card_items = (self.attributes or {}).get('organization_project_card_items')
         if not organization_project_card_items:
             return
@@ -320,7 +331,10 @@ class RequestRequirementCv(ModelDiffMixin, DatesModelBase):
 
 
 @reversion.register(follow=['request_requirement'])
-class RequestRequirementCompetence(DatesModelBase):
+class RequestRequirementCompetence(main_permissions.MainModelPermissionsMixin, DatesModelBase):
+    permission_save = main_permissions.request_requirement_competence_save
+    permission_delete = main_permissions.request_requirement_competence_delete
+
     request_requirement = models.ForeignKey(
         'main.RequestRequirement', on_delete=models.CASCADE, related_name='competencies',
         verbose_name=_('требование проектного запроса')
@@ -367,7 +381,10 @@ class RequestRequirementCompetence(DatesModelBase):
 
 
 @reversion.register()
-class TimeSheetRow(DatesModelBase):
+class TimeSheetRow(main_permissions.MainModelPermissionsMixin, DatesModelBase):
+    permission_save = main_permissions.request_time_sheet_row_save
+    permission_delete = main_permissions.request_time_sheet_row_delete
+
     request = models.ForeignKey(
         'main.Request', on_delete=models.CASCADE, related_name='time_sheet_rows',
         verbose_name=_('проектный запрос')
@@ -422,6 +439,7 @@ class TimeSheetRow(DatesModelBase):
         return f'{self.task_name} < {self.id} / {self.request_id} >'
 
     def clean(self):
+        super().clean()
         if not CV.objects.filter(
                 requests_requirements_links__request_requirement__request=self.request,
                 id=self.cv_id,

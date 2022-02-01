@@ -246,6 +246,7 @@ class ModuleFunPoint(main_permissions.MainModelPermissionsMixin, ModelDiffMixin,
     objects = Manager()
 
     def clean(self):
+        super().clean()
         if (
                 self.fun_point_type.organization_customer_id
                 and self.fun_point_type.organization_customer_id !=
@@ -255,7 +256,6 @@ class ModuleFunPoint(main_permissions.MainModelPermissionsMixin, ModelDiffMixin,
                 'Ф-я точка должна принадлежать компании заказчику проекта модуля или быть общеупотребимой')})
         if self.difficulty_level and self.fun_point_type_id != self.difficulty_level.fun_point_type_id:
             raise ValidationError({'difficulty_level': _('Уровень сложности должен принадлежать этому типу ф-й точки')})
-        super().clean()
 
     @property
     def difficulty_factor(self) -> float:

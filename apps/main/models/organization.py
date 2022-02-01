@@ -203,6 +203,7 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         return f'{self.name} ({self.organization_customer.name} <{self.organization_customer_id}>)'
 
     def clean(self):
+        super().clean()
         if self.manager_pfm and Role.PFM not in self.organization_contractor.get_user_roles(self.manager_pfm):
             raise ValidationError({'manager_pfm_id': _('Этот пользователь не может быть РПП на этом проекте')})
         if self.manager_pm and Role.PM not in self.organization_contractor.get_user_roles(self.manager_pm):
@@ -268,6 +269,7 @@ class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, Mo
         verbose_name_plural = _('роли пользователей')
 
     def clean(self):
+        super().clean()
         # if self.role == Role.ADMIN:
         #     raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
         if not OrganizationContractorUserRole.objects.filter(
@@ -275,7 +277,6 @@ class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, Mo
                 user=self.user
         ).exists():
             raise ValidationError(_('Пользователю не назначена роль в организации исполнителе'))
-        super().clean()
 
 
 class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase):
@@ -303,6 +304,7 @@ class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase)
         invalidate_model(self.__class__)
 
     # def clean(self):
+    #     super().clean()
     #     if self.parent and self.positions:
     #         raise ValidationError({
     #             'positions': _(' Должности можно задавать только для карточки верхнего уровня')

@@ -177,6 +177,7 @@ class CV(DatesModelBase):
     objects = Manager()
 
     def clean(self):
+        super().clean()
         if self.manager_rm:
             if not self.organization_contractor:
                 raise ValidationError({
