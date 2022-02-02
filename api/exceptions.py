@@ -55,11 +55,12 @@ def custom_exception_handler(exc, context):
             details = list(map(str, details))
         else:
             details = str(details)
+    if not isinstance(exc, handle_exceptions):
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     response.data['error_type'] = exc.__class__.__name__
     response.data['error_trace'] = ''.join(traceback.format_tb(exc.__traceback__))
     response.data['details'] = details
     response.data['response'] = {'status_code': response.status_code}
     if not isinstance(exc, handle_exceptions):
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         logger.error(str(exc), extra=response.data)
     return response
