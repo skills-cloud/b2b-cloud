@@ -26,10 +26,4 @@
 .inline-group .tabular tr.has_original td.original p {
   display: none;
 }
-#content-main .model-funpointtypedifficultylevel,
-#nav-sidebar .model-funpointtypedifficultylevel,
-#content-main .app-django_celery_beat,
-#nav-sidebar .app-django_celery_beat {
-  display: none !important;
-}
 /*# sourceMappingURL=admin.css.map */

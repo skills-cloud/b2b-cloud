@@ -18,9 +18,3 @@ CELERY = {
     'result_expires': 60 * 60 * 4,
     'beat_scheduler': 'django_celery_beat.schedulers.DatabaseScheduler',
 }
-
-CELERY_EMAIL_TASK_CONFIG = {
-    'name': 'djcelery_email_send',
-    'rate_limit': '500/m',
-    'ignore_result': True,
-}
