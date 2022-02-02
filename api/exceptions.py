@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def custom_exception_handler(exc, context):
+    handle_exceptions = (exceptions.APIException, Http404, PermissionDenied, RestrictedError)
     # if settings.DEBUG and not isinstance(exc, (PermissionDenied, Http404)):
     #     raise exc
     response = exception_handler(exc, context)
@@ -39,7 +40,7 @@ def custom_exception_handler(exc, context):
             'id': user.id,
             'email': user.email,
         }
-    if isinstance(exc, (exceptions.APIException, Http404, PermissionDenied, RestrictedError)):
+    if isinstance(exc, handle_exceptions):
         if isinstance(exc, PermissionDenied):
             response.status_code = status.HTTP_403_FORBIDDEN
         if isinstance(exc, Http404):
@@ -58,5 +59,7 @@ def custom_exception_handler(exc, context):
     response.data['error_trace'] = ''.join(traceback.format_tb(exc.__traceback__))
     response.data['details'] = details
     response.data['response'] = {'status_code': response.status_code}
-    logger.error('API Exception', extra=response.data)
+    if not isinstance(exc, handle_exceptions):
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        logger.error(str(exc), extra=response.data)
     return response
