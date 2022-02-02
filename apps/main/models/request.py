@@ -173,7 +173,7 @@ class RequestRequirement(main_permissions.MainModelPermissionsMixin, DatesModelB
     name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('название'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     position = models.ForeignKey(
-        'dictionary.Position', related_name='requests_requirements', null=True, blank=True, on_delete=models.RESTRICT,
+        'dictionary.Position', related_name='requests_requirements', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name=_('должность')
     )
     experience_years = models.FloatField(null=True, blank=True, verbose_name=_('опыт лет'), help_text='float')
@@ -390,7 +390,7 @@ class TimeSheetRow(main_permissions.MainModelPermissionsMixin, DatesModelBase):
         verbose_name=_('проектный запрос')
     )
     cv = models.ForeignKey(
-        'cv.CV', on_delete=models.RESTRICT, related_name='time_sheet_rows',
+        'cv.CV', on_delete=models.CASCADE, related_name='time_sheet_rows',
         verbose_name=_('анкета исполнителя')
     )
     date_from = models.DateField(default=timezone.now, db_index=True, verbose_name=_('дата начала работ'))

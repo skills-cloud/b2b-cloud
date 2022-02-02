@@ -282,9 +282,9 @@ def request_requirement_competence_delete(
 # Organization Project / Module / Request / Requirement / CV
 ########################################################################################################################
 
-def request_requirement_cv_save(instance: 'main_models.RequestRequirement', user: Optional[User] = None) -> bool:
+def request_requirement_cv_save(instance: 'main_models.RequestRequirementCv', user: Optional[User] = None) -> bool:
     user = _get_user(user)
-    if set(instance.request.module.organization_project.get_user_roles(user)) & set([
+    if set(instance.request_requirement.request.module.organization_project.get_user_roles(user)) & set([
         Role.ADMIN,
         Role.PFM,
         Role.PM,
@@ -294,5 +294,5 @@ def request_requirement_cv_save(instance: 'main_models.RequestRequirement', user
     return False
 
 
-def request_requirement_cv_delete(instance: 'main_models.RequestRequirement', user: Optional[User] = None) -> bool:
+def request_requirement_cv_delete(instance: 'main_models.RequestRequirementCv', user: Optional[User] = None) -> bool:
     return request_requirement_cv_save(instance, user)
