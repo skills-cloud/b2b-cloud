@@ -3,6 +3,7 @@ import logging
 import traceback
 
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.db.models import RestrictedError
 from django.http import Http404
@@ -35,7 +36,7 @@ def custom_exception_handler(exc, context):
             'user': None,
         }
     user = get_current_user()
-    if user:
+    if user and not isinstance(user, AnonymousUser):
         response.data['request']['user'] = {
             'id': user.id,
             'email': user.email,
