@@ -62,7 +62,7 @@ class LoginView(generics.GenericAPIView):
         request_serializer.is_valid(raise_exception=False)
         if settings.DEBUG or settings.DJANGO_TEST:
             user = User.objects.filter(email=request_serializer.data.get('email')).first()
-            if not user.is_active:
+            if not user or not user.is_active:
                 user = None
         else:
             user = authenticate(
