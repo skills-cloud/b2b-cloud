@@ -44,6 +44,10 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
             queryset=main_models.Organization.objects,
             field_name='module__organization_project__organization_customer',
         )
+        organization_contractor_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationContractor.objects,
+            field_name='module__organization_project__organization_contractor',
+        )
         organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationProject.objects,
             field_name='module__organization_project',
@@ -51,6 +55,14 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
         module_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=main_models.Module.objects)
         type_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=main_models.RequestType.objects)
         industry_sector_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.IndustrySector.objects)
+        manager_pfm_id = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='module__organization_project__manager_pfm_id',
+            queryset=User.objects,
+        )
+        manager_pm_id = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='module__organization_project__manager_pm_id',
+            queryset=User.objects,
+        )
         manager_rm_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=User.objects)
 
         class Meta:
@@ -84,6 +96,13 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
                 required=False,
             ),
             openapi.Parameter(
+                'organization_contractor_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
                 'organization_project_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
@@ -106,6 +125,20 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
             ),
             openapi.Parameter(
                 'industry_sector_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'manager_pfm_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'manager_pm_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
@@ -154,12 +187,141 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
 
 
 class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, ModelViewSet):
+    class Filter(filters.FilterSet):
+        organization_customer_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.Organization.objects,
+            field_name='request__module__organization_project__organization_customer',
+        )
+        organization_contractor_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationContractor.objects,
+            field_name='request__module__organization_project__organization_contractor',
+        )
+        organization_project_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.OrganizationProject.objects,
+            field_name='request__module__organization_project',
+        )
+        request_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=main_models.Request.objects,
+        )
+        module_id = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='request__module_id',
+            queryset=main_models.Module.objects,
+        )
+        position_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=dictionary_models.Position.objects,
+        )
+        manager_pfm_id = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='request__module__organization_project__manager_pfm_id',
+            queryset=User.objects,
+        )
+        manager_pm_id = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='request__module__organization_project__manager_pm_id',
+            queryset=User.objects,
+        )
+        manager_rm_id = ModelMultipleChoiceCommaSeparatedFilter(
+            field_name='request__manager_rm_id',
+            queryset=User.objects,
+        )
+
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = main_models.RequestRequirement.objects.prefetch_related(
         *main_models.RequestRequirement.objects.get_queryset_prefetch_related()
     )
     serializer_class = main_serializers.RequestRequirementSerializer
     serializer_read_class = main_serializers.RequestRequirementReadSerializer
+    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
+    filterset_class = Filter
+    search_fields = ['id', 'name', 'description', 'position__name']
+    ordering_fields = list(itertools.chain(*[
+        [k, f'-{k}']
+        for k in ['id', 'sorting', 'name', 'count', 'position__name']
+    ]))
+    ordering = ['sorting', 'name']
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'organization_customer_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'organization_contractor_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'organization_project_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'request_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'module_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'position_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'manager_pfm_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'manager_pm_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'manager_rm_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'ordering',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=ordering_fields),
+                default=ordering,
+                required=False,
+            ),
+            openapi.Parameter(
+                'search',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=False,
+                description='Search in: `[%s]`' % ', '.join(search_fields)
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(
         request_body=main_serializers.RequestRequirementCvWriteDetailsSerializer(),
