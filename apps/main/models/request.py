@@ -140,7 +140,7 @@ class Request(main_permissions.MainModelPermissionsMixin, DatesModelBase):
         if self.manager_rm:
             if not self.module.organization_project.organization_contractor.get_user_roles(self.manager_rm):
                 raise ValidationError({
-                    'manager_rm': _('Этот пользователь не может быть РМ для этого запроса')
+                    'manager_rm_id': _('Этот пользователь не может быть РМ для этого запроса')
                 })
 
     def __str__(self):

@@ -216,9 +216,9 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
     def clean(self):
         super().clean()
         if self.manager_pfm and Role.PFM not in self.organization_contractor.get_user_roles(self.manager_pfm):
-            raise ValidationError({'manager_pfm': _('Этот пользователь не может быть РПП на этом проекте')})
+            raise ValidationError({'manager_pfm_id': _('Этот пользователь не может быть РПП на этом проекте')})
         if self.manager_pm and Role.PM not in self.organization_contractor.get_user_roles(self.manager_pm):
-            raise ValidationError({'manager_pm': _('Этот пользователь не может быть РП на этом проекте')})
+            raise ValidationError({'manager_pm_id': _('Этот пользователь не может быть РП на этом проекте')})
 
     @property
     def modules_count(self) -> int:
