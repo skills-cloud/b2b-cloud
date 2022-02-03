@@ -139,6 +139,13 @@ class OrganizationContractorUserRole(main_permissions.MainModelPermissionsMixin,
     #     super().clean()
 
 
+class OrganizationProjectStatus(models.TextChoices):
+    DRAFT = 'draft', _('Черновик')
+    IN_PROGRESS = 'in_progress', _('В работе')
+    DONE = 'done', _('Успешно завершен')
+    CLOSED = 'closed', _('Закрыт')
+
+
 @reversion.register(follow=['organization_customer'])
 class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
     permission_save = main_permissions.organization_project_save
@@ -151,6 +158,10 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
     organization_contractor = models.ForeignKey(
         'main.OrganizationContractor', on_delete=models.CASCADE, related_name='projects_as_contractor',
         verbose_name=_('исполнитель')
+    )
+    status = models.CharField(
+        max_length=50, default=OrganizationProjectStatus.DRAFT, choices=OrganizationProjectStatus.choices,
+        verbose_name=_('статус')
     )
 
     name = models.CharField(max_length=500, verbose_name=_('название'))

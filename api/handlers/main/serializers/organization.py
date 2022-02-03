@@ -105,7 +105,7 @@ class OrganizationProjectSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.OrganizationProject
         fields = [
-            'id', 'organization_customer_id', 'organization_contractor_id', 'industry_sector_id',
+            'id', 'status', 'organization_customer_id', 'organization_contractor_id', 'industry_sector_id',
             'manager_pfm_id', 'manager_pm_id', 'name', 'description', 'goals', 'plan_description', 'date_from',
             'date_to', 'created_at', 'updated_at',
         ]

@@ -1,3 +1,5 @@
+import itertools
+
 from typing import Type
 
 from django_filters import rest_framework as filters
@@ -7,13 +9,15 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import get_object_or_404
+from rest_framework.filters import SearchFilter
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 
 from acc.models import User
 from main import models as main_models
 from main.services.labor_estimate import ProjectLaborEstimateService
-from api.filters import  ModelMultipleChoiceCommaSeparatedFilter
+from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
+from api.backends import FilterBackend
 from api.views import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
 from api.handlers.main.views.base import MainBaseViewSet
@@ -86,6 +90,15 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     )
     serializer_class = main_serializers.OrganizationProjectSerializer
     serializer_read_class = main_serializers.OrganizationProjectReadSerializer
+    filter_backends = [FilterBackend, OrderingFilterNullsLast, SearchFilter]
+    search_fields = ['name', 'description', 'goals', 'plan_description']
+    ordering_fields = list(itertools.chain(*[
+        [k, f'-{k}']
+        for k in [
+            'id', 'name', 'organization_customer__name', 'status', 'date_from', 'date_to', 'created_at', 'updated_at'
+        ]
+    ]))
+    ordering = ['-updated_at']
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -121,8 +134,8 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
                 'ordering',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_STRING, enum=MainBaseViewSet.ordering_fields),
-                default=MainBaseViewSet.ordering
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=ordering_fields),
+                default=ordering
             ),
         ],
     )
