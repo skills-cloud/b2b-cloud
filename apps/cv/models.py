@@ -181,11 +181,11 @@ class CV(DatesModelBase):
         if self.manager_rm:
             if not self.organization_contractor:
                 raise ValidationError({
-                    'organization_contractor_id': _('Чтобы задать РМа необходимо задать организацию исполнителя')
+                    'organization_contractor': _('Чтобы задать РМа необходимо задать организацию исполнителя')
                 })
             if not self.organization_contractor.get_user_roles(self.manager_rm):
                 raise ValidationError({
-                    'manager_rm_id': _('Этот пользователь не может быть РМ для этой анкеты')
+                    'manager_rm': _('Этот пользователь не может быть РМ для этой анкеты')
                 })
 
     def __str__(self):
