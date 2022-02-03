@@ -51,9 +51,7 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
         module_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=main_models.Module.objects)
         type_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=main_models.RequestType.objects)
         industry_sector_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=dictionary_models.IndustrySector.objects)
-        resource_manager_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=User.objects)
-        recruiter_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=User.objects)
-        manager_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=User.objects)
+        manager_rm_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=User.objects)
 
         class Meta:
             model = main_models.Request
@@ -114,21 +112,7 @@ class RequestViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUserMixin, Mode
                 required=False,
             ),
             openapi.Parameter(
-                'resource_manager_id',
-                openapi.IN_QUERY,
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_INTEGER),
-                required=False,
-            ),
-            openapi.Parameter(
-                'recruiter_id',
-                openapi.IN_QUERY,
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_INTEGER),
-                required=False,
-            ),
-            openapi.Parameter(
-                'manager_id',
+                'manager_rm_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),

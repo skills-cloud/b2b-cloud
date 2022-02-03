@@ -7,14 +7,13 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import get_object_or_404
-from rest_framework.filters import SearchFilter
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 
+from acc.models import User
 from main import models as main_models
 from main.services.labor_estimate import ProjectLaborEstimateService
-from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
-from api.backends import FilterBackend
+from api.filters import  ModelMultipleChoiceCommaSeparatedFilter
 from api.views import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
 from api.handlers.main.views.base import MainBaseViewSet
@@ -74,6 +73,12 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
         organization_contractor_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=main_models.OrganizationContractor.objects,
         )
+        manager_pfm_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=User.objects,
+        )
+        manager_pm_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=User.objects,
+        )
 
     filter_class = Filter
     queryset = main_models.OrganizationProject.objects.prefetch_related(
@@ -93,6 +98,20 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
             ),
             openapi.Parameter(
                 'organization_contractor_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'manager_pfm_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'manager_pm_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
