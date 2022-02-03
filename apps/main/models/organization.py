@@ -9,6 +9,7 @@ from mptt import models as mptt_models
 from mptt import querysets as mptt_querysets
 
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
+from project.contrib.is_call_from_admin import is_call_from_admin
 from acc.models import User, Role
 from main.models import permissions as main_permissions
 
@@ -215,10 +216,15 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
 
     def clean(self):
         super().clean()
+        errors = {}
         if self.manager_pfm and Role.PFM not in self.organization_contractor.get_user_roles(self.manager_pfm):
-            raise ValidationError({'manager_pfm_id': _('Этот пользователь не может быть РПП на этом проекте')})
+            errors['manager_pfm'] = _('Этот пользователь не может быть РПП на этом проекте')
         if self.manager_pm and Role.PM not in self.organization_contractor.get_user_roles(self.manager_pm):
-            raise ValidationError({'manager_pm_id': _('Этот пользователь не может быть РП на этом проекте')})
+            errors['manager_pm'] = _('Этот пользователь не может быть РП на этом проекте')
+        if errors:
+            if not is_call_from_admin():
+                errors = {f'{k}_id': v for k, v in errors.items()}
+            raise ValidationError(errors)
 
     @property
     def modules_count(self) -> int:

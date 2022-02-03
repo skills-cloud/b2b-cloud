@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from project.contrib.db.models import DatesModelBase, ModelDiffMixin
+from project.contrib.is_call_from_admin import is_call_from_admin
 from acc.models import User
 from cv.models import CV
 from main.models.base import ExperienceYears
@@ -137,11 +138,14 @@ class Request(main_permissions.MainModelPermissionsMixin, DatesModelBase):
 
     def clean(self):
         super().clean()
+        errors = {}
         if self.manager_rm:
             if not self.module.organization_project.organization_contractor.get_user_roles(self.manager_rm):
-                raise ValidationError({
-                    'manager_rm_id': _('Этот пользователь не может быть РМ для этого запроса')
-                })
+                errors['manager_rm'] = _('Этот пользователь не может быть РМ для этого запроса')
+        if errors:
+            if not is_call_from_admin():
+                errors = {f'{k}_id': v for k, v in errors.items()}
+            raise ValidationError(errors)
 
     def __str__(self):
         return f'{self.title} <{self.id}> / {self.module.name} /  {self.module.organization_project.name}'

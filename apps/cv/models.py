@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 import reversion
 
 from project.contrib.db.models import DatesModelBase
+from project.contrib.is_call_from_admin import is_call_from_admin
 from acc.models import User
 from main.models import OrganizationContractor
 from cv import models_upload_to as upload_to
@@ -178,15 +179,16 @@ class CV(DatesModelBase):
 
     def clean(self):
         super().clean()
+        errors = {}
         if self.manager_rm:
             if not self.organization_contractor:
-                raise ValidationError({
-                    'organization_contractor_id': _('Чтобы задать РМа необходимо задать организацию исполнителя')
-                })
+                errors['organization_contractor'] = _('Чтобы задать РМа необходимо задать организацию исполнителя')
             if not self.organization_contractor.get_user_roles(self.manager_rm):
-                raise ValidationError({
-                    'manager_rm_id': _('Этот пользователь не может быть РМ для этой анкеты')
-                })
+                errors['manager_rm'] = _('Этот пользователь не может быть РМ для этой анкеты')
+        if errors:
+            if not is_call_from_admin():
+                errors = {f'{k}_id': v for k, v in errors.items()}
+            raise ValidationError(errors)
 
     def __str__(self):
         return f'%s < {self.id_verbose} >' % ' '.join(
