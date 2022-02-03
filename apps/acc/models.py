@@ -4,7 +4,7 @@ import datetime
 
 import hashlib
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 import reversion
 from django.db import models
@@ -115,8 +115,9 @@ class User(ModelPermissionsMixin, AbstractUser):
         self.save()
         return password
 
-    def generate_password_and_send_invite(self):
-        password = self.generate_password()
+    def generate_password_and_send_invite(self, password: Optional[str] = None):
+        if not password:
+            password = self.generate_password()
         msg = get_email_message_by_template('registration_invite', user=self, password=password)
         msg.to = [self.email]
         msg.send()

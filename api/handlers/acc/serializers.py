@@ -101,8 +101,8 @@ class UserManageSerializer(ModelSerializerWithCallCleanMethod):
                 role_instance = main_models.OrganizationProjectUserRole(**role_kwargs, role=row['role'])
                 role_instance.clean()
                 role_instance.save()
-        if not password and is_new:
-            self.instance.generate_password_and_send_invite()
+        if is_new:
+            self.instance.generate_password_and_send_invite(password)
         return self.instance
 
     def is_valid(self, raise_exception=False):
