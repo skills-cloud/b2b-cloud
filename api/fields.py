@@ -22,8 +22,11 @@ class PrimaryKeyRelatedIdField(PrimaryKeyRelatedField):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if 'request' in self.context and hasattr(queryset, 'filter_by_user'):
-            return queryset.filter_by_user(self.context['request'].user)
+        if 'request' in self.context:
+            if hasattr(queryset, 'filter_as_fk_by_user'):
+                return queryset.filter_as_fk_by_user(self.context['request'].user)
+            if hasattr(queryset, 'filter_by_user'):
+                return queryset.filter_by_user(self.context['request'].user)
         return queryset
 
     def bind(self, field_name, parent):

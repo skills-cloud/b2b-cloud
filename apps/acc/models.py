@@ -28,9 +28,8 @@ class Role(models.TextChoices):
 
 
 class UserQuerySet(models.QuerySet):
-    def filter_by_user(self, user: 'User'):
-        qs = self.exclude(id=user.id)
-        qs = qs.exclude(email='AnonymousUser')
+    def filter_as_fk_by_user(self, user: 'User'):
+        qs = self.exclude(email='AnonymousUser')
         if user.is_superuser or user.is_staff:
             return qs
         return qs.filter(
@@ -39,6 +38,9 @@ class UserQuerySet(models.QuerySet):
                 for row in user.organizations_contractors_roles.all()
             ]
         ).distinct()
+
+    def filter_by_user(self, user: 'User'):
+        return self.filter_as_fk_by_user(user).exclude(id=user.id)
 
 
 class UserManager(models.Manager.from_queryset(UserQuerySet), BaseUserManager):
