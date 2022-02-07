@@ -36,7 +36,7 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     class Filter(filters.FilterSet):
         class Meta:
             model = main_models.Organization
-            fields = ['is_customer', 'is_contractor']
+            fields = ['is_customer', 'is_contractor', 'is_partner']
 
     filterset_class = Filter
     queryset = main_models.Organization.objects
@@ -52,6 +52,12 @@ class OrganizationViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
             ),
             openapi.Parameter(
                 'is_contractor',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+            openapi.Parameter(
+                'is_partner',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_BOOLEAN,
                 required=False,
@@ -175,10 +181,10 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
 
 class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
-    class Filter(OrganizationViewSet.Filter):
+    class Filter(filters.FilterSet):
         class Meta:
-            model = main_models.Organization
-            fields = ['is_contractor']
+            model = main_models.OrganizationCustomer
+            fields = ['is_contractor', 'is_partner']
 
     filter_class = Filter
     queryset = main_models.OrganizationCustomer.objects
@@ -188,14 +194,13 @@ class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
-                'contractor_id',
+                'is_contractor',
                 openapi.IN_QUERY,
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                type=openapi.TYPE_BOOLEAN,
                 required=False,
             ),
             openapi.Parameter(
-                'is_contractor',
+                'is_partner',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_BOOLEAN,
                 required=False,
@@ -214,9 +219,41 @@ class OrganizationCustomerViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
 
 
 class OrganizationContractorViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
+    class Filter(filters.FilterSet):
+        class Meta:
+            model = main_models.OrganizationContractor
+            fields = ['is_customer', 'is_partner']
+
+    filter_class = Filter
     queryset = main_models.OrganizationContractor.objects
     serializer_class = main_serializers.OrganizationContractorSerializer
     serializer_read_class = main_serializers.OrganizationContractorReadSerializer
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'is_customer',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+            openapi.Parameter(
+                'is_partner',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+            openapi.Parameter(
+                'ordering',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=MainBaseViewSet.ordering_fields),
+                default=MainBaseViewSet.ordering
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OrganizationProjectCardItemTemplateViewSet(

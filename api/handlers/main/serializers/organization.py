@@ -35,7 +35,9 @@ class MainOrganizationSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.Organization
         fields = [
-            'id', 'name', 'description', 'is_customer', 'is_contractor',
+            'id', 'name', 'description', 'is_customer', 'is_contractor', 'is_partner',
+            'legal_name', 'legal_name', 'short_name', 'general_manager_name',
+            'contact_person', 'contacts_phone', 'contacts_email',
             'created_at', 'updated_at', 'current_user_roles',
         ]
 

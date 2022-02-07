@@ -34,6 +34,14 @@ class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, D
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     is_customer = models.BooleanField(default=False, verbose_name=_('это заказчик?'))
     is_contractor = models.BooleanField(default=False, verbose_name=_('это исполнитель?'))
+    is_partner = models.BooleanField(default=False, verbose_name=_('это партнер?'))
+    legal_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('юридическое наименование'))
+    short_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('краткое наименование'))
+    general_manager_name = models.CharField(max_length=500, null=True, blank=True,
+                                            verbose_name=_('генеральный директор'))
+    contact_person = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('контактное лицо'))
+    contacts_phone = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('контактный телефон'))
+    contacts_email = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('контактный e-mail'))
 
     class Meta:
         ordering = ['name']
