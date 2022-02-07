@@ -160,6 +160,8 @@ class Request(main_permissions.MainModelPermissionsMixin, DatesModelBase):
 
 
 class RequestRequirementStatus(models.TextChoices):
+    OPEN = 'open', _('Открыт')
+    CLOSED = 'closed', _('Закрыт')
     IN_PROGRESS = 'in_progress', _('В работе')
     DONE = 'done', _('Успешно завершен')
 
@@ -172,6 +174,10 @@ class RequestRequirement(main_permissions.MainModelPermissionsMixin, DatesModelB
     request = models.ForeignKey(
         'main.Request', on_delete=models.CASCADE, related_name='requirements',
         verbose_name=_('проектный запрос')
+    )
+    status = models.CharField(
+        max_length=50, default=RequestRequirementStatus.OPEN, choices=RequestRequirementStatus.choices,
+        verbose_name=_('статус')
     )
     sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
     name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('название'))
@@ -237,18 +243,6 @@ class RequestRequirement(main_permissions.MainModelPermissionsMixin, DatesModelB
     @property
     def cv_list_ids(self) -> List[int]:
         return [cv_link.cv_id for cv_link in self.cv_links.all()]
-
-    def status(self) -> RequestRequirementStatus:
-        if not self.count:
-            return RequestRequirementStatus.IN_PROGRESS
-        cv_done_count = sum([
-            1
-            for self_cv in self.cv_links.all()
-            if self_cv.status == RequestRequirementCvStatus.WORKER
-        ]) or 0
-        if self.count <= cv_done_count:
-            return RequestRequirementStatus.DONE
-        return RequestRequirementStatus.IN_PROGRESS
 
 
 class RequestRequirementCvStatus(models.TextChoices):

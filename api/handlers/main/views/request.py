@@ -223,6 +223,12 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
             queryset=User.objects,
         )
 
+        class Meta:
+            model = main_models.RequestRequirement
+            fields = [
+                'status',
+            ]
+
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = main_models.RequestRequirement.objects.prefetch_related(
         *main_models.RequestRequirement.objects.get_queryset_prefetch_related()
@@ -301,6 +307,13 @@ class RequestRequirementViewSet(ReadWriteSerializersMixin, ViewSetFilteredByUser
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'status',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_STRING, enum=main_models.RequestRequirementStatus.values),
                 required=False,
             ),
             openapi.Parameter(
