@@ -155,10 +155,6 @@ class Module(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesMo
                     '<br>ПН-ПТ deadline_date-start_date')
     )
     work_days_hours_count = models.IntegerField(default=8, verbose_name=_('кол-во рабочих часов в рабочем дне'))
-    manager = models.ForeignKey(
-        'acc.User', related_name='modules', null=True, blank=True,
-        on_delete=models.SET_NULL, verbose_name=_('руководитель')
-    )
     goals = models.TextField(null=True, blank=True, verbose_name=_('цели'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
@@ -180,7 +176,6 @@ class Module(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesMo
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
-                'manager',
                 'organization_project', 'organization_project__organization_customer',
                 'positions_labor_estimates', 'positions_labor_estimates__position',
                 *cls.get_queryset_fun_points_prefetch_related(),

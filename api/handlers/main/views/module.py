@@ -72,7 +72,6 @@ class ModuleViewSet(
             queryset=main_models.OrganizationProject.objects,
             field_name='organization_project',
         )
-        manager_id = ModelMultipleChoiceCommaSeparatedFilter(queryset=User.objects)
 
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = main_models.Module.objects
@@ -98,13 +97,6 @@ class ModuleViewSet(
             ),
             openapi.Parameter(
                 'organization_project_id',
-                openapi.IN_QUERY,
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_INTEGER),
-                required=False,
-            ),
-            openapi.Parameter(
-                'manager_id',
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),

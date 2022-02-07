@@ -113,7 +113,7 @@ class RequestRequirementSerializer(ModelSerializerWithCallCleanMethod):
     class Meta:
         model = main_models.RequestRequirement
         fields = [
-            'id', 'request_id', 'position_id', 'type_of_employment_id', 'work_location_city_id',
+            'id', 'request_id', 'status', 'position_id', 'type_of_employment_id', 'work_location_city_id',
             'sorting', 'name', 'description', 'experience_years', 'count', 'work_location_address', 'max_price',
             'date_from', 'date_to',
         ]

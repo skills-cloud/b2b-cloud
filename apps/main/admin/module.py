@@ -83,7 +83,7 @@ class ModuleAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         PositionLaborEstimateInline,
     ]
     list_display = ['id', '_organization', 'organization_project', 'name', ]
-    autocomplete_fields = ['organization_project', 'manager']
+    autocomplete_fields = ['organization_project']
     list_filter = [
         OrganizationFilter,
         OrganizationProjectAdminFilter,

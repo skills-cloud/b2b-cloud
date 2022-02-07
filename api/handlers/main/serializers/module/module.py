@@ -95,15 +95,11 @@ class ModuleWriteSerializer(ModelSerializerWithCallCleanMethod):
         queryset=main_models.OrganizationProject.objects,
         label=main_models.Module._meta.get_field('organization_project').verbose_name,
     )
-    manager_id = PrimaryKeyRelatedIdField(
-        queryset=User.objects, allow_null=True, required=False,
-        label=main_models.Module._meta.get_field('manager').verbose_name,
-    )
 
     class Meta:
         model = main_models.Module
         fields = [
-            'id', 'organization_project_id', 'name', 'start_date', 'deadline_date', 'manager_id',
+            'id', 'organization_project_id', 'name', 'start_date', 'deadline_date',
             'work_days_count', 'work_days_hours_count', 'goals', 'description', 'created_at', 'updated_at', 'sorting',
         ]
         validators = [
@@ -116,14 +112,13 @@ class ModuleWriteSerializer(ModelSerializerWithCallCleanMethod):
 
 class ModuleReadSerializer(ModuleWriteSerializer):
     organization_project = OrganizationProjectInlineSerializer(read_only=True)
-    manager = UserInlineSerializer(read_only=True, allow_null=True)
     fun_points = ModuleFunPointInlineSerializer(many=True, read_only=True)
     positions_labor_estimates = ModulePositionLaborEstimateInlineSerializer(many=True, read_only=True)
     difficulty_factor = serializers.FloatField(allow_null=True, read_only=True)
 
     class Meta(ModuleWriteSerializer.Meta):
         fields = ModuleWriteSerializer.Meta.fields + [
-            'difficulty_factor', 'organization_project', 'manager', 'fun_points', 'positions_labor_estimates',
+            'difficulty_factor', 'organization_project', 'fun_points', 'positions_labor_estimates',
         ]
 
 
