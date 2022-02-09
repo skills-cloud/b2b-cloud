@@ -33,7 +33,7 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': ['console_colored'],
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'propagate': False,
         },
     }
