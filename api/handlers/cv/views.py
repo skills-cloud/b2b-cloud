@@ -84,7 +84,7 @@ class CvViewSet(ViewSetFilteredByUserMixin, viewsets.ModelViewSet):
         [k, f'-{k}']
         for k in ['id', 'first_name', 'middle_name', 'last_name', 'created_at', 'updated_at']
     ]))
-    ordering = ['-updated_at']
+    ordering = ['-id']
     queryset = cv_models.CV.objects.distinct()
 
     def get_queryset(self):

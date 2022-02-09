@@ -11,6 +11,10 @@ class DictionaryModelBase(DatesModelBase):
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    attributes = models.JSONField(
+        default=dict, verbose_name=_('доп. атрибуты'), editable=False,
+        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
+    )
 
     class Meta(DatesModelBase.Meta):
         abstract = True
