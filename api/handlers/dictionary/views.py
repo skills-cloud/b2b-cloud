@@ -8,6 +8,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
 from dictionary import models as dictionary_models
+from api.views import ReadWriteSerializersMixin
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedIdFilter
 from api.backends import FilterBackend
 from api.handlers.dictionary import serializers as dictionary_serializers
@@ -48,9 +49,10 @@ class TypeOfEmploymentViewSet(DictionaryBaseViewSet):
     serializer_class = dictionary_serializers.TypeOfEmploymentSerializer
 
 
-class CityViewSet(DictionaryBaseViewSet):
+class CityViewSet(ReadWriteSerializersMixin, DictionaryBaseViewSet):
     queryset = dictionary_models.City.objects.prefetch_related('country')
     serializer_class = dictionary_serializers.CitySerializer
+    serializer_read_class = dictionary_serializers.CityReadSerializer
     search_fields = ['name', 'country__name']
     filterset_fields = ['country_id']
 
