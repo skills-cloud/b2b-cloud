@@ -14,9 +14,10 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 
 from acc.models import User
+from dictionary import models as dictionary_models
 from main import models as main_models
 from main.services.labor_estimate import ProjectLaborEstimateService
-from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
+from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter, DateFromToRangeFilter
 from api.backends import FilterBackend
 from api.views import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
@@ -89,6 +90,11 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
         manager_pm_id = ModelMultipleChoiceCommaSeparatedFilter(
             queryset=User.objects,
         )
+        industry_sector_id = ModelMultipleChoiceCommaSeparatedFilter(
+            queryset=dictionary_models.IndustrySector.objects,
+        )
+        date_from = filters.DateFilter(lookup_expr='gte')
+        date_to = filters.DateFilter(lookup_expr='lte')
 
     filter_class = Filter
     queryset = main_models.OrganizationProject.objects.prefetch_related(
@@ -134,6 +140,27 @@ class OrganizationProjectViewSet(ViewSetFilteredByUserMixin, MainBaseViewSet):
                 openapi.IN_QUERY,
                 type=openapi.TYPE_ARRAY,
                 items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'industry_sector_id',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                required=False,
+            ),
+            openapi.Parameter(
+                'date_from',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE,
+                required=False,
+            ),
+            openapi.Parameter(
+                'date_to',
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE,
                 required=False,
             ),
             openapi.Parameter(
