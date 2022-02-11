@@ -73,6 +73,7 @@ class CompetenceSerializer(DictionaryBaseSerializer):
     parent_id = PrimaryKeyRelatedIdField(
         queryset=dictionary_models.Competence.objects,
         label=dictionary_models.Competence._meta.get_field('parent').verbose_name,
+        required=False,
     )
 
     class Meta(DictionaryBaseSerializer.Meta):
