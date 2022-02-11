@@ -17,7 +17,7 @@ from acc.models import User
 from dictionary import models as dictionary_models
 from main import models as main_models
 from main.services.labor_estimate import ProjectLaborEstimateService
-from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter, DateFromToRangeFilter
+from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedFilter
 from api.backends import FilterBackend
 from api.views import ReadWriteSerializersMixin, ViewSetFilteredByUserMixin
 from api.handlers.main import serializers as main_serializers
