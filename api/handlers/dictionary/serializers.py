@@ -70,9 +70,14 @@ class PositionSerializer(DictionaryBaseSerializer):
 
 
 class CompetenceSerializer(DictionaryBaseSerializer):
+    parent_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Competence.objects,
+        label=dictionary_models.Competence._meta.get_field('parent').verbose_name,
+    )
+
     class Meta(DictionaryBaseSerializer.Meta):
         model = dictionary_models.Competence
-        fields = ['id', 'parent_id', 'name']
+        fields = ['id', 'parent_id', 'name', 'description', 'sorting', 'is_verified']
         exclude = None
 
 
@@ -93,7 +98,7 @@ class OrganizationSerializer(DictionaryBaseSerializer):
 
 class CompetenceInlineSerializer(CompetenceSerializer):
     class Meta(CompetenceSerializer.Meta):
-        fields = ['id', 'parent_id', 'name', 'description', 'is_verified']
+        fields = ['id', 'parent_id', 'name']
         exclude = None
 
 
