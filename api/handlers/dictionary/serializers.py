@@ -1,15 +1,14 @@
-from typing import Dict, List, Any
-
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
+from api.fields import PrimaryKeyRelatedIdField
 from dictionary import models as dictionary_models
 from api.serializers import ModelSerializer
 
 
 class DictionaryBaseSerializer(ModelSerializer):
     class Meta:
-        exclude = ['created_at', 'updated_at', 'sorting']
+        exclude = ['created_at', 'updated_at', 'attributes']
 
 
 class TypeOfEmploymentSerializer(DictionaryBaseSerializer):
@@ -23,10 +22,21 @@ class CountrySerializer(DictionaryBaseSerializer):
 
 
 class CitySerializer(DictionaryBaseSerializer):
+    country_id = PrimaryKeyRelatedIdField(
+        queryset=dictionary_models.Country.objects,
+        label=dictionary_models.City._meta.get_field('country').verbose_name,
+    )
+
+    class Meta:
+        model = dictionary_models.City
+        fields = ['id', 'country_id', 'name', 'is_verified', 'sorting']
+
+
+class CityReadSerializer(CitySerializer):
     country = CountrySerializer()
 
-    class Meta(DictionaryBaseSerializer.Meta):
-        model = dictionary_models.City
+    class Meta(CitySerializer.Meta):
+        fields = CitySerializer.Meta.fields + ['country']
 
 
 class CitizenshipSerializer(DictionaryBaseSerializer):
