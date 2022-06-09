@@ -1,4 +1,3 @@
-version: '3.5'
 stages:
   - build
   - deploy
