@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from os import environ
+from os import environ, path
 from split_settings.tools import include, optional
 
 sys.path.append('apps')
@@ -9,6 +9,10 @@ environ.setdefault('DJANGO_ENV', 'dev')
 DJANGO_ENV = environ['DJANGO_ENV']
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+LOCALE_PATHS = (
+    path.join(BASE_DIR, 'locale'),
+)
 
 SECRET_KEY = 'django-insecure-2mw(kwl1g&-t28nvir)jby8mk%%64ad$@v4_mnkgz&m=$-92kn'
 
