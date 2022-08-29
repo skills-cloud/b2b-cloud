@@ -10,10 +10,6 @@ DJANGO_ENV = environ['DJANGO_ENV']
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-LOCALE_PATHS = (
-    path.join(BASE_DIR, 'locale'),
-)
-
 SECRET_KEY = 'django-insecure-2mw(kwl1g&-t28nvir)jby8mk%%64ad$@v4_mnkgz&m=$-92kn'
 
 _base_settings = (

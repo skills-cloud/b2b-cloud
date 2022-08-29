@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 10:15+0300\n"
+"POT-Creation-Date: 2022-08-29 12:44+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -688,6 +688,14 @@ msgstr "created"
 msgid "обновлено"
 msgstr "updated"
 
+#: project/settings/bits/locale.py:16
+msgid "English"
+msgstr "English"
+
+#: project/settings/bits/locale.py:17
+msgid "Russian"
+msgstr "Russian"
+
 #: templates/nesting/admin/inlines/tabular.html:33
 msgid "Delete?"
 msgstr "Delete?"
@@ -1279,12 +1287,6 @@ msgstr "Add another %(verbose_name)s"
 
 #~ msgid "У вас нет прав"
 #~ msgstr "You don't have permission"
-
-#~ msgid "English"
-#~ msgstr "English"
-
-#~ msgid "Russian"
-#~ msgstr "Russian"
 
 #~ msgid "Change"
 #~ msgstr "Change"

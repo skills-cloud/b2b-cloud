@@ -23,4 +23,5 @@ if settings.DEBUG:
 
 urlpatterns += [
     path('api/', include(app_urlpatterns + api_urls.urlpatterns)),
+    path('i18n/', include('django.conf.urls.i18n')),
 ]
