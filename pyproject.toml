@@ -86,8 +86,6 @@ pygit2 = "^1.6.1"
 openpyxl = "^3.0.7"
 docx2txt = "^0.8"
 
-[tool.poetry.dev-dependencies]
-
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.4.0"
