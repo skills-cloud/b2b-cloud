@@ -85,6 +85,7 @@ django-nested-admin = "^3.3.3"
 pygit2 = "^1.6.1"
 openpyxl = "^3.0.7"
 docx2txt = "^0.8"
+python-dotenv = "^0.20.0"
 
 
 [tool.poetry.dev-dependencies]
