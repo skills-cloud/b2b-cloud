@@ -13,61 +13,61 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='citizenship',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='city',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='competence',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='contacttype',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='country',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='educationgraduate',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='educationplace',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='educationspecialty',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='industrysector',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='physicallimitation',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='position',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
         migrations.AlterField(
             model_name='typeofemployment',
             name='name',
-            field=models.CharField(db_index=True, max_length=500, verbose_name='название'),
+            field=models.CharField(db_index=True, max_length=500, verbose_name='name'),
         ),
     ]

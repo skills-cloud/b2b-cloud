@@ -12,9 +12,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='requestrequirement',
             name='status',
-            field=models.CharField(choices=[('open', 'Открыт'), ('closed', 'Закрыт'), ('in_progress', 'В работе'),
-                                            ('done', 'Успешно завершен')], default='open', max_length=50,
-                                   verbose_name='статус'),
+            field=models.CharField(choices=[('open', 'Open'), ('closed', 'Closed'), ('in_progress', 'In progress'),
+                                            ('done', 'Successfully completed')], default='open', max_length=50,
+                                   verbose_name='status'),
         ),
         migrations.RemoveField(
             model_name='module',
@@ -23,36 +23,36 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='contact_person',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='контактное лицо'),
+            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='contact person'),
         ),
         migrations.AddField(
             model_name='organization',
             name='contacts_email',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='контактный e-mail'),
+            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='contact email'),
         ),
         migrations.AddField(
             model_name='organization',
             name='contacts_phone',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='контактный телефон'),
+            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='contact phone'),
         ),
         migrations.AddField(
             model_name='organization',
             name='general_manager_name',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='генеральный директор'),
+            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='general manager'),
         ),
         migrations.AddField(
             model_name='organization',
             name='is_partner',
-            field=models.BooleanField(default=False, verbose_name='это партнер?'),
+            field=models.BooleanField(default=False, verbose_name='is a partner?'),
         ),
         migrations.AddField(
             model_name='organization',
             name='legal_name',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='юридическое наименование'),
+            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='legal name'),
         ),
         migrations.AddField(
             model_name='organization',
             name='short_name',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='краткое наименование'),
+            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='short name'),
         ),
     ]

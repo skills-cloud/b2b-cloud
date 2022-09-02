@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cvpositioncompetence',
             name='competence',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dictionary.competence', verbose_name='компетенция'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dictionary.competence', verbose_name='competence'),
         ),
     ]

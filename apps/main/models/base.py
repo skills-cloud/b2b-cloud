@@ -8,13 +8,13 @@ __all__ = [
 
 
 class ExperienceYears(models.IntegerChoices):
-    ZERO = 1, _('Менее года')
-    THREE = 3, _('1 – 3 года')
-    FIVE = 5, _('3 - 5 лет')
-    ONE_HUNDRED = 100, _('Более 5 лет')
+    ZERO = 1, _('Less than a year')
+    THREE = 3, _('1 – 3 years')
+    FIVE = 5, _('3 - 5 years')
+    ONE_HUNDRED = 100, _('More than 5 years')
 
 
 class WorkLocationType(models.TextChoices):
-    OFFICE = 'office', _('Офис')
-    HOME = 'home', _('Удаленная работа')
-    MIXED = 'mixed', _('Офис или удаленная')
+    OFFICE = 'office', _('Office')
+    HOME = 'home', _('Remote')
+    MIXED = 'mixed', _('Office or remote')

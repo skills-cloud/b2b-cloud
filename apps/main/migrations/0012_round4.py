@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             model_name='request',
             name='module',
             field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='requests',
-                                    to='main.module', verbose_name='модуль'),
+                                    to='main.module', verbose_name='module'),
             preserve_default=False,
         ),
     ]

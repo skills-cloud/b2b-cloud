@@ -32,28 +32,28 @@ __all__ = [
 
 @reversion.register()
 class RequestType(models.Model):
-    name = models.CharField(max_length=500, verbose_name=_('название'))
+    name = models.CharField(max_length=500, verbose_name=_('name'))
 
     class Meta:
         ordering = ['name']
-        verbose_name = _('запросы / тип запроса')
-        verbose_name_plural = _('запросы / типы запросов')
+        verbose_name = _('requests / request type')
+        verbose_name_plural = _('requests / request types')
 
     def __str__(self):
         return self.name
 
 
 class RequestStatus(models.TextChoices):
-    DRAFT = 'draft', _('Черновик')
-    IN_PROGRESS = 'in_progress', _('В работе')
-    DONE = 'done', _('Успешно завершен')
-    CLOSED = 'closed', _('Закрыт')
+    DRAFT = 'draft', _('Draft')
+    IN_PROGRESS = 'in_progress', _('In progress')
+    DONE = 'done', _('Successfully completed')
+    CLOSED = 'closed', _('Closed')
 
 
 class RequestPriority(models.IntegerChoices):
-    MAJOR = 10, _('Высокий')
-    DEFAULT = 20, _('Обычный')
-    MINOR = 30, _('Низкий')
+    MAJOR = 10, _('Major')
+    DEFAULT = 20, _('Default')
+    MINOR = 30, _('Minor')
 
 
 @reversion.register(follow=['requirements'])
@@ -63,37 +63,37 @@ class Request(main_permissions.MainModelPermissionsMixin, DatesModelBase):
 
     module = models.ForeignKey(
         'main.Module', related_name='requests', on_delete=models.CASCADE,
-        verbose_name=_('модуль')
+        verbose_name=_('module')
     )
     type = models.ForeignKey(
         'main.RequestType', related_name='requests', null=True, blank=True, on_delete=models.CASCADE,
-        verbose_name=_('тип запроса')
+        verbose_name=_('request type')
     )
-    title = models.TextField(null=True, blank=True, verbose_name=_('заголовок (название или номер)'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    title = models.TextField(null=True, blank=True, verbose_name=_('header (name or number)'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
     status = models.CharField(
         max_length=50, default=RequestStatus.DRAFT, choices=RequestStatus.choices,
-        verbose_name=_('статус')
+        verbose_name=_('status')
     )
     priority = models.IntegerField(
         default=RequestPriority.DEFAULT, choices=RequestPriority.choices,
-        verbose_name=_('приоритет')
+        verbose_name=_('priority')
     )
     industry_sector = models.ForeignKey(
         'dictionary.IndustrySector', related_name='requests', null=True, blank=True, on_delete=models.RESTRICT,
-        verbose_name=_('отрасль')
+        verbose_name=_('industry')
     )
-    start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
-    deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
+    start_date = models.DateField(null=True, blank=True, verbose_name=_('start date'))
+    deadline_date = models.DateField(null=True, blank=True, verbose_name=_('deadline'))
     manager_rm = models.ForeignKey(
         'acc.User', related_name='requests_as_rm', null=True, blank=True,
-        on_delete=models.SET_NULL, verbose_name=_('РМ')
+        on_delete=models.SET_NULL, verbose_name=_('RM')
     )
 
     class Meta:
         ordering = ['priority', '-id']
-        verbose_name = _('запрос')
-        verbose_name_plural = _('запросы')
+        verbose_name = _('request')
+        verbose_name_plural = _('requests')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -141,7 +141,7 @@ class Request(main_permissions.MainModelPermissionsMixin, DatesModelBase):
         errors = {}
         if self.manager_rm:
             if not self.module.organization_project.organization_contractor.get_user_roles(self.manager_rm):
-                errors['manager_rm'] = _('Этот пользователь не может быть РМ для этого запроса')
+                errors['manager_rm'] = _('This user cannot be set as resource manager of this request')
         if errors:
             if not is_call_from_admin():
                 errors = {f'{k}_id': v for k, v in errors.items()}
@@ -160,10 +160,10 @@ class Request(main_permissions.MainModelPermissionsMixin, DatesModelBase):
 
 
 class RequestRequirementStatus(models.TextChoices):
-    OPEN = 'open', _('Открыт')
-    CLOSED = 'closed', _('Закрыт')
-    IN_PROGRESS = 'in_progress', _('В работе')
-    DONE = 'done', _('Успешно завершен')
+    OPEN = 'open', _('Open')
+    CLOSED = 'closed', _('Closed')
+    IN_PROGRESS = 'in_progress', _('In progress')
+    DONE = 'done', _('Successfully completed')
 
 
 @reversion.register(follow=['request', 'competencies', 'cv_links'])
@@ -173,38 +173,38 @@ class RequestRequirement(main_permissions.MainModelPermissionsMixin, DatesModelB
 
     request = models.ForeignKey(
         'main.Request', on_delete=models.CASCADE, related_name='requirements',
-        verbose_name=_('проектный запрос')
+        verbose_name=_('request')
     )
     status = models.CharField(
         max_length=50, default=RequestRequirementStatus.OPEN, choices=RequestRequirementStatus.choices,
-        verbose_name=_('статус')
+        verbose_name=_('status')
     )
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
-    name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
+    name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('name'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
     position = models.ForeignKey(
         'dictionary.Position', related_name='requests_requirements', null=True, blank=True, on_delete=models.CASCADE,
-        verbose_name=_('должность')
+        verbose_name=_('position')
     )
-    experience_years = models.FloatField(null=True, blank=True, verbose_name=_('опыт лет'), help_text='float')
-    count = models.IntegerField(null=True, blank=True, verbose_name=_('количество'))
+    experience_years = models.FloatField(null=True, blank=True, verbose_name=_('experience years'), help_text='float')
+    count = models.IntegerField(null=True, blank=True, verbose_name=_('count'))
     type_of_employment = models.ForeignKey(
         'dictionary.TypeOfEmployment', related_name='requests_requirements', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('тип занятости')
+        on_delete=models.RESTRICT, verbose_name=_('type of employment')
     )
     work_location_city = models.ForeignKey(
         'dictionary.City', related_name='requests_requirements', null=True, blank=True, on_delete=models.SET_NULL,
-        verbose_name=_('город')
+        verbose_name=_('city')
     )
-    work_location_address = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('адрес'))
-    max_price = models.FloatField(null=True, blank=True, verbose_name=_('макс. цена'))
-    date_from = models.DateField(null=True, blank=True, verbose_name=_('дата с'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('дата по'))
+    work_location_address = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('address'))
+    max_price = models.FloatField(null=True, blank=True, verbose_name=_('max rate'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('date from'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('date to'))
 
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('запросы / требование')
-        verbose_name_plural = _('запросы / требования')
+        verbose_name = _('requests / requirement')
+        verbose_name_plural = _('requests / requirements')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -262,26 +262,26 @@ class RequestRequirementCv(main_permissions.MainModelPermissionsMixin, ModelDiff
     """
     request_requirement = models.ForeignKey(
         'main.RequestRequirement', on_delete=models.CASCADE, related_name='cv_links',
-        verbose_name=_('требование проектного запроса')
+        verbose_name=_('requiest requirement')
     )
     cv = models.ForeignKey(
         'cv.CV', on_delete=models.CASCADE, related_name='requests_requirements_links',
-        verbose_name=_('анкета')
+        verbose_name=_('CV')
     )
     status = models.CharField(
         max_length=50, choices=RequestRequirementCvStatus.choices, default=RequestRequirementCvStatus.CANDIDATE,
-        verbose_name=_('статус')
+        verbose_name=_('status')
     )
-    date_from = models.DateField(null=True, blank=True, verbose_name=_('участие в проекте с'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('участие в проекте по'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('working on project from'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('working on project to'))
 
     rating = models.IntegerField(
         null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(5)],
-        verbose_name=_('рейтинг')
+        verbose_name=_('rating')
     )
     attributes = models.JSONField(
-        default=dict, verbose_name=_('доп. атрибуты'),
-        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
+        default=dict, verbose_name=_('additional attributes'),
+        help_text=_('avoid editing if you do not know the purpose of this field')
     )
 
     class Meta:
@@ -289,8 +289,8 @@ class RequestRequirementCv(main_permissions.MainModelPermissionsMixin, ModelDiff
         unique_together = [
             ['request_requirement', 'cv']
         ]
-        verbose_name = _('анкета')
-        verbose_name_plural = _('анкеты')
+        verbose_name = _('CV')
+        verbose_name_plural = _('CVs')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -324,7 +324,7 @@ class RequestRequirementCv(main_permissions.MainModelPermissionsMixin, ModelDiff
         )
         if len(cards_items_ids) != cards_items_qs.count():
             raise ValidationError({
-                'attributes.organization_project_card_items': _('Неверно задана ID минимум одной карточки')
+                'attributes.organization_project_card_items': _('At least one card has invalid ID')
             })
 
 
@@ -335,22 +335,22 @@ class RequestRequirementCompetence(main_permissions.MainModelPermissionsMixin, D
 
     request_requirement = models.ForeignKey(
         'main.RequestRequirement', on_delete=models.CASCADE, related_name='competencies',
-        verbose_name=_('требование проектного запроса')
+        verbose_name=_('request requirement')
     )
-    competence = models.ForeignKey('dictionary.Competence', on_delete=models.CASCADE, verbose_name=_('компетенция'))
+    competence = models.ForeignKey('dictionary.Competence', on_delete=models.CASCADE, verbose_name=_('competence'))
     experience_years = models.IntegerField(
         null=True, blank=True, choices=ExperienceYears.choices,
-        verbose_name=_('опыт лет')
+        verbose_name=_('years of experience')
     )
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
 
     class Meta:
         ordering = ['sorting', '-experience_years', 'id']
         unique_together = [
             ['request_requirement', 'competence']
         ]
-        verbose_name = _('компетенция')
-        verbose_name_plural = _('компетенции')
+        verbose_name = _('competence')
+        verbose_name_plural = _('competencies')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -385,17 +385,17 @@ class TimeSheetRow(main_permissions.MainModelPermissionsMixin, DatesModelBase):
 
     request = models.ForeignKey(
         'main.Request', on_delete=models.CASCADE, related_name='time_sheet_rows',
-        verbose_name=_('проектный запрос')
+        verbose_name=_('request')
     )
     cv = models.ForeignKey(
         'cv.CV', on_delete=models.CASCADE, related_name='time_sheet_rows',
-        verbose_name=_('анкета исполнителя')
+        verbose_name=_('contractor CV')
     )
-    date_from = models.DateField(default=timezone.now, db_index=True, verbose_name=_('дата начала работ'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('дата окончания работ'))
-    task_name = models.CharField(max_length=1000, verbose_name=_('название задачи'))
-    task_description = models.TextField(null=True, blank=True, verbose_name=_('описание задачи'))
-    work_time = models.FloatField(verbose_name=_('затраченное время'))
+    date_from = models.DateField(default=timezone.now, db_index=True, verbose_name=_('start date'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('end date'))
+    task_name = models.CharField(max_length=1000, verbose_name=_('task name'))
+    task_description = models.TextField(null=True, blank=True, verbose_name=_('task description'))
+    work_time = models.FloatField(verbose_name=_('time spent'))
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -428,8 +428,8 @@ class TimeSheetRow(main_permissions.MainModelPermissionsMixin, DatesModelBase):
             ['request', 'date_from'],
             ['request', 'task_name'],
         ]
-        verbose_name = _('запросы / таймшиты')
-        verbose_name_plural = _('запросы / таймшиты')
+        verbose_name = _('requests / timesheets')
+        verbose_name_plural = _('requests / timesheets')
 
     objects = Manager()
 
@@ -443,5 +443,5 @@ class TimeSheetRow(main_permissions.MainModelPermissionsMixin, DatesModelBase):
                 id=self.cv_id,
         ).exists():
             raise ValidationError({
-                'cv': _(f'Анкета <{self.cv_id}> не связана с требованием проектного запроса')
+                'cv': _(f'CV <{self.cv_id}> is not linked to a request requirement')
             })

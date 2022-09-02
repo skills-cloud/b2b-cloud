@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cveducation',
             name='diploma_number',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='номер диплома'),
+            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='diploma number'),
         ),
     ]

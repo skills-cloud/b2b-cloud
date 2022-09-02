@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='requestrequirement',
             name='cv_list',
-            field=models.ManyToManyField(blank=True, related_name='requests_requirements', to='cv.CV', verbose_name='анкеты'),
+            field=models.ManyToManyField(blank=True, related_name='requests_requirements', to='cv.CV', verbose_name='CVs'),
         ),
     ]

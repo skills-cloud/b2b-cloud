@@ -15,12 +15,12 @@ class Migration(migrations.Migration):
             model_name='cvcareer',
             name='organization_new',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                    to='dictionary.organization', verbose_name='заказчик'),
+                                    to='dictionary.organization', verbose_name='customer'),
         ),
         migrations.AddField(
             model_name='cvproject',
             name='organization_new',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                    to='dictionary.organization', verbose_name='заказчик'),
+                                    to='dictionary.organization', verbose_name='customer'),
         ),
     ]

@@ -11,11 +11,11 @@ class Migration(migrations.Migration):
             model_name='cvtimeslot',
             name='kind',
             field=models.CharField(choices=[('manual', 'Manual'), ('request_requirement', 'Request Requirement')],
-                                   default='manual', max_length=50, verbose_name='тип слота'),
+                                   default='manual', max_length=50, verbose_name='slot type'),
         ),
         migrations.AddField(
             model_name='cvtimeslot',
             name='is_free',
-            field=models.BooleanField(default=False, verbose_name='свободен?'),
+            field=models.BooleanField(default=False, verbose_name='available?'),
         ),
     ]

@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             name='request_requirement_link',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
                                     related_name='time_slots', to='main.requestrequirementcv',
-                                    verbose_name='связь с требованием проектного запроса'),
+                                    verbose_name='linked to a request'),
         ),
         migrations.RunSQL('TRUNCATE cv_cvtimeslot CASCADE')
     ]

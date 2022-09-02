@@ -28,18 +28,18 @@ class FunPointType(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, D
 
     organization_customer = models.ForeignKey(
         'main.OrganizationCustomer', related_name='fun_points_types', null=True, blank=True, on_delete=models.CASCADE,
-        verbose_name=_('заказчик'), help_text=_('глобальный тип, если оставить это поле пустым')
+        verbose_name=_('customer'), help_text=_('general type if this field is left empty')
     )
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    name = models.CharField(max_length=500, verbose_name=_('name'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
 
     class Meta:
         ordering = ['name']
         unique_together = [
             ['organization_customer', 'name']
         ]
-        verbose_name = _('модули / тип функциональной точки')
-        verbose_name_plural = _('модули / типы функциональных точек')
+        verbose_name = _('modules / fuctional point type')
+        verbose_name_plural = _('modules / fuctional point types')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -73,19 +73,19 @@ class FunPointTypeDifficultyLevel(main_permissions.MainModelPermissionsMixin, Mo
 
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='difficulty_levels', on_delete=models.CASCADE,
-        verbose_name=_('уровень сложности')
+        verbose_name=_('difficulty level')
     )
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    factor = models.FloatField(default=1, verbose_name=_('коэффициент'))
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    name = models.CharField(max_length=500, verbose_name=_('name'))
+    factor = models.FloatField(default=1, verbose_name=_('factor'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
 
     class Meta:
         ordering = ['sorting', 'id']
         unique_together = [
             ['fun_point_type', 'name']
         ]
-        verbose_name = _('уровень сложности')
-        verbose_name_plural = _('уровни сложности')
+        verbose_name = _('difficulty level')
+        verbose_name_plural = _('difficulty levels')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -110,22 +110,22 @@ class FunPointTypePositionLaborEstimate(main_permissions.MainModelPermissionsMix
 
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='positions_labor_estimates', on_delete=models.CASCADE,
-        verbose_name=_('уровень сложности')
+        verbose_name=_('difficulty level')
     )
     position = models.ForeignKey(
         'dictionary.Position', related_name='fun_points_types_labor_estimates', on_delete=models.CASCADE,
-        verbose_name=_('должность')
+        verbose_name=_('position')
     )
-    hours = models.FloatField(default=1, verbose_name=_('норматив'), help_text=_('в часах'))
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    hours = models.FloatField(default=1, verbose_name=_('standard'), help_text=_('in hours'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
 
     class Meta:
         ordering = ['sorting', 'id']
         unique_together = [
             ['fun_point_type', 'position']
         ]
-        verbose_name = _('норматив трудозатрат')
-        verbose_name_plural = _('нормативы трудозатрат')
+        verbose_name = _('labor standard')
+        verbose_name_plural = _('labor standards')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -144,28 +144,28 @@ class Module(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesMo
 
     organization_project = models.ForeignKey(
         'main.OrganizationProject', related_name='modules', on_delete=models.CASCADE,
-        verbose_name=_('проект')
+        verbose_name=_('project')
     )
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    start_date = models.DateField(null=True, blank=True, verbose_name=_('дата начала'))
-    deadline_date = models.DateField(null=True, blank=True, verbose_name=_('срок'))
+    name = models.CharField(max_length=500, verbose_name=_('name'))
+    start_date = models.DateField(null=True, blank=True, verbose_name=_('start date'))
+    deadline_date = models.DateField(null=True, blank=True, verbose_name=_('deadline'))
     work_days_count = models.IntegerField(
-        null=True, blank=True, verbose_name=_('кол-во рабочих дней'),
-        help_text=_('если пусто, заполнится автоматически из расчета пятидневной рабочей недели'
-                    '<br>ПН-ПТ deadline_date-start_date')
+        null=True, blank=True, verbose_name=_('workdays count'),
+        help_text=_('filled automatically based on a five day work week if left empty'
+                    '<br>Mon-Fri deadline_date-start_date')
     )
-    work_days_hours_count = models.IntegerField(default=8, verbose_name=_('кол-во рабочих часов в рабочем дне'))
-    goals = models.TextField(null=True, blank=True, verbose_name=_('цели'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    work_days_hours_count = models.IntegerField(default=8, verbose_name=_('workday hours count'))
+    goals = models.TextField(null=True, blank=True, verbose_name=_('goals'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
 
     class Meta:
         ordering = ['sorting', 'id']
         unique_together = [
             ['organization_project', 'name']
         ]
-        verbose_name = _('модуль')
-        verbose_name_plural = _('модули')
+        verbose_name = _('module')
+        verbose_name_plural = _('modules')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -209,27 +209,27 @@ class ModuleFunPoint(main_permissions.MainModelPermissionsMixin, ModelDiffMixin,
 
     fun_point_type = models.ForeignKey(
         'main.FunPointType', related_name='fun_points', on_delete=models.RESTRICT,
-        verbose_name=_('тип')
+        verbose_name=_('type')
     )
     module = models.ForeignKey(
         'main.Module', related_name='fun_points', on_delete=models.CASCADE,
-        verbose_name=_('модуль')
+        verbose_name=_('module')
     )
     difficulty_level = models.ForeignKey(
         'main.FunPointTypeDifficultyLevel', related_name='fun_points', null=True, blank=True, on_delete=models.SET_NULL,
-        verbose_name=_('уровень сложности')
+        verbose_name=_('difficulty level')
     )
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    name = models.CharField(max_length=500, verbose_name=_('name'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
 
     class Meta:
         ordering = ['sorting', 'id']
         unique_together = [
             ['module', 'name']
         ]
-        verbose_name = _('функциональная точка')
-        verbose_name_plural = _('функциональные точки')
+        verbose_name = _('functional point')
+        verbose_name_plural = _('functional points')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -248,9 +248,9 @@ class ModuleFunPoint(main_permissions.MainModelPermissionsMixin, ModelDiffMixin,
                 self.module.organization_project.organization_customer_id
         ):
             raise ValidationError({'fun_point_type': _(
-                'Ф-я точка должна принадлежать компании заказчику проекта модуля или быть общеупотребимой')})
+                'Functional point must belong to the company that ordered the module or be commonly used')})
         if self.difficulty_level and self.fun_point_type_id != self.difficulty_level.fun_point_type_id:
-            raise ValidationError({'difficulty_level': _('Уровень сложности должен принадлежать этому типу ф-й точки')})
+            raise ValidationError({'difficulty_level': _('Difficulty level must belong to this functional point type')})
 
     @property
     def difficulty_factor(self) -> float:
@@ -266,23 +266,23 @@ class ModulePositionLaborEstimate(main_permissions.MainModelPermissionsMixin, Da
 
     module = models.ForeignKey(
         'main.Module', related_name='positions_labor_estimates', on_delete=models.CASCADE,
-        verbose_name=_('модуль')
+        verbose_name=_('module')
     )
     position = models.ForeignKey(
         'dictionary.Position', related_name='modules_positions_labor_estimates', on_delete=models.CASCADE,
-        verbose_name=_('должность')
+        verbose_name=_('position')
     )
-    count = models.PositiveIntegerField(default=1, verbose_name=_('кол-во'))
-    hours = models.FloatField(default=1, verbose_name=_('чел/часов'))
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    count = models.PositiveIntegerField(default=1, verbose_name=_('count'))
+    hours = models.FloatField(default=1, verbose_name=_('man-hours'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
 
     class Meta:
         ordering = ['sorting', 'id']
         unique_together = [
             ['module', 'position']
         ]
-        verbose_name = _('норматив трудозатрат')
-        verbose_name_plural = _('нормативы трудозатрат')
+        verbose_name = _('labor standard')
+        verbose_name_plural = _('labor standards')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):

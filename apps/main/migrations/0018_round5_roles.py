@@ -15,16 +15,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='organizationcontractoruserrole',
             name='role',
-            field=models.CharField(choices=[('admin', 'Администратор'), ('pfm', 'Руководитель портфеля проектов'), ('pm', 'Руководитель проекта'), ('rm', 'Ресурсный менеджер')], max_length=50, verbose_name='роль'),
+            field=models.CharField(choices=[('admin', 'Administrator'), ('pfm', 'Project portfolio manager'), ('pm', 'Project manager'), ('rm', 'Resource manager')], max_length=50, verbose_name='role'),
         ),
         migrations.AlterField(
             model_name='organizationprojectuserrole',
             name='role',
-            field=models.CharField(choices=[('admin', 'Администратор'), ('pfm', 'Руководитель портфеля проектов'), ('pm', 'Руководитель проекта'), ('rm', 'Ресурсный менеджер')], max_length=50, verbose_name='роль'),
+            field=models.CharField(choices=[('admin', 'Administrator'), ('pfm', 'Project portfolio manager'), ('pm', 'Project manager'), ('rm', 'Resource manager')], max_length=50, verbose_name='role'),
         ),
         migrations.AlterField(
             model_name='requestrequirementcompetence',
             name='competence',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dictionary.competence', verbose_name='компетенция'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dictionary.competence', verbose_name='competence'),
         ),
     ]

@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cv',
             name='attributes',
-            field=models.JSONField(default=dict, editable=False, help_text='если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования', verbose_name='доп. атрибуты'),
+            field=models.JSONField(default=dict, editable=False, help_text='avoid editing if you do not know the purpose of this field', verbose_name='additional attributes'),
         ),
     ]

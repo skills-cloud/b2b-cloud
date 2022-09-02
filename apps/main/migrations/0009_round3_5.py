@@ -12,17 +12,17 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='organizationprojectcarditem',
-            options={'verbose_name': 'карточка проекта организации',
-                     'verbose_name_plural': 'карточки проектов организаций'},
+            options={'verbose_name': 'organization project card',
+                     'verbose_name_plural': 'organization project cards'},
         ),
         migrations.CreateModel(
             name='OrganizationProjectCardItemTemplate',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='создано')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='обновлено')),
-                ('name', models.CharField(max_length=500, verbose_name='название')),
-                ('description', models.TextField(blank=True, null=True, verbose_name='описание')),
+                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created')),
+                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated')),
+                ('name', models.CharField(max_length=500, verbose_name='name')),
+                ('description', models.TextField(blank=True, null=True, verbose_name='description')),
                 ('lft', models.PositiveIntegerField(editable=False)),
                 ('rght', models.PositiveIntegerField(editable=False)),
                 ('tree_id', models.PositiveIntegerField(db_index=True, editable=False)),
@@ -30,23 +30,23 @@ class Migration(migrations.Migration):
                 ('parent',
                  mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
                                             related_name='children', to='main.organizationprojectcarditemtemplate',
-                                            verbose_name='родительская карточка')),
+                                            verbose_name='parent card')),
             ],
             options={
-                'verbose_name': 'карточка-шаблон проекта организации',
-                'verbose_name_plural': 'карточки-шаблоны проектов организаций',
+                'verbose_name': 'organization project card template',
+                'verbose_name_plural': 'organization project card templates',
             },
         ),
         migrations.AddField(
             model_name='organizationprojectcarditem',
             name='positions',
             field=models.ManyToManyField(related_name='_main_organizationprojectcarditem_positions_+',
-                                         to='dictionary.Position', verbose_name='должности'),
+                                         to='dictionary.Position', verbose_name='positions'),
         ),
         migrations.AddField(
             model_name='organizationprojectcarditemtemplate',
             name='positions',
             field=models.ManyToManyField(related_name='_main_organizationprojectcarditemtemplate_positions_+',
-                                         to='dictionary.Position', verbose_name='должности'),
+                                         to='dictionary.Position', verbose_name='positions'),
         ),
     ]

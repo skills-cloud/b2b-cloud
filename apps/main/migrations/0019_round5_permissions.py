@@ -26,13 +26,13 @@ class Migration(migrations.Migration):
             name='organization_contractor',
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE,
                                     related_name='projects_as_contractor', to='main.organizationcontractor',
-                                    verbose_name='исполнитель'),
+                                    verbose_name='contractor'),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='organizationproject',
             name='organization_customer',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='projects_as_customer',
-                                    to='main.organizationcustomer', verbose_name='заказчик'),
+                                    to='main.organizationcustomer', verbose_name='customer'),
         ),
     ]

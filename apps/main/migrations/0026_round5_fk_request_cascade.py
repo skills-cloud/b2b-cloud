@@ -16,11 +16,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='requestrequirement',
             name='position',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='requests_requirements', to='dictionary.position', verbose_name='должность'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='requests_requirements', to='dictionary.position', verbose_name='position'),
         ),
         migrations.AlterField(
             model_name='timesheetrow',
             name='cv',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_sheet_rows', to='cv.cv', verbose_name='анкета исполнителя'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_sheet_rows', to='cv.cv', verbose_name='contractor CV'),
         ),
     ]

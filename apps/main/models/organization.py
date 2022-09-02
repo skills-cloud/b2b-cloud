@@ -30,23 +30,23 @@ __all__ = [
 
 @reversion.register()
 class Organization(main_permissions.MainModelPermissionsMixin, ModelDiffMixin, DatesModelBase):
-    name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    is_customer = models.BooleanField(default=False, verbose_name=_('это заказчик?'))
-    is_contractor = models.BooleanField(default=False, verbose_name=_('это исполнитель?'))
-    is_partner = models.BooleanField(default=False, verbose_name=_('это партнер?'))
-    legal_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('юридическое наименование'))
-    short_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('краткое наименование'))
+    name = models.CharField(max_length=500, db_index=True, verbose_name=_('name'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    is_customer = models.BooleanField(default=False, verbose_name=_('is a customer?'))
+    is_contractor = models.BooleanField(default=False, verbose_name=_('is a contractor?'))
+    is_partner = models.BooleanField(default=False, verbose_name=_('is a partner?'))
+    legal_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('legal name'))
+    short_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('short name'))
     general_manager_name = models.CharField(max_length=500, null=True, blank=True,
-                                            verbose_name=_('генеральный директор'))
-    contact_person = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('контактное лицо'))
-    contacts_phone = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('контактный телефон'))
-    contacts_email = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('контактный e-mail'))
+                                            verbose_name=_('general manager'))
+    contact_person = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('contact person'))
+    contacts_phone = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('contact phone'))
+    contacts_email = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('contact e-mail'))
 
     class Meta:
         ordering = ['name']
-        verbose_name = _('организация')
-        verbose_name_plural = _('организации')
+        verbose_name = _('organization')
+        verbose_name_plural = _('organizations')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -81,8 +81,8 @@ class OrganizationCustomer(Organization):
     class Meta:
         proxy = True
         ordering = ['name']
-        verbose_name = _('организация заказчик')
-        verbose_name_plural = _('организации заказчики')
+        verbose_name = _('customer organization')
+        verbose_name_plural = _('customer organizations')
 
     objects = Manager()
 
@@ -110,8 +110,8 @@ class OrganizationContractor(Organization):
     class Meta:
         proxy = True
         ordering = ['name']
-        verbose_name = _('организация исполнитель')
-        verbose_name_plural = _('организации исполнители')
+        verbose_name = _('contractor organization')
+        verbose_name_plural = _('contractor organizations')
 
     objects = Manager()
 
@@ -127,32 +127,32 @@ class OrganizationContractorUserRole(main_permissions.MainModelPermissionsMixin,
 
     organization_contractor = models.ForeignKey(
         'main.OrganizationContractor', related_name='users_roles', on_delete=models.CASCADE,
-        verbose_name=_('организация исполнитель'),
+        verbose_name=_('contractor organization'),
     )
     user = models.ForeignKey(
         'acc.User', related_name='organizations_contractors_roles', on_delete=models.CASCADE,
-        verbose_name=_('пользователь'),
+        verbose_name=_('user'),
     )
-    role = models.CharField(max_length=50, choices=Role.choices, verbose_name=_('роль'))
+    role = models.CharField(max_length=50, choices=Role.choices, verbose_name=_('role'))
 
     class Meta:
         unique_together = [
             ['organization_contractor', 'user', 'role']
         ]
-        verbose_name = _('роль пользователя')
-        verbose_name_plural = _('роли пользователей')
+        verbose_name = _('user role')
+        verbose_name_plural = _('user roles')
 
     # def clean(self):
     #     if self.role == Role.ADMIN:
-    #         raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
+    #         raise ValidationError({'role': _('You can not set an administrator using this option')})
     #     super().clean()
 
 
 class OrganizationProjectStatus(models.TextChoices):
-    DRAFT = 'draft', _('Черновик')
-    IN_PROGRESS = 'in_progress', _('В работе')
-    DONE = 'done', _('Успешно завершен')
-    CLOSED = 'closed', _('Закрыт')
+    DRAFT = 'draft', _('Draft')
+    IN_PROGRESS = 'in_progress', _('In progress')
+    DONE = 'done', _('Successfully completed')
+    CLOSED = 'closed', _('Closed')
 
 
 @reversion.register(follow=['organization_customer'])
@@ -162,40 +162,40 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
 
     organization_customer = models.ForeignKey(
         'main.OrganizationCustomer', on_delete=models.CASCADE, related_name='projects_as_customer',
-        verbose_name=_('заказчик')
+        verbose_name=_('customer')
     )
     organization_contractor = models.ForeignKey(
         'main.OrganizationContractor', on_delete=models.CASCADE, related_name='projects_as_contractor',
-        verbose_name=_('исполнитель')
+        verbose_name=_('contractor')
     )
     status = models.CharField(
         max_length=50, default=OrganizationProjectStatus.DRAFT, choices=OrganizationProjectStatus.choices,
-        verbose_name=_('статус')
+        verbose_name=_('status')
     )
 
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    goals = models.TextField(null=True, blank=True, verbose_name=_('цели'))
-    plan_description = models.TextField(null=True, blank=True, verbose_name=_('ресурсный план'))
-    date_from = models.DateField(null=True, blank=True, verbose_name=_('дата с'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('дата по'))
+    name = models.CharField(max_length=500, verbose_name=_('name'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    goals = models.TextField(null=True, blank=True, verbose_name=_('goals'))
+    plan_description = models.TextField(null=True, blank=True, verbose_name=_('resource plan'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('date from'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('date to'))
     industry_sector = models.ForeignKey(
         'dictionary.IndustrySector', related_name='organizations_projects', null=True, blank=True,
-        on_delete=models.RESTRICT, verbose_name=_('отрасль')
+        on_delete=models.RESTRICT, verbose_name=_('industry')
     )
     manager_pfm = models.ForeignKey(
         'acc.User', related_name='organizations_projects_as_pfm', null=True, blank=True,
-        on_delete=models.SET_NULL, verbose_name=_('РПП')
+        on_delete=models.SET_NULL, verbose_name=_('PPM')
     )
     manager_pm = models.ForeignKey(
         'acc.User', related_name='organizations_projects_as_pm', null=True, blank=True,
-        on_delete=models.SET_NULL, verbose_name=_('РП')
+        on_delete=models.SET_NULL, verbose_name=_('PM')
     )
 
     class Meta:
         ordering = ['name']
-        verbose_name = _('проект')
-        verbose_name_plural = _('проекты')
+        verbose_name = _('project')
+        verbose_name_plural = _('projects')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -226,9 +226,9 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         super().clean()
         errors = {}
         if self.manager_pfm and Role.PFM not in self.organization_contractor.get_user_roles(self.manager_pfm):
-            errors['manager_pfm'] = _('Этот пользователь не может быть РПП на этом проекте')
+            errors['manager_pfm'] = _('This user cannot be set as the PPM of this project')
         if self.manager_pm and Role.PM not in self.organization_contractor.get_user_roles(self.manager_pm):
-            errors['manager_pm'] = _('Этот пользователь не может быть РП на этом проекте')
+            errors['manager_pm'] = _('This user cannot be set as the PM of this project')
         if errors:
             if not is_call_from_admin():
                 errors = {f'{k}_id': v for k, v in errors.items()}
@@ -278,41 +278,41 @@ class OrganizationProjectUserRole(main_permissions.MainModelPermissionsMixin, Mo
 
     organization_project = models.ForeignKey(
         'main.OrganizationProject', related_name='users_roles', on_delete=models.CASCADE,
-        verbose_name=_('проект'),
+        verbose_name=_('project'),
     )
     user = models.ForeignKey(
         'acc.User', related_name='organizations_projects_roles', on_delete=models.CASCADE,
-        verbose_name=_('пользователь'),
+        verbose_name=_('user'),
     )
-    role = models.CharField(max_length=50, choices=Role.choices, verbose_name=_('роль'))
+    role = models.CharField(max_length=50, choices=Role.choices, verbose_name=_('role'))
 
     class Meta:
         unique_together = [
             ['organization_project', 'user', 'role']
         ]
-        verbose_name = _('роль пользователя')
-        verbose_name_plural = _('роли пользователей')
+        verbose_name = _('user role')
+        verbose_name_plural = _('user roles')
 
     def clean(self):
         super().clean()
         # if self.role == Role.ADMIN:
-        #     raise ValidationError({'role': _('Вы не можете назначить администратора таким образом')})
+        #     raise ValidationError({'role': _('You can not set an administrator using this option')})
         if not OrganizationContractorUserRole.objects.filter(
                 organization_contractor=self.organization_project.organization_contractor,
                 user=self.user
         ).exists():
-            raise ValidationError(_('Пользователю не назначена роль в организации исполнителе'))
+            raise ValidationError(_('User does not have a set role in contractor organization'))
 
 
 class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase):
     parent = mptt_models.TreeForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
-        verbose_name=_('родительская карточка')
+        verbose_name=_('parent card')
     )
-    name = models.CharField(max_length=500, verbose_name=_('название'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    name = models.CharField(max_length=500, verbose_name=_('name'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
     positions = models.ManyToManyField(
-        'dictionary.Position', blank=True, related_name='+', verbose_name=_('должности'))
+        'dictionary.Position', blank=True, related_name='+', verbose_name=_('positions'))
 
     class Meta:
         abstract = True
@@ -332,7 +332,7 @@ class OrganizationProjectCardItemAbstract(mptt_models.MPTTModel, DatesModelBase)
     #     super().clean()
     #     if self.parent and self.positions:
     #         raise ValidationError({
-    #             'positions': _(' Должности можно задавать только для карточки верхнего уровня')
+    #             'positions': _(' Positions can be set only for high level cards')
     #         })
 
 
@@ -358,20 +358,20 @@ class OrganizationProjectCardItemTemplate(OrganizationProjectCardItemAbstract):
     objects_flat = FlatManager()
 
     class Meta:
-        verbose_name = _('организации / карточка-шаблон проекта организации')
-        verbose_name_plural = _('организации / карточки-шаблоны проектов организаций')
+        verbose_name = _('organizations / organization project card template')
+        verbose_name_plural = _('organizations / organization project card templates')
 
 
 class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
     organization_project = models.ForeignKey(
         'main.OrganizationProject', on_delete=models.CASCADE, related_name='cards_items', null=True, blank=True,
-        verbose_name=_('проект организации'),
-        help_text=_('необходимо задавать только для корневой карточки')
+        verbose_name=_('organization project'),
+        help_text=_('required only for root cards')
     )
 
     class Meta:
-        verbose_name = _('организации / карточка проекта организации')
-        verbose_name_plural = _('организации / карточки проектов организаций')
+        verbose_name = _('organizations / organization project card')
+        verbose_name_plural = _('organizations / organization project cards')
 
     class TreeQuerySet(mptt_querysets.TreeQuerySet):
         def filter_by_user(self, user: User):
@@ -429,7 +429,7 @@ class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
         super().clean()
         if self.parent is None and self.organization_project_id is None:
             raise ValidationError({
-                'organization_project': _('Для карточки верхнего уровня необходимо указать проект организации')
+                'organization_project': _('Organization project needs to be set for a high level card')
             })
 
     def __str__(self):

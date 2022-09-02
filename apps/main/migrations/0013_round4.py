@@ -14,16 +14,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='module',
             name='work_days_count',
-            field=models.IntegerField(blank=True, help_text='если пусто, заполнится автоматически из расчета пятидневной рабочей недели<br>ПН-ПТ deadline_date-start_date', null=True, verbose_name='кол-во рабочих дней'),
+            field=models.IntegerField(blank=True, help_text='will be filled in automatically based on a five-day working week if left empty<br>Mon-Fri deadline_date-start_date', null=True, verbose_name='workdays count'),
         ),
         migrations.AddField(
             model_name='module',
             name='work_days_hours_count',
-            field=models.IntegerField(default=8, verbose_name='кол-во рабочих часов в рабочем дне'),
+            field=models.IntegerField(default=8, verbose_name='workday hours count'),
         ),
         migrations.AlterField(
             model_name='request',
             name='module',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='requests', to='main.module', verbose_name='модуль'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='requests', to='main.module', verbose_name='module'),
         ),
     ]

@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='request',
             name='manager_rm',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='requests_as_rm', to=settings.AUTH_USER_MODEL, verbose_name='РМ'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='requests_as_rm', to=settings.AUTH_USER_MODEL, verbose_name='RM'),
         ),
     ]

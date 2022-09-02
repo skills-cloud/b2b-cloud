@@ -4,7 +4,7 @@ __all__ = ['EMAIL_TEMPLATE']
 
 EmailTemplate = namedtuple('EmailTemplate', ['subject', 'body_text', 'body_html'])
 
-hello = '<p>Здравствуйте{% if user.get_email_title %}, {{ user.get_email_title }}{% endif %}!</p>'
+hello = '<p>Greetings{% if user.get_email_title %}, {{ user.get_email_title }}{% endif %}!</p>'
 
 EMAIL_TEMPLATE = {
     'test': EmailTemplate(
@@ -13,19 +13,19 @@ EMAIL_TEMPLATE = {
         '<h1>TEST TEST TEST</h1><h2>TEST TEST TEST</h2><h3>TEST TEST TEST</h3>',
     ),
     'password_reset': EmailTemplate(
-        'Восстановление пароля на сайте {{ domain }}',
+        'Password recovery {{ domain }}',
         '',
-        'Для продолжения процедуры восстановления пароля <a href="{{ confirm_url }}">пройдите этой по ссылке</a>',
+        'To continue password recovery <a href="{{ confirm_url }}">use this link</a>',
     ),
     'registration_invite': EmailTemplate(
-        'Добро пожаловать в систему {{ domain }}!',
+        'Welcome {{ domain }}!',
         '',
         '''
-<h3>Ваши учетные данные</h3>
+<h3>Your credentials</h3>
 <p>
-Ссылка для входа в личный кабинет <b>{{ base_url }}</b><br>
-E-mail / логин: <b>{{ user.email }}</b><br>
-Пароль: <b>{{ password }}</b>
+Link to enter your personal account <b>{{ base_url }}</b><br>
+E-mail / login: <b>{{ user.email }}</b><br>
+Password: <b>{{ password }}</b>
 </p>
         ''',
     ),

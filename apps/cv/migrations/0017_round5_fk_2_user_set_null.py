@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cv',
             name='manager_rm',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cv_list_as_rm', to=settings.AUTH_USER_MODEL, verbose_name='РМ'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cv_list_as_rm', to=settings.AUTH_USER_MODEL, verbose_name='RM'),
         ),
     ]

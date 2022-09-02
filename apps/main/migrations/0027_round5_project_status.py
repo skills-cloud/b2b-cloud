@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organizationproject',
             name='status',
-            field=models.CharField(choices=[('draft', 'Черновик'), ('in_progress', 'В работе'), ('done', 'Успешно завершен'), ('closed', 'Закрыт')], default='draft', max_length=50, verbose_name='статус'),
+            field=models.CharField(choices=[('draft', 'Draft'), ('in_progress', 'In progress'), ('done', 'Successfully completed'), ('closed', 'Closed')], default='draft', max_length=50, verbose_name='status'),
         ),
     ]

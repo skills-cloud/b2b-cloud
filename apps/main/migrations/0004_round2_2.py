@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cv', '__first__'),
         ('main', '0003_request_start_date'),
     ]
 

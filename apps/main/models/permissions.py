@@ -19,12 +19,12 @@ class MainModelPermissionsMixin:
 
     def clean(self):
         if self.permission_save and not self.permission_save():
-            raise PermissionDenied(_('У вас нет прав'))
+            raise PermissionDenied(_('Permission denied'))
         return super().clean()
 
     def delete(self, **kwargs):
         if self.permission_delete and not self.permission_delete():
-            raise PermissionDenied(_('У вас нет прав'))
+            raise PermissionDenied(_('Permission denied'))
         return super().delete(**kwargs)
 
 

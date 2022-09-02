@@ -14,9 +14,9 @@ class Migration(migrations.Migration):
             model_name='cv',
             name='attributes',
             field=models.JSONField(default=dict,
-                                   help_text='если вы не до конца понимаете назначение этого поля, '
-                                             'вам лучше избежать редактирования',
-                                   verbose_name='доп. атрибуты'),
+                                   help_text='avoid editing'
+                                             'if you do not know the purpose of this field',
+                                   verbose_name='additional attributes'),
         ),
 
         migrations.AddIndex(

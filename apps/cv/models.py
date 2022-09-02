@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class FileModelAbstract(DatesModelBase):
-    file_name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('название файла'))
+    file_name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('file name'))
 
     class Meta:
         abstract = True
@@ -41,14 +41,14 @@ class FileModelAbstract(DatesModelBase):
 
 
 class Gender(models.TextChoices):
-    MALE = 'M', _('Мужской')
-    FEMALE = 'F', _('Женский')
+    MALE = 'M', _('Male')
+    FEMALE = 'F', _('Female')
 
 
 class DaysToContact(models.TextChoices):
-    ALL = 'all', _('Все дни')
-    WORKDAYS = 'workdays', _('Будние дни')
-    WEEKENDS = 'weekends', _('Выходные дни')
+    ALL = 'all', _('All')
+    WORKDAYS = 'workdays', _('Workdays')
+    WEEKENDS = 'weekends', _('Weekends')
 
 
 @reversion.register(follow=['contacts', 'positions', 'career', 'projects', 'education', 'certificates', 'files'])
@@ -57,56 +57,56 @@ class CV(DatesModelBase):
 
     organization_contractor = models.ForeignKey(
         'main.OrganizationContractor', related_name='cv_list', null=True, blank=True, on_delete=models.SET_NULL,
-        verbose_name=_('организация исполнитель')
+        verbose_name=_('Contractor Organization')
     )
     manager_rm = models.ForeignKey(
         'acc.User', related_name='cv_list_as_rm', null=True, blank=True,
-        on_delete=models.SET_NULL, verbose_name=_('РМ')
+        on_delete=models.SET_NULL, verbose_name=_('RM')
     )
     user = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='cv_list',
-        verbose_name=_('пользователь')
+        verbose_name=_('user')
     )
-    last_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('фамилия'))
-    first_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('имя'))
-    middle_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('отчество'))
+    last_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('last name'))
+    first_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('first name'))
+    middle_name = models.CharField(max_length=500, null=True, blank=True, verbose_name=_('middle name'))
     photo = models.ImageField(upload_to=upload_to.cv_photo_upload_to, null=True, blank=True)
-    gender = models.CharField(max_length=1, null=True, blank=True, choices=Gender.choices, verbose_name=_('пол'))
-    birth_date = models.DateField(null=True, blank=True, verbose_name=_('дата рождения'))
+    gender = models.CharField(max_length=1, null=True, blank=True, choices=Gender.choices, verbose_name=_('gender'))
+    birth_date = models.DateField(null=True, blank=True, verbose_name=_('birth date'))
     country = models.ForeignKey(
         'dictionary.Country', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('страна')
+        verbose_name=_('country')
     )
     city = models.ForeignKey(
         'dictionary.City', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('город')
+        verbose_name=_('city')
     )
     citizenship = models.ForeignKey(
         'dictionary.Citizenship', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('гражданство')
+        verbose_name=_('citizenship')
     )
     physical_limitations = models.ManyToManyField(
         'dictionary.PhysicalLimitation', blank=True,
-        verbose_name=_('физические особенности')
+        verbose_name=_('physical limitations')
     )
     days_to_contact = models.CharField(
         max_length=50, choices=DaysToContact.choices, null=True, blank=True,
-        verbose_name=_('дни для связи')
+        verbose_name=_('contact days')
     )
-    time_to_contact_from = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / с'))
-    time_to_contact_to = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / по'))
-    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
-    about = models.TextField(null=True, blank=True, verbose_name=_('доп. информация'))
-    price = models.FloatField(null=True, blank=True, verbose_name=_('ставка'))
+    time_to_contact_from = models.TimeField(null=True, blank=True, verbose_name=_('contact time / from'))
+    time_to_contact_to = models.TimeField(null=True, blank=True, verbose_name=_('contact time / to'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('verified'))
+    about = models.TextField(null=True, blank=True, verbose_name=_('additional information'))
+    price = models.FloatField(null=True, blank=True, verbose_name=_('rate'))
     types_of_employment = models.ManyToManyField(
         'dictionary.TypeOfEmployment', blank=True,
-        verbose_name=_('тип занятости')
+        verbose_name=_('type of employment')
     )
-    linked = models.ManyToManyField('self', blank=True, symmetrical=True, verbose_name=_('связанные анкеты'))
+    linked = models.ManyToManyField('self', blank=True, symmetrical=True, verbose_name=_('linked CVs'))
 
     attributes = models.JSONField(
-        default=dict, verbose_name=_('доп. атрибуты'), editable=False,
-        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
+        default=dict, verbose_name=_('additional attributes'), editable=False,
+        help_text=_('avoid editing if you do not know the purpose of this field')
     )
 
     class Meta:
@@ -114,8 +114,8 @@ class CV(DatesModelBase):
         indexes = [
             GinIndex(fields=['attributes'])
         ]
-        verbose_name = _('анкета')
-        verbose_name_plural = _('анкеты')
+        verbose_name = _('CV')
+        verbose_name_plural = _('CVs')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -182,9 +182,9 @@ class CV(DatesModelBase):
         errors = {}
         if self.manager_rm:
             if not self.organization_contractor:
-                errors['organization_contractor'] = _('Чтобы задать РМа необходимо задать организацию исполнителя')
+                errors['organization_contractor'] = _('To set a resource manager, you need to set a contractor organization')
             if not self.organization_contractor.get_user_roles(self.manager_rm):
-                errors['manager_rm'] = _('Этот пользователь не может быть РМ для этой анкеты')
+                errors['manager_rm'] = _('This user cannot be set as the resource manager for this CV')
         if errors:
             if not is_call_from_admin():
                 errors = {f'{k}_id': v for k, v in errors.items()}
@@ -248,14 +248,14 @@ class CvLinkedObjectManager(models.Manager.from_queryset(CvLinkedObjectQuerySet)
 
 @reversion.register(follow=['cv'])
 class CvContact(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='contacts', verbose_name=_('анкета'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='contacts', verbose_name=_('CV'))
     contact_type = models.ForeignKey(
         'dictionary.ContactType', on_delete=models.RESTRICT,
-        verbose_name=_('тип')
+        verbose_name=_('type')
     )
-    value = models.CharField(max_length=1000, verbose_name=_('значение'))
-    is_primary = models.BooleanField(default=False, verbose_name=_('основной'))
-    comment = models.TextField(max_length=1000, null=True, blank=True, verbose_name=_('комментарий'))
+    value = models.CharField(max_length=1000, verbose_name=_('value'))
+    is_primary = models.BooleanField(default=False, verbose_name=_('primary'))
+    comment = models.TextField(max_length=1000, null=True, blank=True, verbose_name=_('comment'))
 
     class Meta:
         ordering = ['is_primary', '-id']
@@ -265,8 +265,8 @@ class CvContact(DatesModelBase):
         unique_together = [
             'cv', 'contact_type', 'value',
         ]
-        verbose_name = _('контактные данные')
-        verbose_name_plural = _('контактные данные')
+        verbose_name = _('contact information')
+        verbose_name_plural = _('contact information')
 
     objects = CvLinkedObjectManager()
 
@@ -281,41 +281,41 @@ class CvTimeSlotKind(models.TextChoices):
 
 @reversion.register(follow=['cv'])
 class CvTimeSlot(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='time_slots', verbose_name=_('анкета'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='time_slots', verbose_name=_('CV'))
     request_requirement_link = models.ForeignKey(
         'main.RequestRequirementCv', null=True, blank=True, on_delete=models.CASCADE, related_name='time_slots',
-        verbose_name=_('связь с требованием проектного запроса'),
+        verbose_name=_('linked to a request requirement'),
     )
     kind = models.CharField(
         max_length=50, choices=CvTimeSlotKind.choices, default=CvTimeSlotKind.MANUAL,
-        verbose_name=_('тип слота'),
+        verbose_name=_('slot type'),
     )
-    date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('date from'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('date to'))
     country = models.ForeignKey(
         'dictionary.Country', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('страна')
+        verbose_name=_('country')
     )
     city = models.ForeignKey(
         'dictionary.City', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('город')
+        verbose_name=_('city')
     )
     type_of_employment = models.ForeignKey(
         'dictionary.TypeOfEmployment', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('тип занятости')
+        verbose_name=_('type of employment')
     )
-    price = models.FloatField(null=True, blank=True, verbose_name=_('ставка'))
-    is_work_permit_required = models.BooleanField(default=False, verbose_name=_('требуется разрешение на работу'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    is_free = models.BooleanField(default=False, verbose_name=_('свободен?'))
+    price = models.FloatField(null=True, blank=True, verbose_name=_('rate'))
+    is_work_permit_required = models.BooleanField(default=False, verbose_name=_('work permit required'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    is_free = models.BooleanField(default=False, verbose_name=_('available?'))
 
     class Meta:
         ordering = ['-date_from', '-id']
         index_together = [
             [v.replace('-', '') for v in ordering]
         ]
-        verbose_name = _('таймслот')
-        verbose_name_plural = _('таймслоты')
+        verbose_name = _('timeslot')
+        verbose_name_plural = _('timeslots')
 
     class Manager(CvLinkedObjectManager):
         @classmethod
@@ -352,21 +352,21 @@ class CvTimeSlot(DatesModelBase):
 
 @reversion.register(follow=['cv', 'files', 'competencies'])
 class CvPosition(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='positions', verbose_name=_('анкета'))
-    title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='positions', verbose_name=_('CV'))
+    title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('arbitrary title'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('должность')
+        verbose_name=_('position')
     )
-    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
+    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('year started'))
 
     class Meta:
         ordering = ['-id']
         unique_together = [
             ['cv', 'position']
         ]
-        verbose_name = _('должность / роль')
-        verbose_name_plural = _('должности / роли')
+        verbose_name = _('position / role')
+        verbose_name_plural = _('positions / roles')
 
     objects = CvLinkedObjectManager()
 
@@ -384,18 +384,18 @@ class CvPosition(DatesModelBase):
 class CvPositionCompetence(DatesModelBase):
     cv_position = models.ForeignKey(
         'cv.CvPosition', on_delete=models.CASCADE, related_name='competencies',
-        verbose_name=_('должность / роль')
+        verbose_name=_('position / role')
     )
-    competence = models.ForeignKey('dictionary.Competence', on_delete=models.CASCADE, verbose_name=_('компетенция'))
-    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
+    competence = models.ForeignKey('dictionary.Competence', on_delete=models.CASCADE, verbose_name=_('competence'))
+    year_started = models.IntegerField(null=True, blank=True, verbose_name=_('year started'))
 
     class Meta:
         ordering = ['-year_started', 'id']
         unique_together = [
             ['cv_position', 'competence']
         ]
-        verbose_name = _('компетенция роли')
-        verbose_name_plural = _('компетенции роли')
+        verbose_name = _('role competence')
+        verbose_name_plural = _('role competencies')
 
     class Manager(models.Manager):
         @transaction.atomic()
@@ -426,13 +426,13 @@ class CvPositionFile(FileModelAbstract):
     UPLOAD_TO = 'position'
 
     cv_position = models.ForeignKey(
-        'cv.CvPosition', on_delete=models.CASCADE, related_name='files', verbose_name=_('роль'))
-    file = models.FileField(upload_to=upload_to.cv_position_file_upload_to, verbose_name=_('файл'))
+        'cv.CvPosition', on_delete=models.CASCADE, related_name='files', verbose_name=_('role'))
+    file = models.FileField(upload_to=upload_to.cv_position_file_upload_to, verbose_name=_('file'))
 
     class Meta:
         ordering = ['-id']
-        verbose_name = _('файл роли')
-        verbose_name_plural = _('файлы роли')
+        verbose_name = _('role file')
+        verbose_name_plural = _('role files')
 
     def __str__(self):
         return f'< {self.cv_position_id} / {self.id} >'
@@ -440,30 +440,30 @@ class CvPositionFile(FileModelAbstract):
 
 @reversion.register(follow=['cv', 'files'])
 class CvCareer(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='career', verbose_name=_('анкета'))
-    date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='career', verbose_name=_('CV'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('date from'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('date to'))
     organization = models.ForeignKey(
         'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
-        verbose_name=_('заказчик')
+        verbose_name=_('customer')
     )
-    title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
+    title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('arbitrary title'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('должность / роль')
+        verbose_name=_('position / role')
     )
-    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
-    projects = models.ManyToManyField('main.OrganizationProject', blank=True, verbose_name=_('проекты'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('competencies'))
+    projects = models.ManyToManyField('main.OrganizationProject', blank=True, verbose_name=_('projects'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('verified'))
 
     class Meta:
         ordering = ['-date_from', '-id']
         index_together = [
             [v.replace('-', '') for v in ordering]
         ]
-        verbose_name = _('карьера')
-        verbose_name_plural = _('карьера')
+        verbose_name = _('career')
+        verbose_name_plural = _('career')
 
     objects = CvLinkedObjectManager()
 
@@ -476,13 +476,13 @@ class CvCareerFile(FileModelAbstract):
     UPLOAD_TO = 'career'
 
     cv_career = models.ForeignKey(
-        'cv.CvCareer', on_delete=models.CASCADE, related_name='files', verbose_name=_('карьера'))
-    file = models.FileField(upload_to=upload_to.cv_career_file_upload_to, verbose_name=_('файл'))
+        'cv.CvCareer', on_delete=models.CASCADE, related_name='files', verbose_name=_('career'))
+    file = models.FileField(upload_to=upload_to.cv_career_file_upload_to, verbose_name=_('file'))
 
     class Meta:
         ordering = ['-id']
-        verbose_name = _('файл карьеры')
-        verbose_name_plural = _('файлы карьеры')
+        verbose_name = _('career file')
+        verbose_name_plural = _('career files')
 
     class QuerySet(models.QuerySet):
         def filter_by_user(self, user: User):
@@ -496,32 +496,32 @@ class CvCareerFile(FileModelAbstract):
 
 @reversion.register(follow=['cv'])
 class CvProject(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='projects', verbose_name=_('анкета'))
-    name = models.CharField(max_length=1000, verbose_name=_('название'))
-    date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='projects', verbose_name=_('CV'))
+    name = models.CharField(max_length=1000, verbose_name=_('title'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('date from'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('date to'))
     organization = models.ForeignKey(
         'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
-        verbose_name=_('заказчик'))
+        verbose_name=_('customer'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT,
-        verbose_name=_('должность / роль')
+        verbose_name=_('position / role')
     )
     industry_sector = models.ForeignKey(
         'dictionary.IndustrySector', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('отрасль')
+        verbose_name=_('industry')
     )
-    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('competencies'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('verified'))
 
     class Meta:
         ordering = ['-date_from', '-id']
         index_together = [
             [v.replace('-', '') for v in ordering]
         ]
-        verbose_name = _('проект')
-        verbose_name_plural = _('проекты')
+        verbose_name = _('project')
+        verbose_name_plural = _('projects')
 
     objects = CvLinkedObjectManager()
 
@@ -531,33 +531,33 @@ class CvProject(DatesModelBase):
 
 @reversion.register(follow=['cv'])
 class CvEducation(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='education', verbose_name=_('анкета'))
-    date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
-    date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
-    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
-    diploma_number = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('номер диплома'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='education', verbose_name=_('CV'))
+    date_from = models.DateField(null=True, blank=True, verbose_name=_('date from'))
+    date_to = models.DateField(null=True, blank=True, verbose_name=_('date to'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('verified'))
+    diploma_number = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('diploma number'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
     education_place = models.ForeignKey(
         'dictionary.EducationPlace', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('место обучения')
+        verbose_name=_('place of study')
     )
     education_speciality = models.ForeignKey(
         'dictionary.EducationSpecialty', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('специальность')
+        verbose_name=_('specialty')
     )
     education_graduate = models.ForeignKey(
         'dictionary.EducationGraduate', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('степень')
+        verbose_name=_('degree')
     )
-    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
+    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('competencies'))
 
     class Meta:
         ordering = ['-date_from', '-id']
         index_together = [
             [v.replace('-', '') for v in ordering]
         ]
-        verbose_name = _('образование')
-        verbose_name_plural = _('образование')
+        verbose_name = _('education')
+        verbose_name_plural = _('education')
 
     objects = CvLinkedObjectManager()
 
@@ -567,33 +567,33 @@ class CvEducation(DatesModelBase):
 
 @reversion.register(follow=['cv'])
 class CvCertificate(DatesModelBase):
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='certificates', verbose_name=_('анкета'))
-    date = models.DateField(null=True, blank=True, verbose_name=_('выдан'))
-    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
-    name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('наименование'))
-    number = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('номер'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='certificates', verbose_name=_('CV'))
+    date = models.DateField(null=True, blank=True, verbose_name=_('issued'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('verified'))
+    name = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('title'))
+    number = models.CharField(max_length=1000, null=True, blank=True, verbose_name=_('number'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
     education_place = models.ForeignKey(
         'dictionary.EducationPlace', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('место обучения')
+        verbose_name=_('place of study')
     )
     education_speciality = models.ForeignKey(
         'dictionary.EducationSpecialty', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('специальность')
+        verbose_name=_('specialty')
     )
     education_graduate = models.ForeignKey(
         'dictionary.EducationGraduate', on_delete=models.RESTRICT, null=True, blank=True,
-        verbose_name=_('степень')
+        verbose_name=_('degree')
     )
-    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('компетенции'))
+    competencies = models.ManyToManyField('dictionary.Competence', blank=True, verbose_name=_('competencies'))
 
     class Meta:
         ordering = ['-date', '-id']
         index_together = [
             [v.replace('-', '') for v in ordering]
         ]
-        verbose_name = _('сертификат')
-        verbose_name_plural = _('сертификаты')
+        verbose_name = _('certificate')
+        verbose_name_plural = _('certificate')
 
     objects = CvLinkedObjectManager()
 
@@ -605,13 +605,13 @@ class CvCertificate(DatesModelBase):
 class CvFile(FileModelAbstract):
     UPLOAD_TO = 'file'
 
-    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='files', verbose_name=_('анкета'))
-    file = models.FileField(upload_to=upload_to.cv_file_file_upload_to, verbose_name=_('файл'))
+    cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='files', verbose_name=_('CV'))
+    file = models.FileField(upload_to=upload_to.cv_file_file_upload_to, verbose_name=_('file'))
 
     class Meta:
         ordering = ['-id']
-        verbose_name = _('файл анкеты')
-        verbose_name_plural = _('файлы анкеты')
+        verbose_name = _('CV file')
+        verbose_name_plural = _('CV files')
 
     objects = CvLinkedObjectManager()
 

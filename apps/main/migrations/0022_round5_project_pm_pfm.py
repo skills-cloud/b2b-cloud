@@ -20,11 +20,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organizationproject',
             name='manager_pfm',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='organizations_projects_as_pfm', to=settings.AUTH_USER_MODEL, verbose_name='РПП'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='organizations_projects_as_pfm', to=settings.AUTH_USER_MODEL, verbose_name='PPM'),
         ),
         migrations.AddField(
             model_name='organizationproject',
             name='manager_pm',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='organizations_projects_as_pm', to=settings.AUTH_USER_MODEL, verbose_name='РП'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='organizations_projects_as_pm', to=settings.AUTH_USER_MODEL, verbose_name='PM'),
         ),
     ]

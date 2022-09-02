@@ -28,21 +28,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='module',
             name='manager',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='modules', to=settings.AUTH_USER_MODEL, verbose_name='руководитель'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='modules', to=settings.AUTH_USER_MODEL, verbose_name='manager'),
         ),
         migrations.AlterField(
             model_name='organizationproject',
             name='manager_pfm',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='organizations_projects_as_pfm', to=settings.AUTH_USER_MODEL, verbose_name='РПП'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='organizations_projects_as_pfm', to=settings.AUTH_USER_MODEL, verbose_name='PPM'),
         ),
         migrations.AlterField(
             model_name='organizationproject',
             name='manager_pm',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='organizations_projects_as_pm', to=settings.AUTH_USER_MODEL, verbose_name='РП'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='organizations_projects_as_pm', to=settings.AUTH_USER_MODEL, verbose_name='PM'),
         ),
         migrations.AlterField(
             model_name='request',
             name='manager_rm',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='requests_as_rm', to=settings.AUTH_USER_MODEL, verbose_name='РМ'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='requests_as_rm', to=settings.AUTH_USER_MODEL, verbose_name='RM'),
         ),
     ]

@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
             name='organization_contractor',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
                                     related_name='cv_list', to='main.organizationcontractor',
-                                    verbose_name='организация исполнитель'),
+                                    verbose_name='contractor organization'),
         ),
     ]

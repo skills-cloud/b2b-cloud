@@ -116,8 +116,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='organizationproject',
-            options={'ordering': ['name'], 'verbose_name': "organization's project",
-                     'verbose_name_plural': "organization's projects"},
+            options={'ordering': ['name'], 'verbose_name': 'organization\'s project',
+                     'verbose_name_plural': 'organization\'s projects'},
         ),
         migrations.AlterField(
             model_name='organizationproject',

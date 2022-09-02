@@ -16,24 +16,24 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='requestrequirement',
             name='request',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='requirements', to='main.request', verbose_name='проектный запрос'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='requirements', to='main.request', verbose_name='request'),
         ),
         migrations.CreateModel(
             name='TimeSheetRow',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='создано')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='обновлено')),
-                ('date_from', models.DateField(db_index=True, default=django.utils.timezone.now, verbose_name='дата начала работ')),
-                ('date_to', models.DateField(blank=True, null=True, verbose_name='дата окончания работ')),
-                ('task_name', models.CharField(max_length=1000, verbose_name='задача')),
-                ('work_time', models.FloatField(verbose_name='затраченное время')),
-                ('cv', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='time_sheet_rows', to='cv.cv', verbose_name='анкета исполнителя')),
-                ('request_requirement', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='time_sheet_rows', to='main.requestrequirement', verbose_name='требование проектного запроса')),
+                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created')),
+                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated')),
+                ('date_from', models.DateField(db_index=True, default=django.utils.timezone.now, verbose_name='date from')),
+                ('date_to', models.DateField(blank=True, null=True, verbose_name='date to')),
+                ('task_name', models.CharField(max_length=1000, verbose_name='task')),
+                ('work_time', models.FloatField(verbose_name='time spent')),
+                ('cv', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='time_sheet_rows', to='cv.cv', verbose_name='CV')),
+                ('request_requirement', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='time_sheet_rows', to='main.requestrequirement', verbose_name='request requirement')),
             ],
             options={
-                'verbose_name': 'строка таймшита',
-                'verbose_name_plural': 'строки таймшитов',
+                'verbose_name': 'timesheet row',
+                'verbose_name_plural': 'timesheet rows',
                 'ordering': ['-date_from'],
                 'index_together': {('request_requirement', 'task_name'), ('request_requirement', 'date_from')},
             },
@@ -41,17 +41,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='timesheetrow',
             name='task_description',
-            field=models.TextField(blank=True, null=True, verbose_name='описание задачи'),
+            field=models.TextField(blank=True, null=True, verbose_name='task description'),
         ),
         migrations.AlterField(
             model_name='timesheetrow',
             name='task_name',
-            field=models.CharField(max_length=1000, verbose_name='название задачи'),
+            field=models.CharField(max_length=1000, verbose_name='task name'),
         ),
 
         migrations.AddField(
             model_name='request',
             name='title',
-            field=models.TextField(blank=True, null=True, verbose_name='заголовок (название или номер)'),
+            field=models.TextField(blank=True, null=True, verbose_name='header (name or number)'),
         ),
     ]

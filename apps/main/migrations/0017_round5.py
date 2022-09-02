@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
             model_name='organizationproject',
             name='organization_customer',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='projects',
-                                    to='main.organizationcustomer', verbose_name='заказчик'),
+                                    to='main.organizationcustomer', verbose_name='customer'),
         ),
     ]
