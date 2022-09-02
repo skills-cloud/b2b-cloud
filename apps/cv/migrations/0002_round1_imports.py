@@ -14,54 +14,54 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cv',
             name='about',
-            field=models.TextField(blank=True, null=True, verbose_name='доп. информация'),
+            field=models.TextField(blank=True, null=True, verbose_name='additional information'),
         ),
         migrations.AlterModelOptions(
             name='cv',
-            options={'ordering': ['-id'], 'verbose_name': 'анкета', 'verbose_name_plural': 'анкеты'},
+            options={'ordering': ['-id'], 'verbose_name': 'CV', 'verbose_name_plural': 'CVs'},
         ),
         migrations.AlterModelOptions(
             name='cvcareer',
-            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'карьера', 'verbose_name_plural': 'карьера'},
+            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'career', 'verbose_name_plural': 'career'},
         ),
         migrations.AlterModelOptions(
             name='cvcareerfile',
-            options={'ordering': ['-id'], 'verbose_name': 'файл карьеры', 'verbose_name_plural': 'файлы карьеры'},
+            options={'ordering': ['-id'], 'verbose_name': 'career file', 'verbose_name_plural': 'career files'},
         ),
         migrations.AlterModelOptions(
             name='cvcertificate',
-            options={'ordering': ['-date', '-id'], 'verbose_name': 'сертификат', 'verbose_name_plural': 'сертификаты'},
+            options={'ordering': ['-date', '-id'], 'verbose_name': 'certificate', 'verbose_name_plural': 'certificates'},
         ),
         migrations.AlterModelOptions(
             name='cvcontact',
-            options={'ordering': ['is_primary', '-id'], 'verbose_name': 'контактные данные',
-                     'verbose_name_plural': 'контактные данные'},
+            options={'ordering': ['is_primary', '-id'], 'verbose_name': 'contact information',
+                     'verbose_name_plural': 'contact information'},
         ),
         migrations.AlterModelOptions(
             name='cveducation',
-            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'образование',
-                     'verbose_name_plural': 'образование'},
+            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'education',
+                     'verbose_name_plural': 'education'},
         ),
         migrations.AlterModelOptions(
             name='cvfile',
-            options={'ordering': ['-id'], 'verbose_name': 'файл анкеты', 'verbose_name_plural': 'файлы анкеты'},
+            options={'ordering': ['-id'], 'verbose_name': 'CV file', 'verbose_name_plural': 'CV files'},
         ),
         migrations.AlterModelOptions(
             name='cvposition',
-            options={'ordering': ['-id'], 'verbose_name': 'должность / роль',
-                     'verbose_name_plural': 'должности / роли'},
+            options={'ordering': ['-id'], 'verbose_name': 'position / role',
+                     'verbose_name_plural': 'positions / roles'},
         ),
         migrations.AlterModelOptions(
             name='cvpositionfile',
-            options={'ordering': ['-id'], 'verbose_name': 'файл роли', 'verbose_name_plural': 'файлы роли'},
+            options={'ordering': ['-id'], 'verbose_name': 'role file', 'verbose_name_plural': 'role files'},
         ),
         migrations.AlterModelOptions(
             name='cvproject',
-            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'проект', 'verbose_name_plural': 'проекты'},
+            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'project', 'verbose_name_plural': 'projects'},
         ),
         migrations.AlterModelOptions(
             name='cvtimeslot',
-            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'таймслот', 'verbose_name_plural': 'таймслоты'},
+            options={'ordering': ['-date_from', '-id'], 'verbose_name': 'timeslot', 'verbose_name_plural': 'timeslots'},
         ),
         migrations.AlterIndexTogether(
             name='cvcareer',
@@ -90,23 +90,23 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cvposition',
             name='title',
-            field=models.CharField(blank=True, max_length=2000, null=True, verbose_name='произвольное название'),
+            field=models.CharField(blank=True, max_length=2000, null=True, verbose_name='arbitrary title'),
         ),
         migrations.AlterField(
             model_name='cvposition',
             name='position',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='dictionary.position', verbose_name='должность'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='dictionary.position', verbose_name='position'),
         ),
         migrations.AddField(
             model_name='cvcareer',
             name='title',
-            field=models.CharField(blank=True, max_length=2000, null=True, verbose_name='произвольное название'),
+            field=models.CharField(blank=True, max_length=2000, null=True, verbose_name='arbitrary title'),
         ),
 
         migrations.AlterField(
             model_name='cvcareer',
             name='position',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT,
-                                    to='dictionary.position', verbose_name='должность / роль'),
+                                    to='dictionary.position', verbose_name='position / role'),
         ),
     ]

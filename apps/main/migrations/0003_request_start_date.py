@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='request',
             name='start_date',
-            field=models.DateField(blank=True, null=True, verbose_name='дата начала'),
+            field=models.DateField(blank=True, null=True, verbose_name='start date'),
         ),
     ]

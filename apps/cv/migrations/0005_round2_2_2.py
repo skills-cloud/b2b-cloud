@@ -15,16 +15,16 @@ class Migration(migrations.Migration):
             name='CvPositionCompetence',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='создано')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='обновлено')),
-                ('year_started', models.IntegerField(blank=True, null=True, verbose_name='год начала практики')),
+                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created')),
+                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated')),
+                ('year_started', models.IntegerField(blank=True, null=True, verbose_name='year started')),
                 ('competence',
                  models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='dictionary.competence',
-                                   verbose_name='компетенция')),
+                                   verbose_name='competence')),
             ],
             options={
-                'verbose_name': 'компетенция',
-                'verbose_name_plural': 'компетенции',
+                'verbose_name': 'competence',
+                'verbose_name_plural': 'competencies',
                 'ordering': ['-year_started', 'id'],
             },
         ),
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             model_name='cvpositioncompetence',
             name='cv_position',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='competencies',
-                                    to='cv.cvposition', verbose_name='должность / роль'),
+                                    to='cv.cvposition', verbose_name='position / role'),
         ),
         migrations.AlterUniqueTogether(
             name='cvpositioncompetence',
@@ -47,12 +47,12 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='cvpositioncompetence',
-            options={'ordering': ['-year_started', 'id'], 'verbose_name': 'компетенция роли',
-                     'verbose_name_plural': 'компетенции роли'},
+            options={'ordering': ['-year_started', 'id'], 'verbose_name': 'role competence',
+                     'verbose_name_plural': 'role competencies'},
         ),
         migrations.AddField(
             model_name='cvposition',
             name='year_started',
-            field=models.IntegerField(blank=True, null=True, verbose_name='год начала практики'),
+            field=models.IntegerField(blank=True, null=True, verbose_name='year started'),
         ),
     ]

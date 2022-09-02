@@ -14,16 +14,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cv',
             name='linked',
-            field=models.ManyToManyField(blank=True, related_name='_cv_cv_linked_+', to='cv.CV', verbose_name='связанные анкеты'),
+            field=models.ManyToManyField(blank=True, related_name='_cv_cv_linked_+', to='cv.CV', verbose_name='linked CVs'),
         ),
         migrations.AddField(
             model_name='cv',
             name='price',
-            field=models.FloatField(blank=True, null=True, verbose_name='ставка'),
+            field=models.FloatField(blank=True, null=True, verbose_name='rate'),
         ),
         migrations.AddField(
             model_name='cv',
             name='types_of_employment',
-            field=models.ManyToManyField(blank=True, to='dictionary.TypeOfEmployment', verbose_name='тип занятости'),
+            field=models.ManyToManyField(blank=True, to='dictionary.TypeOfEmployment', verbose_name='type of employment'),
         ),
     ]

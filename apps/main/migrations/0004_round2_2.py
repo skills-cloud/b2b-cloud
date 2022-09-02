@@ -7,6 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('cv', '__first__'),
         ('main', '0003_request_start_date'),
     ]
 
@@ -14,16 +15,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='is_customer',
-            field=models.BooleanField(default=False, verbose_name='заказчик?'),
+            field=models.BooleanField(default=False, verbose_name='customer?'),
         ),
         migrations.AddField(
             model_name='requestrequirement',
             name='cv_list',
-            field=models.ManyToManyField(blank=True, to='cv.CV', verbose_name='анкеты'),
+            field=models.ManyToManyField(blank=True, to='cv.CV', verbose_name='CVs'),
         ),
         migrations.AlterField(
             model_name='request',
             name='customer',
-            field=models.ForeignKey(help_text='организации отмеченные как заказчики', limit_choices_to={'is_customer': True}, on_delete=django.db.models.deletion.CASCADE, related_name='requests', to='main.organization', verbose_name='заказчик'),
+            field=models.ForeignKey(help_text='organizations marked as customers', limit_choices_to={'is_customer': True}, on_delete=django.db.models.deletion.CASCADE, related_name='requests', to='main.organization', verbose_name='customer'),
         ),
     ]
