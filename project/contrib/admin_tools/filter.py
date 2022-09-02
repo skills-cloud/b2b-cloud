@@ -32,7 +32,8 @@ class ModelAutocompleteFilter(SimpleListFilter):
                         search_fields=filter_instance.model_search_fields,
                         attrs={
                             'data-ajax--delay': 1200,
-                            'style': 'width:100%',
+                            'data-minimum-input-length': 0,
+                            'data-theme': 'admin-autocomplete',
                         }
                     ),
                     queryset=filter_instance.model_queryset,

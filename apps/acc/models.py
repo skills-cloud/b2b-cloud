@@ -1,12 +1,49 @@
+import random
+
+import datetime
+
+import hashlib
+
+from typing import List, Dict, Optional
+
+import reversion
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group as GroupBase
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
+from project.contrib.db.models import ModelPermissionsMixin
 from project.contrib.db.upload_to import upload_to
+from project.msg import get_email_message_by_template
+
+from acc import permissions as acc_permissions
 
 
-class CustomUserManager(BaseUserManager):
+class Role(models.TextChoices):
+    # EMPLOYEE = 'employee', _('Специалист')
+    ADMIN = 'admin', _('Администратор')
+    PFM = 'pfm', _('Руководитель портфеля проектов')
+    PM = 'pm', _('Руководитель проекта')
+    RM = 'rm', _('Ресурсный менеджер')
+
+
+class UserQuerySet(models.QuerySet):
+    def filter_as_fk_by_user(self, user: 'User'):
+        qs = self.exclude(email='AnonymousUser')
+        if user.is_superuser or user.is_staff:
+            return qs
+        return qs.filter(
+            organizations_contractors_roles__organization_contractor__in=[
+                row.organization_contractor
+                for row in user.organizations_contractors_roles.all()
+            ]
+        ).distinct()
+
+    def filter_by_user(self, user: 'User'):
+        return self.filter_as_fk_by_user(user).exclude(id=user.id)
+
+
+class UserManager(models.Manager.from_queryset(UserQuerySet), BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError(_('The Email must be set'))
@@ -27,23 +64,77 @@ class CustomUserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
 
+    @classmethod
+    def get_queryset_prefetch_related_roles(cls) -> List[str]:
+        return [
+            'organizations_contractors_roles',
+            'organizations_contractors_roles__organization_contractor',
+        ]
 
-class User(AbstractUser):
+
+class Gender(models.TextChoices):
+    MALE = 'M', _('Мужской')
+    FEMALE = 'F', _('Женский')
+    OTHER = '-', _('Другой')
+
+
+@reversion.register()
+class User(ModelPermissionsMixin, AbstractUser):
+    backend = 'django.contrib.auth.backends.ModelBackend'
+
+    permission_save = acc_permissions.user_save
+    permission_delete = acc_permissions.user_delete
+
     UPLOAD_TO = 'user'
     username = None
+
     email = models.EmailField(_('email address'), unique=True)
-    first_name = models.CharField(_('first name'), max_length=150)
-    last_name = models.CharField(_('last name'), max_length=150)
+    first_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('имя'))
+    middle_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('отчество'))
+    last_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('фамилия'))
 
     photo = models.ImageField(null=True, blank=True, upload_to=upload_to)
+
+    gender = models.CharField(max_length=1, null=True, blank=True, choices=Gender.choices, verbose_name=_('пол'))
+    birth_date = models.DateField(null=True, blank=True, verbose_name=_('дата рождения'))
+    phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('телефон'))
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    objects = CustomUserManager()
+    objects = UserManager()
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} < {self.email} >'
+
+    @property
+    def roles(self) -> List[Role]:
+        return [role.role for role in self.system_roles.all()]
+
+    def generate_password(self) -> str:
+        password = hashlib.md5(str(datetime.datetime.now()).encode()).hexdigest()[:random.randint(8, 12)]
+        self.set_password(password)
+        self.save()
+        return password
+
+    def generate_password_and_send_invite(self, password: Optional[str] = None):
+        if not password:
+            password = self.generate_password()
+        msg = get_email_message_by_template('registration_invite', user=self, password=password)
+        msg.to = [self.email]
+        msg.send()
+
+
+class UserSystemRole(models.Model):
+    user = models.ForeignKey('acc.User', related_name='system_roles', on_delete=models.CASCADE)
+    role = models.CharField(max_length=50, choices=Role.choices)
+
+    class Meta:
+        unique_together = [
+            ['user', 'role']
+        ]
+        verbose_name = _('системная роль')
+        verbose_name_plural = _('системные роли')
 
 
 class Group(GroupBase):

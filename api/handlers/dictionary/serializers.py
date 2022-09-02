@@ -1,6 +1,7 @@
 from typing import Dict, List, Any
 
 from rest_framework import serializers
+from rest_framework_recursive.fields import RecursiveField
 
 from dictionary import models as dictionary_models
 from api.serializers import ModelSerializer
@@ -75,6 +76,11 @@ class IndustrySectorSerializer(DictionaryBaseSerializer):
         model = dictionary_models.IndustrySector
 
 
+class OrganizationSerializer(DictionaryBaseSerializer):
+    class Meta(DictionaryBaseSerializer.Meta):
+        model = dictionary_models.Organization
+
+
 class CompetenceInlineSerializer(CompetenceSerializer):
     class Meta(CompetenceSerializer.Meta):
         fields = ['id', 'parent_id', 'name', 'description', 'is_verified']
@@ -82,12 +88,9 @@ class CompetenceInlineSerializer(CompetenceSerializer):
 
 
 class CompetenceTreeSerializer(DictionaryBaseSerializer):
-    children = serializers.SerializerMethodField()
+    children = serializers.ListField(source='get_children', child=RecursiveField())
 
     class Meta(DictionaryBaseSerializer.Meta):
         model = dictionary_models.Competence
         exclude = None
         fields = ['id', 'parent_id', 'name', 'description', 'is_verified', 'children']
-
-    def get_children(self, instance: dictionary_models.Competence) -> List[Dict[str, Any]]:
-        return CompetenceTreeSerializer(instance.get_children(), many=True).data

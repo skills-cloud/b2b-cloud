@@ -34,8 +34,7 @@ RUN \
     && apt-get update -y \
     && apt install -y postgresql-client-13
 RUN pip install -U pip setuptools poetry
-COPY poetry.lock pyproject.toml $WORKDIR/
-RUN poetry config virtualenvs.create false
+COPY poetry.* pyproject.toml $WORKDIR/
 RUN poetry install --no-dev --no-interaction --no-ansi
 ADD . ${WORKDIR}
 RUN ./manage.py collectstatic --noinput -v 0

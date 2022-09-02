@@ -3,15 +3,21 @@ from django.contrib.auth.admin import UserAdmin as UserAdminBase, GroupAdmin as 
 from django.utils.translation import gettext, gettext_lazy as _
 from django.contrib.auth.models import Group as GroupBase
 
-from acc.models import User, Group
-from project.contrib.admin_tools.filter import IsNullFilter
+from acc import models as acc_models
+from main.models.organization import OrganizationContractorUserRole
 
 admin.site.unregister(GroupBase)
 
 
-@admin.register(User)
+@admin.register(acc_models.User)
 class UserAdmin(UserAdminBase):
-    list_display = ('id', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser')
+    class OrganizationContractorUserRoleInline(admin.TabularInline):
+        model = OrganizationContractorUserRole
+        autocomplete_fields = ['organization_contractor']
+        extra = 0
+
+    inlines = [OrganizationContractorUserRoleInline]
+    list_display = ('id', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser')
     search_fields = ('first_name', 'last_name', 'email')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
 
@@ -22,7 +28,7 @@ class UserAdmin(UserAdminBase):
         (_('Permissions'), {
             'fields': (
                 'is_active', 'is_staff', 'is_superuser',
-                'groups', 'user_permissions'
+                # 'groups', 'user_permissions'
             ),
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
@@ -34,13 +40,11 @@ class UserAdmin(UserAdminBase):
         }),
     )
 
+# class GroupUserInline(admin.TabularInline):
+#     model = acc_models.Group.user_set.through
+#     readonly_fields = ['user']
+#     extra = 0
 
-class GroupUserInline(admin.TabularInline):
-    model = Group.user_set.through
-    readonly_fields = ['user']
-    extra = 0
-
-
-@admin.register(Group)
-class GroupAdmin(GroupAdminBase):
-    inlines = [GroupUserInline]
+# @admin.register(acc_models. Group)
+# class GroupAdmin(GroupAdminBase):
+#     inlines = [GroupUserInline]

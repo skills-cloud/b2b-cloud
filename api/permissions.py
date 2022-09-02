@@ -1,18 +1,48 @@
-from functools import partial
+from typing import Optional, Callable
+
 from rest_framework.permissions import (
-    AllowAny as AllowAnyBase, IsAuthenticated as IsAuthenticatedBase, SAFE_METHODS
+    AllowAny as AllowAnyBase,
+    IsAuthenticated as IsAuthenticatedBase,
+    IsAuthenticatedOrReadOnly as IsAuthenticatedOrReadOnlyBase,
+    DjangoModelPermissions,
 )
 
 
-class CheckPermissionMethodMixin:
-    @classmethod
-    def get_check_permission_method(cls, instance, is_safe_method=True):
-        if hasattr(instance, 'check_permission_api'):
-            return partial(instance.check_permission_api, is_safe_method=is_safe_method)
-        return instance.check_permission
+class ModelObjectPermissions(DjangoModelPermissions):
+    def has_permission(self, request, view):
+        if not (fnc := getattr(self, f'object_has_action_permission__{view.action}', None)):
+            fnc = super().has_permission
+        return fnc(request, view)
+
+    def object_has_action_permission__list(self, request, view) -> Optional[bool]:
+        return IsAuthenticated().has_permission(request, view)
+
+    def object_has_action_permission__retrieve(self, request, view):
+        return self.object_has_action_permission__list(request, view)
+
+    def object_has_action_permission__create(self, request, view) -> Optional[bool]:
+        if hasattr(view.queryset.model.objects, 'has_add_permission'):
+            return view.queryset.model.objects.has_add_permission(request.user)
+
+    def object_has_action_permission__update(self, request, view) -> Optional[bool]:
+        obj = view.get_object()
+        if hasattr(obj, 'user_has_change_permission'):
+            return obj.user_has_change_permission(request.user)
+
+    def object_has_action_permission__partial_update(self, request, view) -> Optional[bool]:
+        return self.object_has_action_permission__update(request, view)
+
+    def object_has_action_permission__destroy(self, request, view) -> Optional[bool]:
+        obj = view.get_object()
+        if hasattr(obj, 'user_has_delete_permission'):
+            return obj.user_has_delete_permission(request.user)
 
 
 class AllowAny(AllowAnyBase):
+    pass
+
+
+class IsAuthenticatedOrReadOnly(IsAuthenticatedOrReadOnlyBase):
     pass
 
 

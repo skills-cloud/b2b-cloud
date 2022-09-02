@@ -14,6 +14,7 @@ class CurrencyReference(DatesModelBase):
     designation = models.CharField(
         max_length=5, verbose_name=_('Обозначение')
     )
+    # ссылки валют
 
     class Meta:
         verbose_name = _('Справочник Валюты')

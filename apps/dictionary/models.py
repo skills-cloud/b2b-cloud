@@ -7,10 +7,14 @@ from project.contrib.db.models import DatesModelBase
 
 
 class DictionaryModelBase(DatesModelBase):
-    name = models.CharField(max_length=500, verbose_name=_('название'))
+    name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    attributes = models.JSONField(
+        default=dict, verbose_name=_('доп. атрибуты'), editable=False,
+        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
+    )
 
     class Meta(DatesModelBase.Meta):
         abstract = True
@@ -123,3 +127,10 @@ class IndustrySector(DictionaryModelBase):
         ordering = ['sorting', 'name']
         verbose_name = _('отрасль')
         verbose_name_plural = _('отрасли')
+
+
+class Organization(DictionaryModelBase):
+    class Meta:
+        ordering = ['sorting', 'name']
+        verbose_name = _('компания')
+        verbose_name_plural = _('компании')

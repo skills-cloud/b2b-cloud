@@ -10,5 +10,5 @@ class Celery(celery.Celery):
         pass
 
 
-app = Celery('app', config_source=settings.CELERY)
+app = Celery('sandbox', config_source=settings.CELERY)
 app.autodiscover_tasks()

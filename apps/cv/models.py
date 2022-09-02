@@ -1,14 +1,21 @@
-from typing import Optional, List, Dict, Any
-from typing import Optional
+from django.core.exceptions import ValidationError
+from typing import TYPE_CHECKING, Optional, List, Dict
 from pathlib import Path
+
 from django.db import models, transaction
 from django.utils import timezone
+from django.contrib.postgres.indexes import GinIndex
 from django.utils.translation import gettext_lazy as _
 import reversion
 
 from project.contrib.db.models import DatesModelBase
+from project.contrib.is_call_from_admin import is_call_from_admin
 from acc.models import User
+from main.models import OrganizationContractor
 from cv import models_upload_to as upload_to
+
+if TYPE_CHECKING:
+    from main.models import OrganizationProject, RequestRequirement, Request
 
 
 class FileModelAbstract(DatesModelBase):
@@ -33,19 +40,29 @@ class FileModelAbstract(DatesModelBase):
             return None
 
 
+class Gender(models.TextChoices):
+    MALE = 'M', _('Мужской')
+    FEMALE = 'F', _('Женский')
+
+
+class DaysToContact(models.TextChoices):
+    ALL = 'all', _('Все дни')
+    WORKDAYS = 'workdays', _('Будние дни')
+    WEEKENDS = 'weekends', _('Выходные дни')
+
+
 @reversion.register(follow=['contacts', 'positions', 'career', 'projects', 'education', 'certificates', 'files'])
 class CV(DatesModelBase):
-    class Gender(models.TextChoices):
-        MALE = 'M', _('Мужской')
-        FEMALE = 'F', _('Женский')
-
-    class DaysToContact(models.TextChoices):
-        ALL = 'all', _('Все дни')
-        WORKDAYS = 'workdays', _('Будние дни')
-        WEEKENDS = 'weekends', _('Выходные дни')
-
     UPLOAD_TO = 'cv'
 
+    organization_contractor = models.ForeignKey(
+        'main.OrganizationContractor', related_name='cv_list', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('организация исполнитель')
+    )
+    manager_rm = models.ForeignKey(
+        'acc.User', related_name='cv_list_as_rm', null=True, blank=True,
+        on_delete=models.SET_NULL, verbose_name=_('РМ')
+    )
     user = models.ForeignKey(
         'acc.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='cv_list',
         verbose_name=_('пользователь')
@@ -78,7 +95,6 @@ class CV(DatesModelBase):
     )
     time_to_contact_from = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / с'))
     time_to_contact_to = models.TimeField(null=True, blank=True, verbose_name=_('время для связи / по'))
-    is_resource_owner = models.BooleanField(default=False, verbose_name=_('владелец ресурса'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
     about = models.TextField(null=True, blank=True, verbose_name=_('доп. информация'))
     price = models.FloatField(null=True, blank=True, verbose_name=_('ставка'))
@@ -88,14 +104,24 @@ class CV(DatesModelBase):
     )
     linked = models.ManyToManyField('self', blank=True, symmetrical=True, verbose_name=_('связанные анкеты'))
 
+    attributes = models.JSONField(
+        default=dict, verbose_name=_('доп. атрибуты'), editable=False,
+        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
+    )
+
     class Meta:
         ordering = ['-id']
+        indexes = [
+            GinIndex(fields=['attributes'])
+        ]
         verbose_name = _('анкета')
         verbose_name_plural = _('анкеты')
 
     class QuerySet(models.QuerySet):
-        def filter_by_user(self, user: User) -> 'CV.QuerySet':
-            return self
+        def filter_by_user(self, user: User):
+            if user.is_superuser or user.is_staff:
+                return self
+            return self.filter(organization_contractor__in=OrganizationContractor.objects.filter_by_user(user))
 
         def filter_by_position_years(self, years: int) -> 'CV.QuerySet':
             return self.filter(positions__year_started__lte=timezone.now().year - years)
@@ -104,6 +130,7 @@ class CV(DatesModelBase):
         @classmethod
         def get_queryset_prefetch_related(cls) -> List[str]:
             return [
+                'info', 'organization_contractor', 'manager_rm',
                 'user', 'country', 'city', 'citizenship', 'physical_limitations', 'types_of_employment', 'linked',
 
                 'files',
@@ -111,14 +138,19 @@ class CV(DatesModelBase):
                 'contacts', 'contacts__contact_type',
 
                 'time_slots', 'time_slots__country', 'time_slots__city', 'time_slots__type_of_employment',
+                'time_slots__request_requirement_link', 'time_slots__request_requirement_link__request_requirement',
+                'time_slots__request_requirement_link__request_requirement__request',
+                'time_slots__request_requirement_link__request_requirement__request__organization_project',
 
                 'positions', 'positions__position', 'positions__files', 'positions__competencies',
                 'positions__competencies__competence',
 
-                'career', 'career__files', 'career__organization', 'career__projects', 'career__projects__organization',
-                'career__position', 'career__competencies',
+                'career', 'career__files', 'career__organization', 'career__projects',
+                'career__projects__organization_customer', 'career__position', 'career__competencies',
 
-                'projects', 'projects__organization', 'projects__position', 'projects__industry_sector',
+                'projects',
+                'projects__organization',
+                'projects__position', 'projects__industry_sector',
                 'projects__competencies',
 
                 'education', 'education__education_place', 'education__education_graduate',
@@ -126,10 +158,37 @@ class CV(DatesModelBase):
 
                 'certificates', 'certificates__education_place', 'certificates__education_graduate',
                 'certificates__education_speciality', 'certificates__competencies',
+            ]
 
+        @classmethod
+        def get_queryset_request_requirements_prefetch_related(cls) -> List[str]:
+            from main.models import Request, RequestRequirement
+            prefix = 'requests_requirements_links__request_requirement'
+            return [
+                *[
+                    f'{prefix}__{f}'
+                    for f in RequestRequirement.objects.get_queryset_prefetch_related_self()
+                ],
+                *[
+                    f'{prefix}__request__{f}'
+                    for f in Request.objects.get_queryset_prefetch_related_self()
+                ],
             ]
 
     objects = Manager()
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.manager_rm:
+            if not self.organization_contractor:
+                errors['organization_contractor'] = _('Чтобы задать РМа необходимо задать организацию исполнителя')
+            if not self.organization_contractor.get_user_roles(self.manager_rm):
+                errors['manager_rm'] = _('Этот пользователь не может быть РМ для этой анкеты')
+        if errors:
+            if not is_call_from_admin():
+                errors = {f'{k}_id': v for k, v in errors.items()}
+            raise ValidationError(errors)
 
     def __str__(self):
         return f'%s < {self.id_verbose} >' % ' '.join(
@@ -140,7 +199,7 @@ class CV(DatesModelBase):
 
     @property
     def id_verbose(self) -> str:
-        return str(self.id).zfill(7)
+        return str(self.id).zfill(7) if self.id else None
 
     @property
     def contact_count(self) -> int:
@@ -178,7 +237,13 @@ class CvLinkedObjectQuerySet(models.QuerySet):
 
 class CvLinkedObjectManager(models.Manager.from_queryset(CvLinkedObjectQuerySet)):
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('cv')
+        return super().get_queryset().prefetch_related(
+            *self.get_queryset_prefetch_related()
+        )
+
+    @classmethod
+    def get_queryset_prefetch_related(cls) -> List[str]:
+        return ['cv']
 
 
 @reversion.register(follow=['cv'])
@@ -209,9 +274,22 @@ class CvContact(DatesModelBase):
         return f'{self.contact_type_id} :: {self.value} < {self.cv_id} / {self.id} >'
 
 
+class CvTimeSlotKind(models.TextChoices):
+    MANUAL = 'manual'
+    REQUEST_REQUIREMENT = 'request_requirement'
+
+
 @reversion.register(follow=['cv'])
 class CvTimeSlot(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='time_slots', verbose_name=_('анкета'))
+    request_requirement_link = models.ForeignKey(
+        'main.RequestRequirementCv', null=True, blank=True, on_delete=models.CASCADE, related_name='time_slots',
+        verbose_name=_('связь с требованием проектного запроса'),
+    )
+    kind = models.CharField(
+        max_length=50, choices=CvTimeSlotKind.choices, default=CvTimeSlotKind.MANUAL,
+        verbose_name=_('тип слота'),
+    )
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
     country = models.ForeignKey(
@@ -229,6 +307,7 @@ class CvTimeSlot(DatesModelBase):
     price = models.FloatField(null=True, blank=True, verbose_name=_('ставка'))
     is_work_permit_required = models.BooleanField(default=False, verbose_name=_('требуется разрешение на работу'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
+    is_free = models.BooleanField(default=False, verbose_name=_('свободен?'))
 
     class Meta:
         ordering = ['-date_from', '-id']
@@ -238,10 +317,37 @@ class CvTimeSlot(DatesModelBase):
         verbose_name = _('таймслот')
         verbose_name_plural = _('таймслоты')
 
-    objects = CvLinkedObjectManager()
+    class Manager(CvLinkedObjectManager):
+        @classmethod
+        def get_queryset_prefetch_related(cls) -> List[str]:
+            return (
+                super().get_queryset_prefetch_related()
+                # + [
+                #     'request_requirement_link', 'request_requirement_link__request_requirement',
+                #     'request_requirement_link__request_requirement__request',
+                #     'request_requirement_link__request_requirement__request__organization_project',
+                # ]
+            )
+
+    objects = Manager()
 
     def __str__(self):
         return f'{self.date_from} – {self.date_to} < {self.cv_id} / {self.id} >'
+
+    @property
+    def request_requirement(self) -> Optional['RequestRequirement']:
+        if self.request_requirement_link:
+            return self.request_requirement_link.request_requirement
+
+    @property
+    def request(self) -> Optional['Request']:
+        if self.request_requirement:
+            return self.request_requirement.request
+
+    @property
+    def organization_project(self) -> Optional['OrganizationProject']:
+        if self.request:
+            return self.request.organization_project
 
 
 @reversion.register(follow=['cv', 'files', 'competencies'])
@@ -280,7 +386,7 @@ class CvPositionCompetence(DatesModelBase):
         'cv.CvPosition', on_delete=models.CASCADE, related_name='competencies',
         verbose_name=_('должность / роль')
     )
-    competence = models.ForeignKey('dictionary.Competence', on_delete=models.RESTRICT, verbose_name=_('компетенция'))
+    competence = models.ForeignKey('dictionary.Competence', on_delete=models.CASCADE, verbose_name=_('компетенция'))
     year_started = models.IntegerField(null=True, blank=True, verbose_name=_('год начала практики'))
 
     class Meta:
@@ -296,7 +402,7 @@ class CvPositionCompetence(DatesModelBase):
         def set_for_position(self, cv_position: CvPosition, data: List[Dict[str, int]]) -> List['CvPositionCompetence']:
             self.filter(cv_position=cv_position).delete()
             return self.bulk_create([
-                CvPositionCompetence(
+                self.model(
                     cv_position=cv_position,
                     **{k: v for k, v in row.items() if k not in ['years']}
                 )
@@ -337,7 +443,10 @@ class CvCareer(DatesModelBase):
     cv = models.ForeignKey('cv.CV', on_delete=models.CASCADE, related_name='career', verbose_name=_('анкета'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
-    organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    organization = models.ForeignKey(
+        'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('заказчик')
+    )
     title = models.CharField(max_length=2000, null=True, blank=True, verbose_name=_('произвольное название'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT, null=True, blank=True,
@@ -391,7 +500,9 @@ class CvProject(DatesModelBase):
     name = models.CharField(max_length=1000, verbose_name=_('название'))
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
-    organization = models.ForeignKey('main.Organization', on_delete=models.RESTRICT, verbose_name=_('заказчик'))
+    organization = models.ForeignKey(
+        'dictionary.Organization', null=True, blank=True, on_delete=models.SET_NULL,
+        verbose_name=_('заказчик'))
     position = models.ForeignKey(
         'dictionary.Position', on_delete=models.RESTRICT,
         verbose_name=_('должность / роль')
@@ -424,6 +535,7 @@ class CvEducation(DatesModelBase):
     date_from = models.DateField(null=True, blank=True, verbose_name=_('период с'))
     date_to = models.DateField(null=True, blank=True, verbose_name=_('период по'))
     is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
+    diploma_number = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('номер диплома'))
     description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
     education_place = models.ForeignKey(
         'dictionary.EducationPlace', on_delete=models.RESTRICT, null=True, blank=True,
@@ -505,3 +617,12 @@ class CvFile(FileModelAbstract):
 
     def __str__(self):
         return f'< {self.cv_id} / {self.id} >'
+
+
+class CvInfo(models.Model):
+    cv = models.OneToOneField('cv.CV', primary_key=True, on_delete=models.DO_NOTHING, related_name='info')
+    rating = models.IntegerField(null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'v_cv_info'
