@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_URL = "https://test.dev.b2bcloud.com/"
+BASE_URL = os.environ.get("BASE_URL")
 
 ALLOWED_HOSTS = ["*"]
 INTERNAL_IPS = ["*"]
@@ -89,7 +89,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "reversion.middleware.RevisionMiddleware",
-    "project.contrib.middleware.TimezoneMiddleware",
+    "project.contrib.middleware.timezone.TimezoneMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
