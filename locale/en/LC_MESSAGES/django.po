@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 12:44+0300\n"
+"POT-Creation-Date: 2022-09-05 12:04+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,12 +18,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: api/handlers/acc/views.py:203
+#: api/handlers/acc/views.py:282
 #, python-format
 msgid "User %s not found."
 msgstr "User %s not found"
 
-#: api/handlers/acc/views.py:234
+#: api/handlers/acc/views.py:313
 msgid ""
 "We've emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
@@ -31,668 +31,1094 @@ msgstr ""
 "We've emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
 
-#: api/handlers/acc/views.py:279
+#: api/handlers/acc/views.py:358
 msgid "Password has been reset with the new password."
 msgstr "Password has been reset with the new password."
 
-#: api/handlers/acc/views.py:290
+#: api/handlers/acc/views.py:369
 msgid "Incorrect password"
 msgstr "Incorrect password"
 
-#: api/handlers/acc/views.py:311
+#: api/handlers/acc/views.py:390
 msgid "Password has been changed"
 msgstr "Password has been changed"
 
-#: apps/acc/admin.py:21
+#: api/handlers/cv/views.py:424
+msgid "Нельзя удалять слот, созданный системой"
+msgstr "You cannot delete a slot created by the system"
+
+#: apps/acc/admin.py:27
 msgid "Personal info"
 msgstr "Personal info"
 
-#: apps/acc/admin.py:22
+#: apps/acc/admin.py:28
 msgid "Permissions"
 msgstr "Permissions"
 
-#: apps/acc/admin.py:28
+#: apps/acc/admin.py:34
 msgid "Important dates"
 msgstr "Important dates"
 
 #: apps/acc/apps.py:8
 #, fuzzy
 #| msgid "Пользователи и роли"
-msgid "Пользователи и группы"
+msgid "Пользователи и роли"
 msgstr "Users and roles"
 
-#: apps/acc/models.py:12
+#: apps/acc/models.py:24
+msgid "Администратор"
+msgstr "Administrator"
+
+#: apps/acc/models.py:25
+msgid "Руководитель портфеля проектов"
+msgstr "Project Portfolio Manager"
+
+#: apps/acc/models.py:26
+msgid "Руководитель проекта"
+msgstr "Project manager"
+
+#: apps/acc/models.py:27
+#, fuzzy
+#| msgid "Ресурсный менеджер"
+msgid "Ресурсный менеджер"
+msgstr "Resource Manager"
+
+#: apps/acc/models.py:49
 msgid "The Email must be set"
 msgstr "The Email must be set"
 
-#: apps/acc/models.py:25
+#: apps/acc/models.py:62
 msgid "Superuser must have is_staff=True."
 msgstr "Superuser must have is_staff=True."
 
-#: apps/acc/models.py:27
+#: apps/acc/models.py:64
 msgid "Superuser must have is_superuser=True."
 msgstr "Superuser must have is_superuser=True."
 
-#: apps/acc/models.py:34
+#: apps/acc/models.py:76
+msgid "Мужской"
+msgstr "Male"
+
+#: apps/acc/models.py:77
+msgid "Женский"
+msgstr "Female"
+
+#: apps/acc/models.py:78
+msgid "Другой"
+msgstr "Another"
+
+#: apps/acc/models.py:91
 msgid "email address"
 msgstr "email address"
 
-#: apps/acc/models.py:35
-msgid "first name"
-msgstr "first name"
+#: apps/acc/models.py:92
+msgid "имя"
+msgstr "firstname"
 
-#: apps/acc/models.py:36
-msgid "last name"
+#: apps/acc/models.py:93
+msgid "отчество"
+msgstr "middle name"
+
+#: apps/acc/models.py:94
+msgid "фамилия"
 msgstr "last name"
+
+#: apps/acc/models.py:98
+msgid "пол"
+msgstr "gender"
+
+#: apps/acc/models.py:99
+msgid "дата рождения"
+msgstr "date of birth"
+
+#: apps/acc/models.py:100
+msgid "телефон"
+msgstr "phone"
+
+#: apps/acc/models.py:136
+msgid "системная роль"
+msgstr "system role"
+
+#: apps/acc/models.py:137
+#, fuzzy
+#| msgid "системная роль"
+msgid "системные роли"
+msgstr "system role"
+
+#: apps/currency/models.py:9
+#, fuzzy
+#| msgid "название"
+msgid "Наименование валюты"
+msgstr "name"
+
+#: apps/currency/models.py:12
+msgid "Цифровой код"
+msgstr ""
+
+#: apps/currency/models.py:15
+#, fuzzy
+#| msgid "значение"
+msgid "Обозначение"
+msgstr "value"
+
+#: apps/currency/models.py:20
+#, fuzzy
+#| msgid "Справочники"
+msgid "Справочник Валюты"
+msgstr "References"
+
+#: apps/currency/models.py:21
+#, fuzzy
+#| msgid "Справочники"
+msgid "Справочники Валют"
+msgstr "References"
 
 #: apps/cv/apps.py:8
 msgid "Анкеты"
 msgstr "Questionnaires"
 
-#: apps/cv/models.py:15
-#, fuzzy
-#| msgid "название"
-msgid "название файла"
-msgstr "name"
-
-#: apps/cv/models.py:39
-msgid "Мужской"
-msgstr "Male"
-
-#: apps/cv/models.py:40
-msgid "Женский"
-msgstr "Female"
-
-#: apps/cv/models.py:43
-msgid "Все дни"
-msgstr "All"
+#: apps/cv/models.py:22
+msgid "file name"
+msgstr "file name"
 
 #: apps/cv/models.py:44
-msgid "Будние дни"
-msgstr "Workdays"
+msgid "Male"
+msgstr "Male"
 
 #: apps/cv/models.py:45
-#, fuzzy
-#| msgid "системные роли"
-msgid "Выходные дни"
-msgstr "Weekends"
+msgid "Female"
+msgstr "Female"
+
+#: apps/cv/models.py:49
+msgid "All"
+msgstr "All"
+
+#: apps/cv/models.py:50
+msgid "Workdays"
+msgstr "Workdays"
 
 #: apps/cv/models.py:51
-#, fuzzy
-#| msgid "Пользователи и роли"
-msgid "пользователь"
-msgstr "Users"
+msgid "Weekends"
+msgstr "Weekends"
 
-#: apps/cv/models.py:53
-msgid "фамилия"
+#: apps/cv/models.py:60
+msgid "Contractor Organization"
+msgstr "Contractor Organization"
+
+#: apps/cv/models.py:64 apps/main/models/request.py:90
+msgid "RM"
+msgstr "RM"
+
+#: apps/cv/models.py:68 apps/main/models/organization.py:134
+#: apps/main/models/organization.py:285
+msgid "user"
+msgstr "user"
+
+#: apps/cv/models.py:70
+msgid "last name"
 msgstr "last name"
 
-#: apps/cv/models.py:54
-msgid "имя"
-msgstr "firstname"
+#: apps/cv/models.py:71
+msgid "first name"
+msgstr "first name"
 
-#: apps/cv/models.py:55
-msgid "отчество"
+#: apps/cv/models.py:72
+msgid "middle name"
 msgstr "middle name"
 
-#: apps/cv/models.py:57
-msgid "пол"
+#: apps/cv/models.py:74
+msgid "gender"
 msgstr "gender"
 
-#: apps/cv/models.py:58
-msgid "дата рождения"
-msgstr "date of birth"
+#: apps/cv/models.py:75
+msgid "birth date"
+msgstr "birth date"
 
-#: apps/cv/models.py:61 apps/cv/models.py:219 apps/dictionary/models.py:32
-#: apps/dictionary/models.py:38
-msgid "страна"
+#: apps/cv/models.py:78 apps/cv/models.py:297
+msgid "country"
 msgstr "country"
 
-#: apps/cv/models.py:65 apps/cv/models.py:223 apps/dictionary/models.py:43
-#: apps/main/models.py:200
-msgid "город"
+#: apps/cv/models.py:82 apps/cv/models.py:301 apps/main/models/request.py:197
+msgid "city"
 msgstr "city"
 
-#: apps/cv/models.py:69 apps/dictionary/models.py:53
-msgid "гражданство"
+#: apps/cv/models.py:86
+msgid "citizenship"
 msgstr "citizenship"
 
-#: apps/cv/models.py:73 apps/dictionary/models.py:96
-msgid "физические особенности"
-msgstr "physical features"
+#: apps/cv/models.py:90
+msgid "physical limitations"
+msgstr "physical limitations"
 
-#: apps/cv/models.py:77
-msgid "дни для связи"
-msgstr "days for communication"
+#: apps/cv/models.py:94
+msgid "contact days"
+msgstr "contact days"
 
-#: apps/cv/models.py:79
-msgid "время для связи / с"
-msgstr "time for communication / from"
+#: apps/cv/models.py:96
+msgid "contact time / from"
+msgstr "contact time / from"
 
-#: apps/cv/models.py:80
-msgid "время для связи / по"
-msgstr "time for communication / to"
+#: apps/cv/models.py:97
+msgid "contact time / to"
+msgstr "contact time / to"
 
-#: apps/cv/models.py:81
-msgid "владелец ресурса"
-msgstr "resource owner"
+#: apps/cv/models.py:98 apps/cv/models.py:458 apps/cv/models.py:516
+#: apps/cv/models.py:537 apps/cv/models.py:572
+msgid "verified"
+msgstr "verified"
 
-#: apps/cv/models.py:82 apps/cv/models.py:349 apps/cv/models.py:405
-#: apps/cv/models.py:426 apps/cv/models.py:460 apps/dictionary/models.py:11
-msgid "подтверждено"
-msgstr "confirmed"
+#: apps/cv/models.py:99
+msgid "additional information"
+msgstr "additional information"
 
-#: apps/cv/models.py:83
-#, fuzzy
-#| msgid "доп. атрибуты"
-msgid "доп. информация"
-msgstr "additional attributes"
+#: apps/cv/models.py:100 apps/cv/models.py:307
+msgid "rate"
+msgstr "rate"
 
-#: apps/cv/models.py:84 apps/cv/models.py:229
-msgid "ставка"
-msgstr "bet"
-
-#: apps/cv/models.py:87 apps/cv/models.py:227 apps/dictionary/models.py:25
-#: apps/main/models.py:196
-msgid "тип занятости"
+#: apps/cv/models.py:103 apps/cv/models.py:305 apps/main/models/request.py:193
+msgid "type of employment"
 msgstr "type of employment"
 
-#: apps/cv/models.py:89
-msgid "связанные анкеты"
-msgstr "related questionnaires"
+#: apps/cv/models.py:105
+msgid "linked CVs"
+msgstr "linked CVs"
 
-#: apps/cv/models.py:93 apps/cv/models.py:186 apps/cv/models.py:214
-#: apps/cv/models.py:249 apps/cv/models.py:337 apps/cv/models.py:390
-#: apps/cv/models.py:423 apps/cv/models.py:458 apps/cv/models.py:496
-#, fuzzy
-#| msgid "Анкеты"
-msgid "анкета"
-msgstr "Questionnaires"
+#: apps/cv/models.py:108 apps/main/models/request.py:283
+msgid "additional attributes"
+msgstr "additional attributes"
 
-#: apps/cv/models.py:94 apps/main/models.py:205
-#, fuzzy
-#| msgid "Анкеты"
-msgid "анкеты"
-msgstr "Questionnaires"
+#: apps/cv/models.py:109 apps/main/models/request.py:284
+msgid "avoid editing if you do not know the purpose of this field"
+msgstr "avoid editing if you do not know the purpose of this field"
 
-#: apps/cv/models.py:189
-msgid "тип"
+#: apps/cv/models.py:117 apps/cv/models.py:251 apps/cv/models.py:284
+#: apps/cv/models.py:355 apps/cv/models.py:443 apps/cv/models.py:499
+#: apps/cv/models.py:534 apps/cv/models.py:570 apps/cv/models.py:608
+#: apps/main/models/request.py:269 apps/main/models/request.py:292
+msgid "CV"
+msgstr "CV"
+
+#: apps/cv/models.py:118 apps/main/models/request.py:293
+msgid "CVs"
+msgstr "CVs"
+
+#: apps/cv/models.py:185
+msgid "To set a resource manager, you need to set a contractor organization"
+msgstr "To set a resource manager, you need to set a contractor organization"
+
+#: apps/cv/models.py:187
+msgid "This user cannot be set as the resource manager for this CV"
+msgstr "This user cannot be set as the resource manager for this CV"
+
+#: apps/cv/models.py:254 apps/main/models/module.py:212
+msgid "type"
 msgstr "type"
 
-#: apps/cv/models.py:191
-msgid "значение"
+#: apps/cv/models.py:256
+msgid "value"
 msgstr "value"
 
-#: apps/cv/models.py:192
-msgid "основной"
-msgstr "main"
+#: apps/cv/models.py:257
+msgid "primary"
+msgstr "primary"
 
-#: apps/cv/models.py:193
-msgid "комментарий"
+#: apps/cv/models.py:258
+msgid "comment"
 msgstr "comment"
 
-#: apps/cv/models.py:203 apps/cv/models.py:204
-msgid "контактные данные"
-msgstr "contact details"
+#: apps/cv/models.py:268 apps/cv/models.py:269
+msgid "contact information"
+msgstr "contact information"
 
-#: apps/cv/models.py:215 apps/cv/models.py:338 apps/cv/models.py:392
-#: apps/cv/models.py:424
-msgid "период с"
-msgstr "period from"
-
-#: apps/cv/models.py:216 apps/cv/models.py:339 apps/cv/models.py:393
-#: apps/cv/models.py:425
-msgid "период по"
-msgstr "period to"
-
-#: apps/cv/models.py:230
-msgid "требуется разрешение на работу"
-msgstr "work permit required"
-
-#: apps/cv/models.py:231 apps/cv/models.py:348 apps/cv/models.py:404
-#: apps/cv/models.py:427 apps/cv/models.py:463 apps/dictionary/models.py:12
-#: apps/main/models.py:28 apps/main/models.py:47 apps/main/models.py:61
-#: apps/main/models.py:112 apps/main/models.py:187
-msgid "описание"
-msgstr "description"
-
-#: apps/cv/models.py:238
-msgid "таймслот"
-msgstr "timeslot"
-
-#: apps/cv/models.py:239
-msgid "таймслоты"
-msgstr "timeslots"
-
-#: apps/cv/models.py:250 apps/cv/models.py:341
-msgid "произвольное название"
-msgstr "arbitrary name"
-
-#: apps/cv/models.py:253 apps/dictionary/models.py:88 apps/main/models.py:190
-msgid "должность"
-msgstr "post"
-
-#: apps/cv/models.py:255 apps/cv/models.py:284
-msgid "год начала практики"
-msgstr "the year of the beginning of the practice"
-
-#: apps/cv/models.py:262 apps/cv/models.py:281 apps/cv/models.py:344
-#: apps/cv/models.py:397
-#, fuzzy
-#| msgid "должность"
-msgid "должность / роль"
-msgstr "post"
-
-#: apps/cv/models.py:263
-#, fuzzy
-#| msgid "должности"
-msgid "должности / роли"
-msgstr "positions"
-
-#: apps/cv/models.py:283 apps/dictionary/models.py:108 apps/main/models.py:237
-#: apps/main/models.py:249
-msgid "компетенция"
-msgstr "competence"
+#: apps/cv/models.py:287
+msgid "linked to a request requirement"
+msgstr "linked to a request requirement"
 
 #: apps/cv/models.py:291
-#, fuzzy
-#| msgid "компетенция"
-msgid "компетенция роли"
+msgid "slot type"
+msgstr "slot type"
+
+#: apps/cv/models.py:293 apps/cv/models.py:444 apps/cv/models.py:501
+#: apps/cv/models.py:535 apps/main/models/organization.py:180
+#: apps/main/models/request.py:201
+msgid "date from"
+msgstr "date from"
+
+#: apps/cv/models.py:294 apps/cv/models.py:445 apps/cv/models.py:502
+#: apps/cv/models.py:536 apps/main/models/organization.py:181
+#: apps/main/models/request.py:202
+msgid "date to"
+msgstr "date to"
+
+#: apps/cv/models.py:308
+msgid "work permit required"
+msgstr "work permit required"
+
+#: apps/cv/models.py:309 apps/cv/models.py:457 apps/cv/models.py:515
+#: apps/cv/models.py:539 apps/cv/models.py:575 apps/main/models/module.py:34
+#: apps/main/models/module.py:159 apps/main/models/module.py:223
+#: apps/main/models/organization.py:34 apps/main/models/organization.py:177
+#: apps/main/models/organization.py:313 apps/main/models/request.py:73
+#: apps/main/models/request.py:184
+msgid "description"
+msgstr "description"
+
+#: apps/cv/models.py:310
+msgid "available?"
+msgstr "available?"
+
+#: apps/cv/models.py:317
+msgid "timeslot"
+msgstr "timeslot"
+
+#: apps/cv/models.py:318
+msgid "timeslots"
+msgstr "timeslots"
+
+#: apps/cv/models.py:356 apps/cv/models.py:450
+msgid "arbitrary title"
+msgstr "arbitrary title"
+
+#: apps/cv/models.py:359 apps/main/models/module.py:117
+#: apps/main/models/module.py:273 apps/main/models/request.py:187
+msgid "position"
+msgstr "position"
+
+#: apps/cv/models.py:361 apps/cv/models.py:390
+msgid "year started"
+msgstr "year started"
+
+#: apps/cv/models.py:368 apps/cv/models.py:387 apps/cv/models.py:453
+#: apps/cv/models.py:508
+msgid "position / role"
+msgstr "position / role"
+
+#: apps/cv/models.py:369
+msgid "positions / roles"
+msgstr "positions / roles"
+
+#: apps/cv/models.py:389 apps/main/models/request.py:340
+#: apps/main/models/request.py:352
+msgid "competence"
 msgstr "competence"
 
-#: apps/cv/models.py:292
-#, fuzzy
-#| msgid "компетенции"
-msgid "компетенции роли"
-msgstr "competencies"
+#: apps/cv/models.py:397
+msgid "role competence"
+msgstr "role competence"
 
-#: apps/cv/models.py:323
-msgid "роль"
+#: apps/cv/models.py:398
+msgid "role competencies"
+msgstr "role competencies"
+
+#: apps/cv/models.py:429 apps/main/models/organization.py:136
+#: apps/main/models/organization.py:287
+msgid "role"
 msgstr "role"
 
-#: apps/cv/models.py:324 apps/cv/models.py:371 apps/cv/models.py:497
-msgid "файл"
+#: apps/cv/models.py:430 apps/cv/models.py:480 apps/cv/models.py:609
+msgid "file"
 msgstr "file"
 
-#: apps/cv/models.py:328
-msgid "файл роли"
-msgstr "roles file"
+#: apps/cv/models.py:434
+msgid "role file"
+msgstr "role file"
 
-#: apps/cv/models.py:329
-#, fuzzy
-#| msgid "системные роли"
-msgid "файлы роли"
-msgstr "roles files"
+#: apps/cv/models.py:435
+msgid "role files"
+msgstr "role files"
 
-#: apps/cv/models.py:340 apps/cv/models.py:394 apps/main/models.py:116
-msgid "заказчик"
+#: apps/cv/models.py:448 apps/cv/models.py:505 apps/main/models/module.py:31
+#: apps/main/models/organization.py:165
+msgid "customer"
 msgstr "customer"
 
-#: apps/cv/models.py:346 apps/cv/models.py:403 apps/cv/models.py:440
-#: apps/cv/models.py:476 apps/dictionary/models.py:109 apps/main/models.py:250
-msgid "компетенции"
+#: apps/cv/models.py:455 apps/cv/models.py:514 apps/cv/models.py:552
+#: apps/cv/models.py:588 apps/main/models/request.py:353
+msgid "competencies"
 msgstr "competencies"
 
-#: apps/cv/models.py:347 apps/cv/models.py:413 apps/main/models.py:74
-msgid "проекты"
+#: apps/cv/models.py:456 apps/cv/models.py:524
+#: apps/main/models/organization.py:198
+msgid "projects"
 msgstr "projects"
 
-#: apps/cv/models.py:356 apps/cv/models.py:357 apps/cv/models.py:370
-msgid "карьера"
+#: apps/cv/models.py:465 apps/cv/models.py:466 apps/cv/models.py:479
+msgid "career"
 msgstr "career"
 
-#: apps/cv/models.py:375
-msgid "файл карьеры"
+#: apps/cv/models.py:484
+msgid "career file"
 msgstr "career file"
 
-#: apps/cv/models.py:376
-msgid "файлы карьеры"
+#: apps/cv/models.py:485
+msgid "career files"
 msgstr "career files"
 
-#: apps/cv/models.py:391 apps/dictionary/models.py:10 apps/main/models.py:27
-#: apps/main/models.py:46 apps/main/models.py:60 apps/main/models.py:82
-#: apps/main/models.py:186
-msgid "название"
-msgstr "name"
+#: apps/cv/models.py:500 apps/cv/models.py:573
+msgid "title"
+msgstr "title"
 
-#: apps/cv/models.py:401 apps/dictionary/models.py:124 apps/main/models.py:128
-msgid "отрасль"
-msgstr "branch"
+#: apps/cv/models.py:512 apps/main/models/organization.py:184
+#: apps/main/models/request.py:84
+msgid "industry"
+msgstr "industry"
 
-#: apps/cv/models.py:412 apps/main/models.py:73 apps/main/models.py:132
-msgid "проект"
+#: apps/cv/models.py:523 apps/main/models/module.py:147
+#: apps/main/models/organization.py:197 apps/main/models/organization.py:281
+msgid "project"
 msgstr "project"
 
-#: apps/cv/models.py:430 apps/cv/models.py:466
-#, fuzzy
-#| msgid "место учебы"
-msgid "место обучения"
+#: apps/cv/models.py:538
+msgid "diploma number"
+msgstr "diploma number"
+
+#: apps/cv/models.py:542 apps/cv/models.py:578
+msgid "place of study"
 msgstr "place of study"
 
-#: apps/cv/models.py:434 apps/cv/models.py:470 apps/dictionary/models.py:74
-msgid "специальность"
-msgstr "specialization"
+#: apps/cv/models.py:546 apps/cv/models.py:582
+msgid "specialty"
+msgstr "specialty"
 
-#: apps/cv/models.py:438 apps/cv/models.py:474
-#, fuzzy
-#| msgid "ученая степень"
-msgid "степень"
-msgstr "academic degree"
+#: apps/cv/models.py:550 apps/cv/models.py:586
+msgid "degree"
+msgstr "degree"
 
-#: apps/cv/models.py:447 apps/cv/models.py:448
-#, fuzzy
-#| msgid "название"
-msgid "образование"
-msgstr "name"
+#: apps/cv/models.py:559 apps/cv/models.py:560
+msgid "education"
+msgstr "education"
 
-#: apps/cv/models.py:459
-msgid "выдан"
+#: apps/cv/models.py:571
+msgid "issued"
 msgstr "issued"
 
-#: apps/cv/models.py:461
-#, fuzzy
-#| msgid "название"
-msgid "наименование"
-msgstr "name"
-
-#: apps/cv/models.py:462
-msgid "номер"
+#: apps/cv/models.py:574
+msgid "number"
 msgstr "number"
 
-#: apps/cv/models.py:483
-msgid "сертификат"
+#: apps/cv/models.py:595 apps/cv/models.py:596
+msgid "certificate"
 msgstr "certificate"
 
-#: apps/cv/models.py:484
-msgid "сертификаты"
-msgstr "certificates"
+#: apps/cv/models.py:613
+msgid "CV file"
+msgstr "CV file"
 
-#: apps/cv/models.py:501
-#, fuzzy
-#| msgid "Анкеты"
-msgid "файл анкеты"
-msgstr "Questionnaires"
-
-#: apps/cv/models.py:502
-#, fuzzy
-#| msgid "Анкеты"
-msgid "файлы анкеты"
-msgstr "Questionnaires"
+#: apps/cv/models.py:614
+msgid "CV files"
+msgstr "CV files"
 
 #: apps/dictionary/apps.py:8
 msgid "Справочники"
 msgstr "References"
 
-#: apps/dictionary/models.py:13 apps/main/models.py:185 apps/main/models.py:242
+#: apps/dictionary/models.py:10
+msgid "название"
+msgstr "name"
+
+#: apps/dictionary/models.py:11
+msgid "подтверждено"
+msgstr "confirmed"
+
+#: apps/dictionary/models.py:12
+msgid "описание"
+msgstr "description"
+
+#: apps/dictionary/models.py:13
 msgid "сортировка"
 msgstr "sorting"
 
-#: apps/dictionary/models.py:26
+#: apps/dictionary/models.py:15
+#, fuzzy
+#| msgid "доп. атрибуты"
+msgid "доп. атрибуты"
+msgstr "additional attributes"
+
+#: apps/dictionary/models.py:16
+msgid ""
+"если вы не до конца понимаете назначение этого поля, вам лучше избежать "
+"редактирования"
+msgstr ""
+"if you don't fully understand the purpose of this field, you'd better avoid "
+"editing"
+
+#: apps/dictionary/models.py:29
+msgid "тип занятости"
+msgstr "type of employment"
+
+#: apps/dictionary/models.py:30
 msgid "типы занятости"
 msgstr "types of employment"
 
-#: apps/dictionary/models.py:33
+#: apps/dictionary/models.py:36 apps/dictionary/models.py:42
+msgid "страна"
+msgstr "country"
+
+#: apps/dictionary/models.py:37
 msgid "страны"
 msgstr "countries"
 
-#: apps/dictionary/models.py:44
+#: apps/dictionary/models.py:47
+msgid "город"
+msgstr "city"
+
+#: apps/dictionary/models.py:48
 msgid "города"
 msgstr "cites"
 
-#: apps/dictionary/models.py:54
+#: apps/dictionary/models.py:57
+msgid "гражданство"
+msgstr "citizenship"
+
+#: apps/dictionary/models.py:58
 msgid "гражданства"
 msgstr "citizenship"
 
-#: apps/dictionary/models.py:60
+#: apps/dictionary/models.py:64
 msgid "тип контактной информации"
 msgstr "type of contact information"
 
-#: apps/dictionary/models.py:61
+#: apps/dictionary/models.py:65
 msgid "типы контактной информации"
 msgstr "types of contact information"
 
-#: apps/dictionary/models.py:67
+#: apps/dictionary/models.py:71
 msgid "место учебы"
 msgstr "place of study"
 
-#: apps/dictionary/models.py:68
+#: apps/dictionary/models.py:72
 msgid "места учебы"
 msgstr "places of study"
 
-#: apps/dictionary/models.py:75
+#: apps/dictionary/models.py:78
+msgid "специальность"
+msgstr "specialization"
+
+#: apps/dictionary/models.py:79
 msgid "специальности"
 msgstr "specialties"
 
-#: apps/dictionary/models.py:81
+#: apps/dictionary/models.py:85
 msgid "ученая степень"
 msgstr "academic degree"
 
-#: apps/dictionary/models.py:82
+#: apps/dictionary/models.py:86
 msgid "ученые степени"
 msgstr "academic degrees"
 
-#: apps/dictionary/models.py:89
+#: apps/dictionary/models.py:92
+msgid "должность"
+msgstr "post"
+
+#: apps/dictionary/models.py:93
 msgid "должности"
 msgstr "positions"
 
-#: apps/dictionary/models.py:95
+#: apps/dictionary/models.py:99
 msgid "физическая особенность"
 msgstr "physical feature"
 
-#: apps/dictionary/models.py:103
+#: apps/dictionary/models.py:100
+msgid "физические особенности"
+msgstr "physical features"
+
+#: apps/dictionary/models.py:107
 msgid "родитель"
 msgstr "parent"
 
-#: apps/dictionary/models.py:125
+#: apps/dictionary/models.py:112
+msgid "компетенция"
+msgstr "competence"
+
+#: apps/dictionary/models.py:113
+msgid "компетенции"
+msgstr "competencies"
+
+#: apps/dictionary/models.py:128
+msgid "отрасль"
+msgstr "branch"
+
+#: apps/dictionary/models.py:129
 msgid "отрасли"
 msgstr "industries"
+
+#: apps/dictionary/models.py:135
+msgid "компания"
+msgstr "company"
+
+#: apps/dictionary/models.py:136
+msgid "компании"
+msgstr "companies"
 
 #: apps/main/apps.py:8
 #, fuzzy
 #| msgid "Организации, модули и запросы"
-msgid "Организации и запросы"
+msgid "Организации, модули и запросы"
 msgstr "Organizations, modules and queries"
 
-#: apps/main/models.py:13
-msgid "Менее года"
+#: apps/main/models/base.py:11
+msgid "Less than a year"
 msgstr "Less than a year"
 
-#: apps/main/models.py:14
-msgid "1 – 3 года"
+#: apps/main/models/base.py:12
+msgid "1 – 3 years"
 msgstr "1 – 3 years"
 
-#: apps/main/models.py:15
-msgid "3 - 5 лет"
-msgstr "3 – 5 years"
+#: apps/main/models/base.py:13
+msgid "3 - 5 years"
+msgstr "3 - 5 years"
 
-#: apps/main/models.py:16
-msgid "Более 5 лет"
+#: apps/main/models/base.py:14
+msgid "More than 5 years"
 msgstr "More than 5 years"
 
-#: apps/main/models.py:20
-msgid "Офис"
+#: apps/main/models/base.py:18
+msgid "Office"
 msgstr "Office"
 
-#: apps/main/models.py:21
-msgid "Удаленная работа"
+#: apps/main/models/base.py:19
+msgid "Remote"
 msgstr "Remote"
 
-#: apps/main/models.py:22
-msgid "Офис или удаленная"
+#: apps/main/models/base.py:20
+msgid "Office or remote"
 msgstr "Office or remote"
 
-#: apps/main/models.py:29
-msgid "заказчик?"
-msgstr "the customer?"
+#: apps/main/models/module.py:31
+msgid "general type if this field is left empty"
+msgstr "general type if this field is left empty"
 
-#: apps/main/models.py:33 apps/main/models.py:44
-msgid "организация"
-msgstr "organization"
+#: apps/main/models/module.py:33 apps/main/models/module.py:78
+#: apps/main/models/module.py:149 apps/main/models/module.py:222
+#: apps/main/models/organization.py:33 apps/main/models/organization.py:176
+#: apps/main/models/organization.py:312 apps/main/models/request.py:35
+#: apps/main/models/request.py:183
+msgid "name"
+msgstr "name"
 
-#: apps/main/models.py:34
-msgid "организации"
-msgstr "organizations"
+#: apps/main/models/module.py:41
+msgid "modules / fuctional point type"
+msgstr "modules / fuctional point type"
 
-#: apps/main/models.py:51
-#, fuzzy
-#| msgid "типы контактной информации"
-msgid "проект организации"
-msgstr "types of contact information"
+#: apps/main/models/module.py:42
+msgid "modules / fuctional point types"
+msgstr "modules / fuctional point types"
 
-#: apps/main/models.py:52
-msgid "проекты организаций"
-msgstr "projects of organizations"
+#: apps/main/models/module.py:76 apps/main/models/module.py:87
+#: apps/main/models/module.py:113 apps/main/models/module.py:220
+msgid "difficulty level"
+msgstr "difficulty level"
 
-#: apps/main/models.py:64
-#, fuzzy
-#| msgid "Ресурсный менеджер"
-msgid "ресурсные менеджеры"
-msgstr "Resource Manager"
+#: apps/main/models/module.py:79
+msgid "factor"
+msgstr "factor"
 
-#: apps/main/models.py:68
-msgid "рекрутеры"
-msgstr "recruiters"
+#: apps/main/models/module.py:80 apps/main/models/module.py:120
+#: apps/main/models/module.py:160 apps/main/models/module.py:224
+#: apps/main/models/module.py:277 apps/main/models/request.py:182
+#: apps/main/models/request.py:345
+msgid "sorting"
+msgstr "sorting"
 
-#: apps/main/models.py:86
-#, fuzzy
-#| msgid "тип контактной информации"
-msgid "тип проектного запроса"
-msgstr "type of contact information"
+#: apps/main/models/module.py:88
+msgid "difficulty levels"
+msgstr "difficulty levels"
 
-#: apps/main/models.py:87
-#, fuzzy
-#| msgid "типы контактной информации"
-msgid "типы проектных запросов"
-msgstr "types of contact information"
+#: apps/main/models/module.py:119
+msgid "standard"
+msgstr "standard"
 
-#: apps/main/models.py:94
-msgid "Черновик"
-msgstr "Draft"
+#: apps/main/models/module.py:119
+msgid "in hours"
+msgstr "in hours"
 
-#: apps/main/models.py:95
-msgid "В работе"
-msgstr "In progress"
+#: apps/main/models/module.py:127 apps/main/models/module.py:284
+msgid "labor standard"
+msgstr "labor standard"
 
-#: apps/main/models.py:96
-msgid "Успешно завершен"
-msgstr "Successfully completed"
+#: apps/main/models/module.py:128 apps/main/models/module.py:285
+msgid "labor standards"
+msgstr "labor standards"
 
-#: apps/main/models.py:97
-msgid "Закрыт"
-msgstr "Closed"
-
-#: apps/main/models.py:101
-msgid "Высокий"
-msgstr "Tall"
-
-#: apps/main/models.py:102
-msgid "Обычный"
-msgstr "Usual"
-
-#: apps/main/models.py:103
-msgid "Низкий"
-msgstr "Low"
-
-#: apps/main/models.py:110
-#, fuzzy
-#| msgid "тип занятости"
-msgid "тип запроса"
-msgstr "type of request"
-
-#: apps/main/models.py:116
-#, fuzzy
-#| msgid "Организации, модули и запросы"
-msgid "организации отмеченные как заказчики"
-msgstr "Organizations, modules and queries"
-
-#: apps/main/models.py:120
-msgid "статус"
-msgstr "status"
-
-#: apps/main/models.py:124
-msgid "приоритет"
-msgstr "priority"
-
-#: apps/main/models.py:134
-#, fuzzy
-#| msgid "дата рождения"
-msgid "дата начала"
+#: apps/main/models/module.py:150 apps/main/models/request.py:86
+#: apps/main/models/request.py:394
+msgid "start date"
 msgstr "start date"
 
-#: apps/main/models.py:135
-msgid "срок"
-msgstr "term"
+#: apps/main/models/module.py:151 apps/main/models/request.py:87
+msgid "deadline"
+msgstr "deadline"
 
-#: apps/main/models.py:138
-#, fuzzy
-#| msgid "Ресурсный менеджер"
-msgid "рес. менеджер"
-msgstr "Resource Manager"
+#: apps/main/models/module.py:153
+msgid "workdays count"
+msgstr "workdays count"
 
-#: apps/main/models.py:142
-msgid "отв. рекрутер"
-msgstr "responsible recruiter"
+#: apps/main/models/module.py:154
+msgid ""
+"filled automatically based on a five day work week if left empty<br>Mon-Fri "
+"deadline_date-start_date"
+msgstr ""
+"filled automatically based on a five day work week if left empty<br>Mon-Fri "
+"deadline_date-start_date"
 
-#: apps/main/models.py:147
-msgid "проектный запрос"
-msgstr "Project request"
+#: apps/main/models/module.py:157
+msgid "workday hours count"
+msgstr "workday hours count"
 
-#: apps/main/models.py:148
-msgid "проектные запросы"
-msgstr "Projects requests"
+#: apps/main/models/module.py:158 apps/main/models/organization.py:178
+msgid "goals"
+msgstr "goals"
 
-#: apps/main/models.py:183
-msgid "запрос"
-msgstr "request"
+#: apps/main/models/module.py:167 apps/main/models/module.py:216
+#: apps/main/models/module.py:269 apps/main/models/request.py:66
+msgid "module"
+msgstr "module"
 
-#: apps/main/models.py:192 apps/main/models.py:240
-msgid "опыт лет"
-msgstr "years of experience"
+#: apps/main/models/module.py:168
+msgid "modules"
+msgstr "modules"
 
-#: apps/main/models.py:193
-#, fuzzy
-#| msgid "отчество"
-msgid "количество"
+#: apps/main/models/module.py:231
+msgid "functional point"
+msgstr "functional point"
+
+#: apps/main/models/module.py:232
+msgid "functional points"
+msgstr "functional points"
+
+#: apps/main/models/module.py:251
+msgid ""
+"Functional point must belong to the company that ordered the module or be "
+"commonly used"
+msgstr ""
+"Functional point must belong to the company that ordered the module or be "
+"commonly used"
+
+#: apps/main/models/module.py:253
+msgid "Difficulty level must belong to this functional point type"
+msgstr "Difficulty level must belong to this functional point type"
+
+#: apps/main/models/module.py:275 apps/main/models/request.py:190
+msgid "count"
 msgstr "count"
 
-#: apps/main/models.py:202
-msgid "адрес"
+#: apps/main/models/module.py:276
+msgid "man-hours"
+msgstr "man-hours"
+
+#: apps/main/models/organization.py:35
+msgid "is a customer?"
+msgstr "is a customer?"
+
+#: apps/main/models/organization.py:36
+msgid "is a contractor?"
+msgstr "is a contractor?"
+
+#: apps/main/models/organization.py:37
+msgid "is a partner?"
+msgstr "is a partner?"
+
+#: apps/main/models/organization.py:38
+msgid "legal name"
+msgstr "legal name"
+
+#: apps/main/models/organization.py:39
+msgid "short name"
+msgstr "short name"
+
+#: apps/main/models/organization.py:41
+msgid "general manager"
+msgstr "general manager"
+
+#: apps/main/models/organization.py:42
+msgid "contact person"
+msgstr "contact person"
+
+#: apps/main/models/organization.py:43
+msgid "contact phone"
+msgstr "contact phone"
+
+#: apps/main/models/organization.py:44
+msgid "contact e-mail"
+msgstr "contact e-mail"
+
+#: apps/main/models/organization.py:48
+msgid "organization"
+msgstr "organization"
+
+#: apps/main/models/organization.py:49
+msgid "organizations"
+msgstr "organizations"
+
+#: apps/main/models/organization.py:84
+msgid "customer organization"
+msgstr "customer organization"
+
+#: apps/main/models/organization.py:85
+msgid "customer organizations"
+msgstr "customer organizations"
+
+#: apps/main/models/organization.py:113 apps/main/models/organization.py:130
+msgid "contractor organization"
+msgstr "contractor organization"
+
+#: apps/main/models/organization.py:114
+msgid "contractor organizations"
+msgstr "contractor organizations"
+
+#: apps/main/models/organization.py:142 apps/main/models/organization.py:293
+msgid "user role"
+msgstr "user role"
+
+#: apps/main/models/organization.py:143 apps/main/models/organization.py:294
+msgid "user roles"
+msgstr "user roles"
+
+#: apps/main/models/organization.py:152 apps/main/models/request.py:47
+msgid "Draft"
+msgstr "Draft"
+
+#: apps/main/models/organization.py:153 apps/main/models/request.py:48
+#: apps/main/models/request.py:165
+msgid "In progress"
+msgstr "In progress"
+
+#: apps/main/models/organization.py:154 apps/main/models/request.py:49
+#: apps/main/models/request.py:166
+msgid "Successfully completed"
+msgstr "Successfully completed"
+
+#: apps/main/models/organization.py:155 apps/main/models/request.py:50
+#: apps/main/models/request.py:164
+msgid "Closed"
+msgstr "Closed"
+
+#: apps/main/models/organization.py:169
+msgid "contractor"
+msgstr "contractor"
+
+#: apps/main/models/organization.py:173 apps/main/models/request.py:76
+#: apps/main/models/request.py:180 apps/main/models/request.py:273
+msgid "status"
+msgstr "status"
+
+#: apps/main/models/organization.py:179
+msgid "resource plan"
+msgstr "resource plan"
+
+#: apps/main/models/organization.py:188
+msgid "PPM"
+msgstr "PPM"
+
+#: apps/main/models/organization.py:192
+msgid "PM"
+msgstr "PM"
+
+#: apps/main/models/organization.py:229
+msgid "This user cannot be set as the PPM of this project"
+msgstr "This user cannot be set as the PPM of this project"
+
+#: apps/main/models/organization.py:231
+msgid "This user cannot be set as the PM of this project"
+msgstr "This user cannot be set as the PM of this project"
+
+#: apps/main/models/organization.py:304
+msgid "User does not have a set role in contractor organization"
+msgstr "User does not have a set role in contractor organization"
+
+#: apps/main/models/organization.py:310
+msgid "parent card"
+msgstr "parent card"
+
+#: apps/main/models/organization.py:315
+msgid "positions"
+msgstr "positions"
+
+#: apps/main/models/organization.py:361
+msgid "organizations / organization project card template"
+msgstr "organizations / organization project card template"
+
+#: apps/main/models/organization.py:362
+msgid "organizations / organization project card templates"
+msgstr "organizations / organization project card templates"
+
+#: apps/main/models/organization.py:368
+msgid "organization project"
+msgstr "organization project"
+
+#: apps/main/models/organization.py:369
+msgid "required only for root cards"
+msgstr "required only for root cards"
+
+#: apps/main/models/organization.py:373
+msgid "organizations / organization project card"
+msgstr "organizations / organization project card"
+
+#: apps/main/models/organization.py:374
+msgid "organizations / organization project cards"
+msgstr "organizations / organization project cards"
+
+#: apps/main/models/organization.py:432
+msgid "Organization project needs to be set for a high level card"
+msgstr "Organization project needs to be set for a high level card"
+
+#: apps/main/models/permissions.py:22 apps/main/models/permissions.py:27
+msgid "Permission denied"
+msgstr "Permission denied"
+
+#: apps/main/models/request.py:39
+msgid "requests / request type"
+msgstr "requests / request type"
+
+#: apps/main/models/request.py:40
+msgid "requests / request types"
+msgstr "requests / request types"
+
+#: apps/main/models/request.py:54
+msgid "Major"
+msgstr "Major"
+
+#: apps/main/models/request.py:55
+msgid "Default"
+msgstr "Default"
+
+#: apps/main/models/request.py:56
+msgid "Minor"
+msgstr "Minor"
+
+#: apps/main/models/request.py:70
+msgid "request type"
+msgstr "request type"
+
+#: apps/main/models/request.py:72
+msgid "header (name or number)"
+msgstr "header (name or number)"
+
+#: apps/main/models/request.py:80
+msgid "priority"
+msgstr "priority"
+
+#: apps/main/models/request.py:95 apps/main/models/request.py:176
+#: apps/main/models/request.py:388
+msgid "request"
+msgstr "request"
+
+#: apps/main/models/request.py:96
+msgid "requests"
+msgstr "requests"
+
+#: apps/main/models/request.py:144
+msgid "This user cannot be set as resource manager of this request"
+msgstr "This user cannot be set as resource manager of this request"
+
+#: apps/main/models/request.py:163
+msgid "Open"
+msgstr "Open"
+
+#: apps/main/models/request.py:189
+msgid "experience years"
+msgstr "experience years"
+
+#: apps/main/models/request.py:199
+msgid "address"
 msgstr "address"
 
-#: apps/main/models.py:203
-msgid "макс. цена"
-msgstr "max price"
+#: apps/main/models/request.py:200
+msgid "max rate"
+msgstr "max rate"
 
-#: apps/main/models.py:209 apps/main/models.py:235
-#, fuzzy
-#| msgid "Организации, модули и запросы"
-msgid "требование проектного запроса"
-msgstr "Organizations, modules and queries"
+#: apps/main/models/request.py:206
+msgid "requests / requirement"
+msgstr "requests / requirement"
 
-#: apps/main/models.py:210
-#, fuzzy
-#| msgid "Организации, модули и запросы"
-msgid "требования проектного запроса"
-msgstr "Organizations, modules and queries"
+#: apps/main/models/request.py:207
+msgid "requests / requirements"
+msgstr "requests / requirements"
+
+#: apps/main/models/request.py:265
+msgid "requiest requirement"
+msgstr "requiest requirement"
+
+#: apps/main/models/request.py:275
+msgid "working on project from"
+msgstr "working on project from"
+
+#: apps/main/models/request.py:276
+msgid "working on project to"
+msgstr "working on project to"
+
+#: apps/main/models/request.py:280
+msgid "rating"
+msgstr "rating"
+
+#: apps/main/models/request.py:327
+msgid "At least one card has invalid ID"
+msgstr "At least one card has invalid ID"
+
+#: apps/main/models/request.py:338
+msgid "request requirement"
+msgstr "request requirement"
+
+#: apps/main/models/request.py:343
+msgid "years of experience"
+msgstr "years of experience"
+
+#: apps/main/models/request.py:392
+msgid "contractor CV"
+msgstr "contractor CV"
+
+#: apps/main/models/request.py:395
+msgid "end date"
+msgstr "end date"
+
+#: apps/main/models/request.py:396
+msgid "task name"
+msgstr "task name"
+
+#: apps/main/models/request.py:397
+msgid "task description"
+msgstr "task description"
+
+#: apps/main/models/request.py:398
+msgid "time spent"
+msgstr "time spent"
+
+#: apps/main/models/request.py:431 apps/main/models/request.py:432
+msgid "requests / timesheets"
+msgstr "requests / timesheets"
+
+#: apps/main/models/request.py:446
+#, python-brace-format
+msgid "CV <{self.cv_id}> is not linked to a request requirement"
+msgstr "CV <{self.cv_id}> is not linked to a request requirement"
+
+#: project/contrib/admin_tools/admin_mixin.py:29
+msgid "Файлы"
+msgstr "Files"
 
 #: project/contrib/admin_tools/templates/admin_tools/model-autocomplete-filter.html:2
+#: templates/django_admin_listfilter_dropdown/dropdown_filter.html:7
 #, python-format
 msgid " By %(filter_title)s "
 msgstr " By %(filter_title)s "
 
-#: project/contrib/db/models.py:10
+#: project/contrib/db/models.py:13
 msgid "создано"
 msgstr "created"
 
-#: project/contrib/db/models.py:11
+#: project/contrib/db/models.py:14
 msgid "обновлено"
 msgstr "updated"
 
-#: project/settings/bits/locale.py:16
+#: project/contrib/db/models.py:57 project/contrib/db/models.py:62
+msgid "У вас нет прав"
+msgstr "You don't have permission"
+
+#: project/settings.py:159
 msgid "English"
 msgstr "English"
 
-#: project/settings/bits/locale.py:17
+#: project/settings.py:160
 msgid "Russian"
 msgstr "Russian"
 
@@ -700,599 +1126,327 @@ msgstr "Russian"
 msgid "Delete?"
 msgstr "Delete?"
 
-#: templates/nesting/admin/inlines/tabular.html:122
+#: templates/nesting/admin/inlines/tabular.html:59
+msgid "Change"
+msgstr "Change"
+
+#: templates/nesting/admin/inlines/tabular.html:59
+msgid "View"
+msgstr "View"
+
+#: templates/nesting/admin/inlines/tabular.html:61
+msgid "View on site"
+msgstr "View on site"
+
+#: templates/nesting/admin/inlines/tabular.html:125
 #, python-format
 msgid "Add another %(verbose_name)s"
 msgstr "Add another %(verbose_name)s"
 
-#~ msgid "Нельзя удалять слот, созданный системой"
-#~ msgstr "You cannot delete a slot created by the system"
-
-#~ msgid "Администратор"
-#~ msgstr "Administrator"
-
-#~ msgid "Руководитель портфеля проектов"
-#~ msgstr "Project Portfolio Manager"
-
-#~ msgid "Руководитель проекта"
-#~ msgstr "Project manager"
-
-#~ msgid "Другой"
-#~ msgstr "Another"
-
-#~ msgid "телефон"
-#~ msgstr "phone"
-
-#~ msgid "системная роль"
-#~ msgstr "system role"
-
-#~ msgid "file name"
-#~ msgstr "file name"
-
-#~ msgid "Male"
-#~ msgstr "Male"
-
-#~ msgid "Female"
-#~ msgstr "Female"
-
-#~ msgid "All"
-#~ msgstr "All"
-
-#~ msgid "Workdays"
-#~ msgstr "Workdays"
-
-#~ msgid "Weekends"
-#~ msgstr "Weekends"
-
-#~ msgid "Contractor Organization"
-#~ msgstr "Contractor Organization"
-
-#~ msgid "RM"
-#~ msgstr "RM"
-
-#~ msgid "user"
-#~ msgstr "user"
-
-#~ msgid "middle name"
-#~ msgstr "middle name"
-
-#~ msgid "gender"
-#~ msgstr "gender"
-
-#~ msgid "birth date"
-#~ msgstr "birth date"
-
-#~ msgid "country"
-#~ msgstr "country"
-
-#~ msgid "city"
-#~ msgstr "city"
-
-#~ msgid "citizenship"
-#~ msgstr "citizenship"
-
-#~ msgid "physical limitations"
-#~ msgstr "physical limitations"
-
-#~ msgid "contact days"
-#~ msgstr "contact days"
-
-#~ msgid "contact time / from"
-#~ msgstr "contact time / from"
-
-#~ msgid "contact time / to"
-#~ msgstr "contact time / to"
-
-#~ msgid "verified"
-#~ msgstr "verified"
-
-#~ msgid "additional information"
-#~ msgstr "additional information"
-
-#~ msgid "rate"
-#~ msgstr "rate"
-
-#~ msgid "type of employment"
-#~ msgstr "type of employment"
-
-#~ msgid "linked CVs"
-#~ msgstr "linked CVs"
-
-#~ msgid "additional attributes"
-#~ msgstr "additional attributes"
-
-#~ msgid "avoid editing if you do not know the purpose of this field"
-#~ msgstr "avoid editing if you do not know the purpose of this field"
-
-#~ msgid "CV"
-#~ msgstr "CV"
-
-#~ msgid "CVs"
-#~ msgstr "CVs"
-
-#~ msgid "To set a resource manager, you need to set a contractor organization"
-#~ msgstr ""
-#~ "To set a resource manager, you need to set a contractor organization"
-
-#~ msgid "This user cannot be set as the resource manager for this CV"
-#~ msgstr "This user cannot be set as the resource manager for this CV"
-
-#~ msgid "type"
-#~ msgstr "type"
-
-#~ msgid "value"
-#~ msgstr "value"
-
-#~ msgid "primary"
-#~ msgstr "primary"
-
-#~ msgid "comment"
-#~ msgstr "comment"
-
-#~ msgid "contact information"
-#~ msgstr "contact information"
-
-#~ msgid "linked to a request requirement"
-#~ msgstr "linked to a request requirement"
-
-#~ msgid "slot type"
-#~ msgstr "slot type"
-
-#~ msgid "date from"
-#~ msgstr "date from"
-
-#~ msgid "date to"
-#~ msgstr "date to"
-
-#~ msgid "work permit required"
-#~ msgstr "work permit required"
-
-#~ msgid "description"
-#~ msgstr "description"
-
-#~ msgid "available?"
-#~ msgstr "available?"
-
-#~ msgid "timeslot"
-#~ msgstr "timeslot"
-
-#~ msgid "timeslots"
-#~ msgstr "timeslots"
-
-#~ msgid "arbitrary title"
-#~ msgstr "arbitrary title"
-
-#~ msgid "position"
-#~ msgstr "position"
-
-#~ msgid "year started"
-#~ msgstr "year started"
-
-#~ msgid "position / role"
-#~ msgstr "position / role"
-
-#~ msgid "positions / roles"
-#~ msgstr "positions / roles"
-
-#~ msgid "competence"
-#~ msgstr "competence"
-
-#~ msgid "role competence"
-#~ msgstr "role competence"
-
-#~ msgid "role competencies"
-#~ msgstr "role competencies"
-
-#~ msgid "role"
-#~ msgstr "role"
-
-#~ msgid "file"
-#~ msgstr "file"
-
-#~ msgid "role file"
-#~ msgstr "role file"
-
-#~ msgid "role files"
-#~ msgstr "role files"
-
-#~ msgid "customer"
-#~ msgstr "customer"
-
-#~ msgid "competencies"
-#~ msgstr "competencies"
-
-#~ msgid "projects"
-#~ msgstr "projects"
-
-#~ msgid "career"
-#~ msgstr "career"
-
-#~ msgid "career file"
-#~ msgstr "career file"
-
-#~ msgid "career files"
-#~ msgstr "career files"
-
-#~ msgid "title"
-#~ msgstr "title"
-
-#~ msgid "industry"
-#~ msgstr "industry"
-
-#~ msgid "project"
-#~ msgstr "project"
-
-#~ msgid "diploma number"
-#~ msgstr "diploma number"
-
-#~ msgid "place of study"
-#~ msgstr "place of study"
-
-#~ msgid "specialty"
-#~ msgstr "specialty"
-
-#~ msgid "degree"
-#~ msgstr "degree"
-
-#~ msgid "education"
-#~ msgstr "education"
-
-#~ msgid "issued"
-#~ msgstr "issued"
-
-#~ msgid "number"
-#~ msgstr "number"
-
-#~ msgid "certificate"
-#~ msgstr "certificate"
-
-#~ msgid "CV file"
-#~ msgstr "CV file"
-
-#~ msgid "CV files"
-#~ msgstr "CV files"
-
-#~ msgid ""
-#~ "если вы не до конца понимаете назначение этого поля, вам лучше избежать "
-#~ "редактирования"
-#~ msgstr ""
-#~ "if you don't fully understand the purpose of this field, you'd better "
-#~ "avoid editing"
-
-#~ msgid "компания"
-#~ msgstr "company"
-
-#~ msgid "компании"
-#~ msgstr "companies"
-
-#~ msgid "Less than a year"
-#~ msgstr "Less than a year"
-
-#~ msgid "1 – 3 years"
-#~ msgstr "1 – 3 years"
-
-#~ msgid "3 - 5 years"
-#~ msgstr "3 - 5 years"
-
-#~ msgid "More than 5 years"
-#~ msgstr "More than 5 years"
-
-#~ msgid "Office"
-#~ msgstr "Office"
-
-#~ msgid "Remote"
-#~ msgstr "Remote"
-
-#~ msgid "Office or remote"
-#~ msgstr "Office or remote"
-
-#~ msgid "general type if this field is left empty"
-#~ msgstr "general type if this field is left empty"
-
-#~ msgid "name"
+#, fuzzy
+#~| msgid "название"
+#~ msgid "название файла"
 #~ msgstr "name"
 
-#~ msgid "modules / fuctional point type"
-#~ msgstr "modules / fuctional point type"
+#~ msgid "Все дни"
+#~ msgstr "All"
 
-#~ msgid "modules / fuctional point types"
-#~ msgstr "modules / fuctional point types"
+#~ msgid "Будние дни"
+#~ msgstr "Workdays"
 
-#~ msgid "difficulty level"
-#~ msgstr "difficulty level"
+#, fuzzy
+#~| msgid "системные роли"
+#~ msgid "Выходные дни"
+#~ msgstr "Weekends"
 
-#~ msgid "factor"
-#~ msgstr "factor"
+#, fuzzy
+#~| msgid "Пользователи и роли"
+#~ msgid "пользователь"
+#~ msgstr "Users"
 
-#~ msgid "sorting"
-#~ msgstr "sorting"
+#~ msgid "дни для связи"
+#~ msgstr "days for communication"
 
-#~ msgid "difficulty levels"
-#~ msgstr "difficulty levels"
+#~ msgid "время для связи / с"
+#~ msgstr "time for communication / from"
 
-#~ msgid "standard"
-#~ msgstr "standard"
+#~ msgid "время для связи / по"
+#~ msgstr "time for communication / to"
 
-#~ msgid "in hours"
-#~ msgstr "in hours"
+#~ msgid "владелец ресурса"
+#~ msgstr "resource owner"
 
-#~ msgid "labor standard"
-#~ msgstr "labor standard"
+#~ msgid "ставка"
+#~ msgstr "bet"
 
-#~ msgid "labor standards"
-#~ msgstr "labor standards"
+#~ msgid "связанные анкеты"
+#~ msgstr "related questionnaires"
 
-#~ msgid "start date"
-#~ msgstr "start date"
+#, fuzzy
+#~| msgid "Анкеты"
+#~ msgid "анкета"
+#~ msgstr "Questionnaires"
 
-#~ msgid "deadline"
-#~ msgstr "deadline"
+#, fuzzy
+#~| msgid "Анкеты"
+#~ msgid "анкеты"
+#~ msgstr "Questionnaires"
 
-#~ msgid "workdays count"
-#~ msgstr "workdays count"
+#~ msgid "тип"
+#~ msgstr "type"
 
-#~ msgid ""
-#~ "filled automatically based on a five day work week if left empty<br>Mon-"
-#~ "Fri deadline_date-start_date"
-#~ msgstr ""
-#~ "filled automatically based on a five day work week if left empty<br>Mon-"
-#~ "Fri deadline_date-start_date"
+#~ msgid "основной"
+#~ msgstr "main"
 
-#~ msgid "workday hours count"
-#~ msgstr "workday hours count"
+#~ msgid "комментарий"
+#~ msgstr "comment"
 
-#~ msgid "goals"
-#~ msgstr "goals"
+#~ msgid "контактные данные"
+#~ msgstr "contact details"
 
-#~ msgid "module"
-#~ msgstr "module"
+#~ msgid "период с"
+#~ msgstr "period from"
 
-#~ msgid "modules"
-#~ msgstr "modules"
+#~ msgid "период по"
+#~ msgstr "period to"
 
-#~ msgid "functional point"
-#~ msgstr "functional point"
+#~ msgid "требуется разрешение на работу"
+#~ msgstr "work permit required"
 
-#~ msgid "functional points"
-#~ msgstr "functional points"
+#~ msgid "таймслот"
+#~ msgstr "timeslot"
 
-#~ msgid ""
-#~ "Functional point must belong to the company that ordered the module or be "
-#~ "commonly used"
-#~ msgstr ""
-#~ "Functional point must belong to the company that ordered the module or be "
-#~ "commonly used"
+#~ msgid "таймслоты"
+#~ msgstr "timeslots"
 
-#~ msgid "Difficulty level must belong to this functional point type"
-#~ msgstr "Difficulty level must belong to this functional point type"
+#~ msgid "произвольное название"
+#~ msgstr "arbitrary name"
 
-#~ msgid "count"
-#~ msgstr "count"
+#~ msgid "год начала практики"
+#~ msgstr "the year of the beginning of the practice"
 
-#~ msgid "man-hours"
-#~ msgstr "man-hours"
+#, fuzzy
+#~| msgid "должность"
+#~ msgid "должность / роль"
+#~ msgstr "post"
 
-#~ msgid "is a customer?"
-#~ msgstr "is a customer?"
-
-#~ msgid "is a contractor?"
-#~ msgstr "is a contractor?"
-
-#~ msgid "is a partner?"
-#~ msgstr "is a partner?"
-
-#~ msgid "legal name"
-#~ msgstr "legal name"
-
-#~ msgid "short name"
-#~ msgstr "short name"
-
-#~ msgid "general manager"
-#~ msgstr "general manager"
-
-#~ msgid "contact person"
-#~ msgstr "contact person"
-
-#~ msgid "contact phone"
-#~ msgstr "contact phone"
-
-#~ msgid "contact e-mail"
-#~ msgstr "contact e-mail"
-
-#~ msgid "organization"
-#~ msgstr "organization"
-
-#~ msgid "organizations"
-#~ msgstr "organizations"
-
-#~ msgid "customer organization"
-#~ msgstr "customer organization"
-
-#~ msgid "customer organizations"
-#~ msgstr "customer organizations"
-
-#~ msgid "contractor organization"
-#~ msgstr "contractor organization"
-
-#~ msgid "contractor organizations"
-#~ msgstr "contractor organizations"
-
-#~ msgid "user role"
-#~ msgstr "user role"
-
-#~ msgid "user roles"
-#~ msgstr "user roles"
-
-#~ msgid "Draft"
-#~ msgstr "Draft"
-
-#~ msgid "In progress"
-#~ msgstr "In progress"
-
-#~ msgid "Successfully completed"
-#~ msgstr "Successfully completed"
-
-#~ msgid "Closed"
-#~ msgstr "Closed"
-
-#~ msgid "contractor"
-#~ msgstr "contractor"
-
-#~ msgid "status"
-#~ msgstr "status"
-
-#~ msgid "resource plan"
-#~ msgstr "resource plan"
-
-#~ msgid "PPM"
-#~ msgstr "PPM"
-
-#~ msgid "PM"
-#~ msgstr "PM"
-
-#~ msgid "This user cannot be set as the PPM of this project"
-#~ msgstr "This user cannot be set as the PPM of this project"
-
-#~ msgid "This user cannot be set as the PM of this project"
-#~ msgstr "This user cannot be set as the PM of this project"
-
-#~ msgid "User does not have a set role in contractor organization"
-#~ msgstr "User does not have a set role in contractor organization"
-
-#~ msgid "parent card"
-#~ msgstr "parent card"
-
-#~ msgid "positions"
+#, fuzzy
+#~| msgid "должности"
+#~ msgid "должности / роли"
 #~ msgstr "positions"
 
-#~ msgid "organizations / organization project card template"
-#~ msgstr "organizations / organization project card template"
+#, fuzzy
+#~| msgid "компетенция"
+#~ msgid "компетенция роли"
+#~ msgstr "competence"
 
-#~ msgid "organizations / organization project card templates"
-#~ msgstr "organizations / organization project card templates"
+#, fuzzy
+#~| msgid "компетенции"
+#~ msgid "компетенции роли"
+#~ msgstr "competencies"
 
-#~ msgid "organization project"
-#~ msgstr "organization project"
+#~ msgid "роль"
+#~ msgstr "role"
 
-#~ msgid "required only for root cards"
-#~ msgstr "required only for root cards"
+#~ msgid "файл"
+#~ msgstr "file"
 
-#~ msgid "organizations / organization project card"
-#~ msgstr "organizations / organization project card"
+#~ msgid "файл роли"
+#~ msgstr "roles file"
 
-#~ msgid "organizations / organization project cards"
-#~ msgstr "organizations / organization project cards"
+#, fuzzy
+#~| msgid "системные роли"
+#~ msgid "файлы роли"
+#~ msgstr "roles files"
 
-#~ msgid "Organization project needs to be set for a high level card"
-#~ msgstr "Organization project needs to be set for a high level card"
+#~ msgid "заказчик"
+#~ msgstr "customer"
 
-#~ msgid "Permission denied"
-#~ msgstr "Permission denied"
+#~ msgid "проекты"
+#~ msgstr "projects"
 
-#~ msgid "requests / request type"
-#~ msgstr "requests / request type"
+#~ msgid "карьера"
+#~ msgstr "career"
 
-#~ msgid "requests / request types"
-#~ msgstr "requests / request types"
+#~ msgid "файл карьеры"
+#~ msgstr "career file"
 
-#~ msgid "Major"
-#~ msgstr "Major"
+#~ msgid "файлы карьеры"
+#~ msgstr "career files"
 
-#~ msgid "Default"
-#~ msgstr "Default"
+#~ msgid "проект"
+#~ msgstr "project"
 
-#~ msgid "Minor"
-#~ msgstr "Minor"
+#, fuzzy
+#~| msgid "место учебы"
+#~ msgid "место обучения"
+#~ msgstr "place of study"
 
-#~ msgid "request type"
-#~ msgstr "request type"
+#, fuzzy
+#~| msgid "ученая степень"
+#~ msgid "степень"
+#~ msgstr "academic degree"
 
-#~ msgid "header (name or number)"
-#~ msgstr "header (name or number)"
+#, fuzzy
+#~| msgid "название"
+#~ msgid "образование"
+#~ msgstr "name"
 
-#~ msgid "priority"
+#~ msgid "выдан"
+#~ msgstr "issued"
+
+#~ msgid "номер"
+#~ msgstr "number"
+
+#~ msgid "сертификат"
+#~ msgstr "certificate"
+
+#~ msgid "сертификаты"
+#~ msgstr "certificates"
+
+#, fuzzy
+#~| msgid "Анкеты"
+#~ msgid "файл анкеты"
+#~ msgstr "Questionnaires"
+
+#, fuzzy
+#~| msgid "Анкеты"
+#~ msgid "файлы анкеты"
+#~ msgstr "Questionnaires"
+
+#~ msgid "Менее года"
+#~ msgstr "Less than a year"
+
+#~ msgid "1 – 3 года"
+#~ msgstr "1 – 3 years"
+
+#~ msgid "3 - 5 лет"
+#~ msgstr "3 – 5 years"
+
+#~ msgid "Более 5 лет"
+#~ msgstr "More than 5 years"
+
+#~ msgid "Офис"
+#~ msgstr "Office"
+
+#~ msgid "Удаленная работа"
+#~ msgstr "Remote"
+
+#~ msgid "Офис или удаленная"
+#~ msgstr "Office or remote"
+
+#~ msgid "заказчик?"
+#~ msgstr "the customer?"
+
+#~ msgid "организация"
+#~ msgstr "organization"
+
+#~ msgid "организации"
+#~ msgstr "organizations"
+
+#, fuzzy
+#~| msgid "типы контактной информации"
+#~ msgid "проект организации"
+#~ msgstr "types of contact information"
+
+#~ msgid "проекты организаций"
+#~ msgstr "projects of organizations"
+
+#~ msgid "рекрутеры"
+#~ msgstr "recruiters"
+
+#, fuzzy
+#~| msgid "тип контактной информации"
+#~ msgid "тип проектного запроса"
+#~ msgstr "type of contact information"
+
+#, fuzzy
+#~| msgid "типы контактной информации"
+#~ msgid "типы проектных запросов"
+#~ msgstr "types of contact information"
+
+#~ msgid "Черновик"
+#~ msgstr "Draft"
+
+#~ msgid "В работе"
+#~ msgstr "In progress"
+
+#~ msgid "Успешно завершен"
+#~ msgstr "Successfully completed"
+
+#~ msgid "Закрыт"
+#~ msgstr "Closed"
+
+#~ msgid "Высокий"
+#~ msgstr "Tall"
+
+#~ msgid "Обычный"
+#~ msgstr "Usual"
+
+#~ msgid "Низкий"
+#~ msgstr "Low"
+
+#, fuzzy
+#~| msgid "тип занятости"
+#~ msgid "тип запроса"
+#~ msgstr "type of request"
+
+#, fuzzy
+#~| msgid "Организации, модули и запросы"
+#~ msgid "организации отмеченные как заказчики"
+#~ msgstr "Organizations, modules and queries"
+
+#~ msgid "статус"
+#~ msgstr "status"
+
+#~ msgid "приоритет"
 #~ msgstr "priority"
 
-#~ msgid "request"
+#, fuzzy
+#~| msgid "дата рождения"
+#~ msgid "дата начала"
+#~ msgstr "start date"
+
+#~ msgid "срок"
+#~ msgstr "term"
+
+#, fuzzy
+#~| msgid "Ресурсный менеджер"
+#~ msgid "рес. менеджер"
+#~ msgstr "Resource Manager"
+
+#~ msgid "отв. рекрутер"
+#~ msgstr "responsible recruiter"
+
+#~ msgid "проектный запрос"
+#~ msgstr "Project request"
+
+#~ msgid "проектные запросы"
+#~ msgstr "Projects requests"
+
+#~ msgid "запрос"
 #~ msgstr "request"
 
-#~ msgid "requests"
-#~ msgstr "requests"
-
-#~ msgid "This user cannot be set as resource manager of this request"
-#~ msgstr "This user cannot be set as resource manager of this request"
-
-#~ msgid "Open"
-#~ msgstr "Open"
-
-#~ msgid "experience years"
-#~ msgstr "experience years"
-
-#~ msgid "address"
-#~ msgstr "address"
-
-#~ msgid "max rate"
-#~ msgstr "max rate"
-
-#~ msgid "requests / requirement"
-#~ msgstr "requests / requirement"
-
-#~ msgid "requests / requirements"
-#~ msgstr "requests / requirements"
-
-#~ msgid "requiest requirement"
-#~ msgstr "requiest requirement"
-
-#~ msgid "working on project from"
-#~ msgstr "working on project from"
-
-#~ msgid "working on project to"
-#~ msgstr "working on project to"
-
-#~ msgid "rating"
-#~ msgstr "rating"
-
-#~ msgid "At least one card has invalid ID"
-#~ msgstr "At least one card has invalid ID"
-
-#~ msgid "request requirement"
-#~ msgstr "request requirement"
-
-#~ msgid "years of experience"
+#~ msgid "опыт лет"
 #~ msgstr "years of experience"
 
-#~ msgid "contractor CV"
-#~ msgstr "contractor CV"
+#, fuzzy
+#~| msgid "отчество"
+#~ msgid "количество"
+#~ msgstr "count"
 
-#~ msgid "end date"
-#~ msgstr "end date"
+#~ msgid "адрес"
+#~ msgstr "address"
 
-#~ msgid "task name"
-#~ msgstr "task name"
+#~ msgid "макс. цена"
+#~ msgstr "max price"
 
-#~ msgid "task description"
-#~ msgstr "task description"
+#, fuzzy
+#~| msgid "Организации, модули и запросы"
+#~ msgid "требование проектного запроса"
+#~ msgstr "Organizations, modules and queries"
 
-#~ msgid "time spent"
-#~ msgstr "time spent"
-
-#~ msgid "requests / timesheets"
-#~ msgstr "requests / timesheets"
-
-#~ msgid "CV <{self.cv_id}> is not linked to a request requirement"
-#~ msgstr "CV <{self.cv_id}> is not linked to a request requirement"
-
-#~ msgid "Файлы"
-#~ msgstr "Files"
-
-#~ msgid "У вас нет прав"
-#~ msgstr "You don't have permission"
-
-#~ msgid "Change"
-#~ msgstr "Change"
-
-#~ msgid "View"
-#~ msgstr "View"
-
-#~ msgid "View on site"
-#~ msgstr "View on site"
+#, fuzzy
+#~| msgid "Организации, модули и запросы"
+#~ msgid "требования проектного запроса"
+#~ msgstr "Organizations, modules and queries"
