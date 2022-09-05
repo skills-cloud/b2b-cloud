@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('main', '0003_request_start_date'),
+        ('cv', '__first__'),
     ]
 
     operations = [
