@@ -30,6 +30,7 @@ __all__ = [
     'OrganizationProjectViewSet',
     'OrganizationProjectCardItemTemplateViewSet',
     'OrganizationProjectCardItemViewSet',
+    'PartnerViewSet'
 ]
 
 
@@ -387,3 +388,8 @@ class OrganizationProjectCardItemViewSet(
         )
         response_serializer = main_serializers.OrganizationProjectCardItemReadTreeSerializer(instance=root_card)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PartnerViewSet(MainBaseViewSet):
+    queryset = main_models.Partner.objects
+    serializer_class = main_serializers.PartnerSerializer

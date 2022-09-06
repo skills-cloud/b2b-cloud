@@ -5,6 +5,7 @@ from cacheops import invalidate_model
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField
 from mptt import models as mptt_models
 from mptt import querysets as mptt_querysets
 
@@ -12,6 +13,8 @@ from project.contrib.db.models import DatesModelBase, ModelDiffMixin
 from project.contrib.is_call_from_admin import is_call_from_admin
 from acc.models import User, Role
 from main.models import permissions as main_permissions
+from main.models.base import ServicesType
+# from main.models.base import
 
 if TYPE_CHECKING:
     from main.models.request import Request, RequestStatus, RequestRequirement, RequestRequirementStatus
@@ -25,6 +28,8 @@ __all__ = [
     'OrganizationProjectUserRole',
     'OrganizationProjectCardItemTemplate',
     'OrganizationProjectCardItem',
+    'Partner',
+    'PartnerNetwork'
 ]
 
 
@@ -434,3 +439,65 @@ class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
 
     def __str__(self):
         return f'{self.name} ({self.organization_project.name} <{self.organization_project_id} >)'
+
+
+class PartnerNetwork(DatesModelBase):
+    name = models.CharField(max_length=255)
+    network_operator = models.ForeignKey(
+        'dictionary.Organization',
+        on_delete=models.RESTRICT,
+        verbose_name='network_operator'
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Partner(DatesModelBase):
+    name = models.ForeignKey(
+        'dictionary.Organization',
+        on_delete=models.RESTRICT,
+        verbose_name='partners'
+    )
+    network = models.ForeignKey(
+        PartnerNetwork,
+        on_delete=models.RESTRICT,
+        verbose_name='network'
+    )
+    services_type = ArrayField(
+        models.CharField(choices=ServicesType.choices,
+                         max_length=255,
+                         verbose_name='services_type')
+    )
+    category = models.ManyToManyField(
+        'dictionary.Category',
+        related_name='partners',
+        verbose_name='competence'
+    )
+    competence = models.ManyToManyField(
+        'dictionary.Competence',
+        verbose_name='competence'
+    )
+    certificate = models.ManyToManyField(
+        'dictionary.Certificate',
+        verbose_name='certificate'
+    )
+    segment = models.ForeignKey(
+        'dictionary.IndustrySector',
+        on_delete=models.RESTRICT
+    )
+    confirmed = models.BooleanField(
+        default=False,
+        verbose_name='confirmed'
+    )
+    accreditation = models.BooleanField(
+        default=False,
+        verbose_name='accreditation'
+    )
+    blocked = models.BooleanField(
+        default=False,
+        verbose_name='blocked'
+    )
+
+    def __str__(self):
+        return self.name

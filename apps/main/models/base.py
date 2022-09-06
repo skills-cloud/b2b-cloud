@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 __all__ = [
     'ExperienceYears',
     'WorkLocationType',
+    'ServicesType'
 ]
 
 
@@ -18,3 +19,8 @@ class WorkLocationType(models.TextChoices):
     OFFICE = 'office', _('Office')
     HOME = 'home', _('Remote')
     MIXED = 'mixed', _('Office or remote')
+
+
+class ServicesType(models.TextChoices):
+    OUTSOURCE = 'OUTSOURCE', _('Outsource')
+    OUTSTAFF = 'OUTSTAFF', _('Outstaff')

@@ -7,13 +7,13 @@ from project.contrib.db.models import DatesModelBase
 
 
 class DictionaryModelBase(DatesModelBase):
-    name = models.CharField(max_length=500, db_index=True, verbose_name=_('название'))
-    is_verified = models.BooleanField(default=False, verbose_name=_('подтверждено'))
-    description = models.TextField(null=True, blank=True, verbose_name=_('описание'))
-    sorting = models.IntegerField(default=0, verbose_name=_('сортировка'))
+    name = models.CharField(max_length=500, db_index=True, verbose_name=_('title'))
+    is_verified = models.BooleanField(default=False, verbose_name=_('verified'))
+    description = models.TextField(null=True, blank=True, verbose_name=_('description'))
+    sorting = models.IntegerField(default=0, verbose_name=_('sorting'))
     attributes = models.JSONField(
-        default=dict, verbose_name=_('доп. атрибуты'), editable=False,
-        help_text=_('если вы не до конца понимаете назначение этого поля, вам лучше избежать редактирования')
+        default=dict, verbose_name=_('additional attributes'), editable=False,
+        help_text=_(' if you don\'t really understand purpose of this field you should avoid editing')
     )
 
     class Meta(DatesModelBase.Meta):
@@ -26,26 +26,26 @@ class DictionaryModelBase(DatesModelBase):
 class TypeOfEmployment(DictionaryModelBase):
     class Meta(DatesModelBase.Meta):
         ordering = ['sorting', 'name']
-        verbose_name = _('тип занятости')
-        verbose_name_plural = _('типы занятости')
+        verbose_name = _('employment type')
+        verbose_name_plural = _('employment types')
 
 
 class Country(DictionaryModelBase):
     class Meta(DatesModelBase.Meta):
         ordering = ['sorting', 'name']
-        verbose_name = _('страна')
-        verbose_name_plural = _('страны')
+        verbose_name = _('country')
+        verbose_name_plural = _('countries')
 
 
 class City(DictionaryModelBase):
     country = models.ForeignKey(
-        'dictionary.Country', on_delete=models.CASCADE, related_name='cities', verbose_name=_('страна')
+        'dictionary.Country', on_delete=models.CASCADE, related_name='cities', verbose_name=_('country')
     )
 
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('город')
-        verbose_name_plural = _('города')
+        verbose_name = _('city')
+        verbose_name_plural = _('cities')
 
     def __str__(self):
         return f'{self.name} < {self.country} >'
@@ -54,63 +54,63 @@ class City(DictionaryModelBase):
 class Citizenship(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('гражданство')
-        verbose_name_plural = _('гражданства')
+        verbose_name = _('citizenship')
+        verbose_name_plural = _('citizenships')
 
 
 class ContactType(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('тип контактной информации')
-        verbose_name_plural = _('типы контактной информации')
+        verbose_name = _('contact info type')
+        verbose_name_plural = _('contact info types')
 
 
 class EducationPlace(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('место учебы')
-        verbose_name_plural = _('места учебы')
+        verbose_name = _('education place')
+        verbose_name_plural = _('education places')
 
 
 class EducationSpecialty(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('специальность')
-        verbose_name_plural = _('специальности')
+        verbose_name = _('specialty')
+        verbose_name_plural = _('specialties')
 
 
 class EducationGraduate(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('ученая степень')
-        verbose_name_plural = _('ученые степени')
+        verbose_name = _('science degree')
+        verbose_name_plural = _('science degree')
 
 
 class Position(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('должность')
-        verbose_name_plural = _('должности')
+        verbose_name = _('position')
+        verbose_name_plural = _('positions')
 
 
 class PhysicalLimitation(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('физическая особенность')
-        verbose_name_plural = _('физические особенности')
+        verbose_name = _('disability')
+        verbose_name_plural = _('disabilities')
 
 
 class Competence(MPTTModel, DictionaryModelBase):
     sorting = None
     parent = TreeForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
-        verbose_name=_('родитель')
+        verbose_name=_('parent')
     )
     aliases = ArrayField(models.CharField(max_length=500), null=True, blank=True)
 
     class Meta:
-        verbose_name = _('компетенция')
-        verbose_name_plural = _('компетенции')
+        verbose_name = _('competence')
+        verbose_name_plural = _('competences')
 
     class MPTTMeta:
         level_attr = 'mptt_level'
@@ -125,12 +125,27 @@ class Competence(MPTTModel, DictionaryModelBase):
 class IndustrySector(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('отрасль')
-        verbose_name_plural = _('отрасли')
+        verbose_name = _('sector')
+        verbose_name_plural = _('sectors')
 
 
 class Organization(DictionaryModelBase):
     class Meta:
         ordering = ['sorting', 'name']
-        verbose_name = _('компания')
-        verbose_name_plural = _('компании')
+        verbose_name = _('company')
+        verbose_name_plural = _('companies')
+
+
+class Category(DictionaryModelBase):
+    class Meta:
+        ordering = ['sorting', 'name']
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
+
+
+class Certificate(DictionaryModelBase):
+    class Meta:
+        ordering = ['sorting', 'name']
+        verbose_name = _('certificate')
+        verbose_name_plural = _('certificate')
+

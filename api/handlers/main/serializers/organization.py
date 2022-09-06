@@ -26,6 +26,7 @@ __all__ = [
     'OrganizationProjectCardItemTemplateSerializer',
     'OrganizationProjectCardItemSerializer',
     'OrganizationProjectCardItemReadTreeSerializer',
+    'PartnerSerializer'
 ]
 
 
@@ -210,3 +211,16 @@ class OrganizationProjectCardItemReadTreeSerializer(OrganizationProjectCardItemS
 
     class Meta(OrganizationProjectCardItemSerializer.Meta):
         fields = OrganizationProjectCardItemSerializer.Meta.fields + ['children']
+
+
+class PartnerSerializer(ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+
+
+class PartnerNetwork(ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+    partner = PartnerSerializer(many=True)

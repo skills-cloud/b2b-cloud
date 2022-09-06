@@ -86,3 +86,13 @@ class CompetenceAdmin(DraggableMPTTAdmin):
     list_display_links = ['indented_title']
     list_filter = ['is_verified']
     autocomplete_fields = ['parent']
+
+
+@admin.register(dictionary_models.Category)
+class CategoryAdmin(DictionaryBaseAdmin):
+    pass
+
+
+@admin.register(dictionary_models.Certificate)
+class CertificateAdmin(DictionaryBaseAdmin):
+    pass

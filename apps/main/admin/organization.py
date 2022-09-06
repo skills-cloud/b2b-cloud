@@ -3,7 +3,8 @@ from mptt.admin import DraggableMPTTAdmin
 
 from project.contrib.admin_tools.filter import ModelAutocompleteFilter
 from main import models as main_models
-from main.admin.base import MainBaseAdmin
+
+from .base import MainBaseAdmin
 
 
 class OrganizationProjectAdminFilter(ModelAutocompleteFilter):
@@ -83,3 +84,13 @@ class OrganizationProjectCardItemAdmin(OrganizationProjectCardItemTemplateAdmin)
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('organization_project')
+
+
+@admin.register(main_models.Partner)
+class PartnerAdmin(MainBaseAdmin):
+    pass
+
+
+@admin.register(main_models.PartnerNetwork)
+class PartnerNetworkAdmin(MainBaseAdmin):
+    pass

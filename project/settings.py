@@ -178,8 +178,9 @@ STATICFILES_FINDERS = [
 ]
 
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-STATIC_ROOT = WWW_FILES_BASE_FOLDER / "assets"
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+# STATIC_ROOT = WWW_FILES_BASE_FOLDER / "assets"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 STATIC_URL = "/api/assets/"
 

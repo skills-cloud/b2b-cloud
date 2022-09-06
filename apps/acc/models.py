@@ -21,10 +21,10 @@ from acc import permissions as acc_permissions
 
 class Role(models.TextChoices):
     # EMPLOYEE = 'employee', _('Специалист')
-    ADMIN = 'admin', _('Администратор')
-    PFM = 'pfm', _('Руководитель портфеля проектов')
-    PM = 'pm', _('Руководитель проекта')
-    RM = 'rm', _('Ресурсный менеджер')
+    ADMIN = 'admin', _('Administrator')
+    PFM = 'pfm', _('Project portfolio manager')
+    PM = 'pm', _('Project manager')
+    RM = 'rm', _('Resource manager')
 
 
 class UserQuerySet(models.QuerySet):
@@ -73,9 +73,9 @@ class UserManager(models.Manager.from_queryset(UserQuerySet), BaseUserManager):
 
 
 class Gender(models.TextChoices):
-    MALE = 'M', _('Мужской')
-    FEMALE = 'F', _('Женский')
-    OTHER = '-', _('Другой')
+    MALE = 'M', _('Мale')
+    FEMALE = 'F', _('Female')
+    OTHER = '-', _('Other')
 
 
 @reversion.register()
@@ -89,15 +89,15 @@ class User(ModelPermissionsMixin, AbstractUser):
     username = None
 
     email = models.EmailField(_('email address'), unique=True)
-    first_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('имя'))
-    middle_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('отчество'))
-    last_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('фамилия'))
+    first_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('first name'))
+    middle_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('middle name'))
+    last_name = models.CharField(null=True, blank=True, max_length=150, verbose_name=_('last name'))
 
     photo = models.ImageField(null=True, blank=True, upload_to=upload_to)
 
-    gender = models.CharField(max_length=1, null=True, blank=True, choices=Gender.choices, verbose_name=_('пол'))
-    birth_date = models.DateField(null=True, blank=True, verbose_name=_('дата рождения'))
-    phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('телефон'))
+    gender = models.CharField(max_length=1, null=True, blank=True, choices=Gender.choices, verbose_name=_('gender'))
+    birth_date = models.DateField(null=True, blank=True, verbose_name=_('birth date'))
+    phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('phone number'))
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -133,8 +133,8 @@ class UserSystemRole(models.Model):
         unique_together = [
             ['user', 'role']
         ]
-        verbose_name = _('системная роль')
-        verbose_name_plural = _('системные роли')
+        verbose_name = _('system role')
+        verbose_name_plural = _('system roles')
 
 
 class Group(GroupBase):
