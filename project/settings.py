@@ -1,5 +1,6 @@
 import sys
 import os
+import environ
 
 import dj_database_url
 
@@ -9,8 +10,16 @@ from django.utils.translation import ugettext_lazy as _
 
 from multiprocessing import cpu_count
 from dotenv import load_dotenv
+from dotenv import dotenv_values
 
-load_dotenv()
+env = environ.Env(
+    # DEBUG=(bool, True),
+    # LLOWED_HOSTS=(list, [])
+)
+env.read_env('.env')
+
+# load_dotenv()
+config = dotenv_values('envs/.env')
 
 BASE_URL = os.environ.get("BASE_URL")
 

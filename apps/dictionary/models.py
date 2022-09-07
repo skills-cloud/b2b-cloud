@@ -148,4 +148,3 @@ class Certificate(DictionaryModelBase):
         ordering = ['sorting', 'name']
         verbose_name = _('certificate')
         verbose_name_plural = _('certificate')
-

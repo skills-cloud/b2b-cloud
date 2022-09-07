@@ -88,6 +88,7 @@ python-dotenv = "^0.20.0"
 gunicorn = "^20.1.0"
 business_calendar = "^0.2.1"
 numpy = "^1.23.2"
+python-environ = "^0.4.54"
 
 
 [tool.poetry.dev-dependencies]

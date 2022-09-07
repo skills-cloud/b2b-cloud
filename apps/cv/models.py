@@ -11,7 +11,7 @@ import reversion
 from project.contrib.db.models import DatesModelBase
 from project.contrib.is_call_from_admin import is_call_from_admin
 from acc.models import User
-from main.models import OrganizationContractor
+from apps.main.models import OrganizationContractor
 from cv import models_upload_to as upload_to
 
 if TYPE_CHECKING:
@@ -49,6 +49,27 @@ class DaysToContact(models.TextChoices):
     ALL = 'all', _('All')
     WORKDAYS = 'workdays', _('Workdays')
     WEEKENDS = 'weekends', _('Weekends')
+
+
+class Language(models.TextChoices):
+    ENGLISH = 'english', _('English')
+    RUSSIAN = 'russian', _('Russian')
+    SPANISH = 'spanish', _('Spanish')
+    GERMAN = 'german', _('German')
+    CHINESE = 'chinese', _('Chinese')
+    JAPANESE = 'japanese', _('Japanese')
+    KOREAN = 'korean', _('Korean')
+    TURKISH = 'turkish', _('Turkish')
+
+
+class LanguageLevel(models.TextChoices):
+    BEGINNER = 'A1', _('Beginner-A1')
+    ELEMENTARY = 'A2', _('Elementary-A2')
+    INTERMEDIATE = 'B1', _('Intermediate-B1')
+    UPPER_INTER = 'B2', _('Upper Intermediate-B2')
+    ADVANCED = 'C1', _('Advanced-C1')
+    FLUENT = 'C2', _('Fluent-C2')
+    NATIVE = 'native', _("Native")
 
 
 @reversion.register(follow=['contacts', 'positions', 'career', 'projects', 'education', 'certificates', 'files'])

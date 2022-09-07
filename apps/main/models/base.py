@@ -24,3 +24,4 @@ class WorkLocationType(models.TextChoices):
 class ServicesType(models.TextChoices):
     OUTSOURCE = 'OUTSOURCE', _('Outsource')
     OUTSTAFF = 'OUTSTAFF', _('Outstaff')
+    BOTH = 'BOTH', _('Both')

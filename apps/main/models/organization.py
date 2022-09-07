@@ -441,38 +441,27 @@ class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
         return f'{self.name} ({self.organization_project.name} <{self.organization_project_id} >)'
 
 
-class PartnerNetwork(DatesModelBase):
-    name = models.CharField(max_length=255)
-    network_operator = models.ForeignKey(
-        'dictionary.Organization',
-        on_delete=models.RESTRICT,
-        verbose_name='network_operator'
-    )
-
-    def __str__(self):
-        return self.name
-
-
 class Partner(DatesModelBase):
-    name = models.ForeignKey(
+    name = models.CharField(
+        max_length=255,
+        verbose_name='partner\'s name'
+    )
+    organization = models.ForeignKey(
         'dictionary.Organization',
         on_delete=models.RESTRICT,
-        verbose_name='partners'
+        verbose_name='partners',
     )
-    network = models.ForeignKey(
-        PartnerNetwork,
-        on_delete=models.RESTRICT,
-        verbose_name='network'
-    )
-    services_type = ArrayField(
-        models.CharField(choices=ServicesType.choices,
-                         max_length=255,
-                         verbose_name='services_type')
+    services_type = models.CharField(
+        choices=ServicesType.choices,
+        max_length=255,
+        verbose_name='services_type',
+        blank=True,
+        null=True
     )
     category = models.ManyToManyField(
         'dictionary.Category',
-        related_name='partners',
-        verbose_name='competence'
+        related_name='categories',
+        verbose_name='category'
     )
     competence = models.ManyToManyField(
         'dictionary.Competence',
@@ -497,6 +486,24 @@ class Partner(DatesModelBase):
     blocked = models.BooleanField(
         default=False,
         verbose_name='blocked'
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class PartnerNetwork(DatesModelBase):
+    name = models.CharField(
+        max_length=255,
+        verbose_name='network name'
+    )
+    network_operator = models.ForeignKey(
+        'dictionary.Organization',
+        on_delete=models.RESTRICT,
+        verbose_name='network_operator'
+    )
+    partners = models.ManyToManyField(
+        Partner
     )
 
     def __str__(self):
