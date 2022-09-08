@@ -13,6 +13,8 @@ def user_save(instance: 'User', user: Optional['User'] = None) -> bool:
     from acc.models import Role
     from main.models import OrganizationContractorUserRole
     user = _get_user(user)
+    if not user:
+        return True
     if user.is_superuser or user.is_staff:
         return True
     return OrganizationContractorUserRole.objects.filter(
