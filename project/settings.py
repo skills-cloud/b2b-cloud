@@ -41,7 +41,6 @@ PROJECT_APPS = [
     "dictionary",
     "main",
     "cv",
-    "currency",
 ]
 
 ADVANCED_APPS = [
@@ -201,7 +200,7 @@ LOGIN_URL = "/api/login/"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("api.authentication.SessionAuthentication",),
-    "DEFAULT_PERMISSION_CLASSES": ("api.permissions.IsAuthenticated",),
+    # "DEFAULT_PERMISSION_CLASSES": ("api.permissions.IsAuthenticated",),
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_PAGINATION_CLASS": "api.pagination.DefaultPagination",
     "DEFAULT_RENDERER_CLASSES": ("drf_ujson.renderers.UJSONRenderer",),
