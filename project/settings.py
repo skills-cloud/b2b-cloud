@@ -16,7 +16,7 @@ env.read_env('envs/.env')
 
 BASE_URL = os.environ.get("BASE_URL")
 
-ALLOWED_HOSTS = ["127.0.0.1", "dev.b2bcloud.com", '89.108.124.151']
+ALLOWED_HOSTS = ["127.0.0.1", "dev.b2bcloud.com", '89.108.124.151', "back.b2bcloud.com"]
 INTERNAL_IPS = ["89.108.124.151"]
 os.environ.setdefault("DJANGO_ENV", "dev")
 DJANGO_ENV = os.environ.get("DJANGO_ENV")
