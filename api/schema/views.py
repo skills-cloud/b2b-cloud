@@ -10,7 +10,6 @@ SchemaViewBase = get_schema_view(
         default_version='v1',
     ),
     public=True,
-    url=settings.BASE_URL,
     permission_classes=(IsAuthenticatedOrReadOnly,),
 )
 

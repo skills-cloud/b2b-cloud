@@ -9,22 +9,15 @@ from pathlib import Path
 from django.utils.translation import ugettext_lazy as _
 
 from multiprocessing import cpu_count
-from dotenv import load_dotenv
-from dotenv import dotenv_values
 
-env = environ.Env(
-    # DEBUG=(bool, True),
-    # LLOWED_HOSTS=(list, [])
-)
-env.read_env('.env')
+env = environ.Env()
+env.read_env('envs/.env')
 
-# load_dotenv()
-config = dotenv_values('envs/.env')
 
 BASE_URL = os.environ.get("BASE_URL")
 
-ALLOWED_HOSTS = ["*"]
-INTERNAL_IPS = ["*"]
+ALLOWED_HOSTS = ["127.0.0.1", "dev.b2bcloud.com", '89.108.124.151', "back.b2bcloud.com"]
+INTERNAL_IPS = ["89.108.124.151"]
 os.environ.setdefault("DJANGO_ENV", "dev")
 DJANGO_ENV = os.environ.get("DJANGO_ENV")
 
@@ -88,7 +81,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = [
-    # 'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
