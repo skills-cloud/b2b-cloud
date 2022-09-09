@@ -37,6 +37,8 @@ def _get_user(user: User) -> User:
 ########################################################################################################################
 def organization_contractor_save(instance: 'main_models.OrganizationContractor', user: Optional[User] = None) -> bool:
     user = _get_user(user)
+    if not user:
+        return True
     if set(instance.get_user_roles(user)) & set([Role.ADMIN]):
         return True
     return False
