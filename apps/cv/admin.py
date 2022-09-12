@@ -1,5 +1,7 @@
-from django.contrib import admin
 import nested_admin
+
+from django.contrib import admin
+
 from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
 from reversion.admin import VersionAdmin
 from admin_auto_filters.filters import AutocompleteFilter
@@ -87,6 +89,10 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         model = cv_models.CvFile
         extra = 0
 
+    class LanguageInline(nested_admin.NestedTabularInline):
+        model = cv_models.LanguageLevel
+        extra = 0
+
     inlines = [
         CvContactInline,
         CvTimeSlotInline,
@@ -96,6 +102,7 @@ class CvAdmin(VersionAdmin, nested_admin.NestedModelAdmin):
         CvEducationInline,
         CvCertificateInline,
         CvFileInline,
+        LanguageInline
     ]
     list_select_related = True
     list_display_counters = [

@@ -442,69 +442,80 @@ class OrganizationProjectCardItem(OrganizationProjectCardItemAbstract):
 
 
 class Partner(DatesModelBase):
-    name = models.CharField(
-        max_length=255,
-        verbose_name='partner\'s name'
-    )
     organization = models.ForeignKey(
         'dictionary.Organization',
         on_delete=models.RESTRICT,
-        verbose_name='partners',
+        verbose_name=_('partners'),
+        related_name='partners'
     )
     services_type = models.CharField(
         choices=ServicesType.choices,
-        max_length=255,
-        verbose_name='services_type',
-        blank=True,
-        null=True
+        max_length=15,
+        verbose_name=_('services_type'),
+        default=ServicesType.OUTSTAFF
     )
     category = models.ManyToManyField(
         'dictionary.Category',
         related_name='categories',
-        verbose_name='category'
+        verbose_name=_('category')
     )
     competence = models.ManyToManyField(
         'dictionary.Competence',
-        verbose_name='competence'
+        verbose_name=_('competence'),
+        related_name='competences'
     )
     certificate = models.ManyToManyField(
         'dictionary.Certificate',
-        verbose_name='certificate'
+        verbose_name=_('certificate'),
+        related_name='certificates'
     )
     segment = models.ForeignKey(
         'dictionary.IndustrySector',
-        on_delete=models.RESTRICT
+        on_delete=models.RESTRICT,
+        verbose_name=_('segment'),
+        related_name='partners'
     )
-    confirmed = models.BooleanField(
+    is_confirmed = models.BooleanField(
         default=False,
-        verbose_name='confirmed'
+        verbose_name=_('is confirmed')
     )
-    accreditation = models.BooleanField(
+    is_accredited = models.BooleanField(
         default=False,
-        verbose_name='accreditation'
+        verbose_name=_('is accredited')
     )
-    blocked = models.BooleanField(
+    is_blocked = models.BooleanField(
         default=False,
-        verbose_name='blocked'
+        verbose_name=_('is blocked')
     )
 
+    class Meta:
+        verbose_name = _('partner')
+        verbose_name_plural = _('partners')
+
     def __str__(self):
-        return self.name
+        return self.organization.name
 
 
 class PartnerNetwork(DatesModelBase):
     name = models.CharField(
         max_length=255,
-        verbose_name='network name'
+        verbose_name=_('network name')
     )
     network_operator = models.ForeignKey(
         'dictionary.Organization',
         on_delete=models.RESTRICT,
-        verbose_name='network_operator'
+        verbose_name=_('network_operator'),
+        related_name='networks'
     )
     partners = models.ManyToManyField(
-        Partner
+        Partner,
+        related_name='partners',
+        verbose_name=_('partners')
     )
+
+    class Meta:
+        verbose_name = _('partner network')
+        verbose_name_plural = _('partner networks')
 
     def __str__(self):
         return self.name

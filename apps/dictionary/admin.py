@@ -96,3 +96,8 @@ class CategoryAdmin(DictionaryBaseAdmin):
 @admin.register(dictionary_models.Certificate)
 class CertificateAdmin(DictionaryBaseAdmin):
     pass
+
+
+@admin.register(dictionary_models.CurrencyReference)
+class CurrencyAdmin(DictionaryBaseAdmin):
+    pass

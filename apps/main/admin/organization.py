@@ -88,7 +88,7 @@ class OrganizationProjectCardItemAdmin(OrganizationProjectCardItemTemplateAdmin)
 
 @admin.register(main_models.Partner)
 class PartnerAdmin(MainBaseAdmin):
-    pass
+    list_display = ['id', 'organization']
 
 
 @admin.register(main_models.PartnerNetwork)

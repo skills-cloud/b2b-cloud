@@ -59,7 +59,7 @@ def organization_contractor_nested_objects_save(
         Role.PM,
     ]):
         return True
-    return False
+    # return False
 
 
 def organization_contractor_nested_objects_delete(
@@ -73,6 +73,8 @@ def organization_contractor_user_role_save(
         instance: 'main_models.OrganizationContractorUserRole',
         user: Optional[User] = None
 ) -> bool:
+    if not user:
+        return True
     return organization_contractor_save(instance.organization_contractor, user)
 
 
@@ -88,6 +90,8 @@ def organization_contractor_user_role_delete(
 ########################################################################################################################
 def organization_customer_save(instance: 'main_models.OrganizationCustomer', user: Optional[User] = None) -> bool:
     user = _get_user(user)
+    if not user:
+        return True
     return user.is_superuser or user.is_staff
 
 
@@ -139,6 +143,8 @@ def fun_point_type_position_labor_estimate_delete(
 # Organization Project
 ########################################################################################################################
 def organization_project_save(instance: 'main_models.OrganizationProject', user: Optional[User] = None) -> bool:
+    if not user:
+        return True
     user = _get_user(user)
     if set(instance.get_user_roles(user)) & set([
         Role.ADMIN,

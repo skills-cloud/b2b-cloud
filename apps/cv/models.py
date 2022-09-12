@@ -62,7 +62,7 @@ class Language(models.TextChoices):
     TURKISH = 'turkish', _('Turkish')
 
 
-class LanguageLevel(models.TextChoices):
+class Level(models.TextChoices):
     BEGINNER = 'A1', _('Beginner-A1')
     ELEMENTARY = 'A2', _('Elementary-A2')
     INTERMEDIATE = 'B1', _('Intermediate-B1')
@@ -647,3 +647,26 @@ class CvInfo(models.Model):
     class Meta:
         managed = False
         db_table = 'v_cv_info'
+
+
+class LanguageLevel(DatesModelBase):
+    cv = models.ForeignKey(
+        CV,
+        on_delete=models.CASCADE,
+        related_name='languages',
+        verbose_name=_('language')
+    )
+    language = models.CharField(
+        max_length=8,
+        choices=Language.choices,
+        verbose_name=_('language')
+    )
+    level = models.CharField(
+        max_length=6,
+        choices=Level.choices,
+        verbose_name=_('level')
+    )
+
+    class Meta:
+        verbose_name = _('Language level')
+        verbose_name_plural = _('Language levels')
