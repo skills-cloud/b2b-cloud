@@ -3,6 +3,7 @@ from mptt.admin import DraggableMPTTAdmin
 from adminsortable2.admin import SortableAdminMixin
 
 from dictionary import models as dictionary_models
+from cv.models import LanguageLevel
 
 
 class DictionaryBaseAdmin(SortableAdminMixin, admin.ModelAdmin):
@@ -101,3 +102,4 @@ class CertificateAdmin(DictionaryBaseAdmin):
 @admin.register(dictionary_models.CurrencyReference)
 class CurrencyAdmin(DictionaryBaseAdmin):
     pass
+

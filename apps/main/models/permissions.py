@@ -73,8 +73,6 @@ def organization_contractor_user_role_save(
         instance: 'main_models.OrganizationContractorUserRole',
         user: Optional[User] = None
 ) -> bool:
-    if not user:
-        return True
     return organization_contractor_save(instance.organization_contractor, user)
 
 

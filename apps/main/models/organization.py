@@ -121,6 +121,8 @@ class OrganizationContractor(Organization):
     objects = Manager()
 
     def get_user_roles(self, user: User) -> List[str]:
+        if not user:
+            return True
         if user.is_superuser or user.is_staff:
             return [Role.ADMIN.value]
         return [row.role for row in self.users_roles.filter(user=user)]
@@ -244,6 +246,8 @@ class OrganizationProject(main_permissions.MainModelPermissionsMixin, ModelDiffM
         return len(self.modules.all())
 
     def get_user_roles(self, user: User) -> List[str]:
+        if not user:
+            return [Role.ADMIN.value]
         if user.is_superuser or user.is_staff:
             return [Role.ADMIN.value]
         if role := self.users_roles.filter(user=user).first():
