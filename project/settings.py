@@ -17,6 +17,7 @@ env.read_env('envs/.env')
 BASE_URL = os.environ.get("BASE_URL")
 
 ALLOWED_HOSTS = [
+    "*",
     "127.0.0.1", "dev.b2bcloud.com",
     "89.108.124.151", "back.b2bcloud.com",
     "deven.b2bcloud.com"
@@ -77,7 +78,7 @@ INSTALLED_APPS = (
         "mptt",
         "adminsortable2",
         "reversion",
-        "nested_admin",
+        "nested_admin"
     ]
     + ADVANCED_APPS
     + PROJECT_APPS
