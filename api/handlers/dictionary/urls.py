@@ -1,5 +1,7 @@
 from rest_framework import routers
 
+from django.urls import path
+
 from . import views
 
 
@@ -23,5 +25,9 @@ router.register('organization', views.OrganizationViewSet)
 router.register('competence-tree', views.CompetenceTreeViewSet)
 router.register('competence', views.CompetenceViewSet)
 
-urlpatterns = []
+urlpatterns = [
+    path('delete-competence-duplicates/',
+         views.DeleteDuplicateAPIView.as_view(),
+         name='delete_duplicates')
+]
 urlpatterns += router.urls

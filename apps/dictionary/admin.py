@@ -3,7 +3,6 @@ from mptt.admin import DraggableMPTTAdmin
 from adminsortable2.admin import SortableAdminMixin
 
 from dictionary import models as dictionary_models
-from cv.models import LanguageLevel
 
 
 class DictionaryBaseAdmin(SortableAdminMixin, admin.ModelAdmin):
@@ -87,6 +86,7 @@ class CompetenceAdmin(DraggableMPTTAdmin):
     list_display_links = ['indented_title']
     list_filter = ['is_verified']
     autocomplete_fields = ['parent']
+    change_list_template = 'admin/duplicate_button.html'
 
 
 @admin.register(dictionary_models.Category)
