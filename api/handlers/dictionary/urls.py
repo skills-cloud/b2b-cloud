@@ -25,9 +25,5 @@ router.register('organization', views.OrganizationViewSet)
 router.register('competence-tree', views.CompetenceTreeViewSet)
 router.register('competence', views.CompetenceViewSet)
 
-urlpatterns = [
-    path('delete-competence-duplicates/',
-         views.DeleteDuplicatesView.as_view(),
-         name='delete_duplicates')
-]
+urlpatterns = []
 urlpatterns += router.urls
