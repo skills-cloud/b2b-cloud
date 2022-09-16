@@ -27,7 +27,7 @@ router.register('competence', views.CompetenceViewSet)
 
 urlpatterns = [
     path('delete-competence-duplicates/',
-         views.DeleteDuplicateAPIView.as_view(),
+         views.DeleteDuplicatesView.as_view(),
          name='delete_duplicates')
 ]
 urlpatterns += router.urls

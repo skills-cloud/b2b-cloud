@@ -1,16 +1,12 @@
 import itertools
 
+from django.views.generic.base import TemplateView
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, mixins
 from django_filters import rest_framework as filters
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
 from dictionary import models as dictionary_models
 from api.views import ReadWriteSerializersMixin
 from api.filters import OrderingFilterNullsLast, ModelMultipleChoiceCommaSeparatedIdFilter
@@ -147,18 +143,3 @@ class CompetenceTreeViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = dictionary_serializers.CompetenceTreeSerializer
     pagination_class = None
 
-
-class DeleteDuplicateAPIView(APIView):
-
-    def get(self, request):
-        next_url = request.GET.get(
-            'next',
-            reverse('admin:dictionary_competence_changelist')
-        )
-        queryset = dictionary_models.Competence.objects.all().order_by('name')
-        for row in queryset:
-            if dictionary_models.Competence.objects.filter(
-                    name__iexact=row.name
-            ).count() > 1:
-                row.delete()
-        return HttpResponseRedirect(next_url)

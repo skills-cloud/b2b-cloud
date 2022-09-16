@@ -4,6 +4,6 @@
 {% block object-tools-items %}
 {{ block.super }}
 <li>
-    <a href="{% url 'delete_duplicates' %}?next={{ request.get_full_path }}" class="btn btn-high btn-success">Delete duplicates</a>
+    <a href="{% url 'admin:get_duplicates' %}?next={{ request.get_full_path }}" class="btn btn-high btn-success">Delete duplicates</a>
 </li>
 {% endblock %}
