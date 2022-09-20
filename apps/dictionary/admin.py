@@ -4,11 +4,12 @@ from mptt.admin import DraggableMPTTAdmin
 from django.contrib import admin
 from django.urls import path, reverse
 from django.shortcuts import render
+from django.utils.translation import gettext as _
 
-from django.http.response import HttpResponseRedirect
-
+from django.http.response import HttpResponseRedirect, JsonResponse
 
 from dictionary import models as dictionary_models
+from cv import models as cv_models
 
 
 class DictionaryBaseAdmin(SortableAdminMixin, admin.ModelAdmin):
@@ -46,7 +47,71 @@ class CitizenshipAdmin(DictionaryBaseAdmin):
 
 @admin.register(dictionary_models.ContactType)
 class ContactTypeAdmin(DictionaryBaseAdmin):
-    pass
+    change_list_template = 'admin/contacts/change_list.html'
+
+    class Media:
+        js = (
+            'js/contact-type-optimizer.js',
+        )
+        css = {
+            'all': (
+                'styles/contact-type-optimizer.css',
+            )
+        }
+
+    def move_email_contact_type(self, request):
+        return self._move_email_contact_type(request)
+
+    def _move_email_contact_type(self, request):
+        e_mail_type = self.model.objects.filter(name__iexact='e-mail').first()
+        email_types = self.model.objects.filter(name__iexact='email')
+
+        if not email_types.exists():
+            return JsonResponse({
+                'message': _('Contact type with name `Email` not found!')
+            }, status=400)
+
+        if not e_mail_type:
+            e_mail_type = self.model.objects.create(name='e-mail')
+
+        cvs = cv_models.CV.objects.filter(
+            contacts__contact_type__in=email_types
+        )
+
+        for cv in cvs:
+            email_contact_items = cv.contacts.filter(
+                contact_type__in=email_types
+            )
+            if cv.contacts.filter(contact_type=e_mail_type).exists():
+                email_contact_items.delete()
+                continue
+
+            new_e_mail_items = [
+                cv_models.CvContact(
+                    cv=cv,
+                    contact_type=e_mail_type,
+                    value=x.value,
+                    is_primary=x.is_primary,
+                    comment=x.comment
+                ) for x in email_contact_items
+            ]
+            cv_models.CvContact.objects.bulk_create(new_e_mail_items)
+            email_contact_items.delete()
+
+        email_types.delete()
+
+        return JsonResponse({
+            'message': _('Contact types successfully optimized!'),
+        })
+
+    def get_urls(self):
+        urlpatterns = [
+            path('move-email-contact-type/',
+                 self.admin_site.admin_view(self.move_email_contact_type),
+                 name='move_email_contact_type')
+        ]
+        urlpatterns += super().get_urls()
+        return urlpatterns
 
 
 @admin.register(dictionary_models.EducationPlace)

@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from multiprocessing import cpu_count
 
 env = environ.Env()
-env.read_env('envs/.env')
+env.read_env('envs/.env_en')
 
 
 BASE_URL = os.environ.get("BASE_URL")
@@ -187,7 +187,9 @@ STATICFILES_FINDERS = [
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 # STATIC_ROOT = WWW_FILES_BASE_FOLDER / "assets"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'templates', 'assets')
+]
 STATIC_URL = "/api/assets/"
 
 
