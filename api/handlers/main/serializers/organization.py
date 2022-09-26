@@ -14,6 +14,7 @@ from api.serializers import ModelSerializer, ModelSerializerWithCallCleanMethod
 from api.handlers.acc.serializers import UserInlineSerializer
 from api.handlers.dictionary import serializers as dictionary_serializers
 
+
 __all__ = [
     'MainOrganizationSerializer',
     'OrganizationCustomerSerializer',
@@ -26,7 +27,8 @@ __all__ = [
     'OrganizationProjectCardItemTemplateSerializer',
     'OrganizationProjectCardItemSerializer',
     'OrganizationProjectCardItemReadTreeSerializer',
-    'PartnerSerializer'
+    'PartnerSerializer',
+    'PartnerNetworkSerializer'
 ]
 
 
@@ -216,11 +218,27 @@ class OrganizationProjectCardItemReadTreeSerializer(OrganizationProjectCardItemS
 class PartnerSerializer(ModelSerializer):
 
     class Meta:
+        model = main_models.Partner
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['segment'] = instance.segment.name
+        representation['organization'] = instance.organization.name
+        representation['category'] = [item.name for item in instance.category.all()]
+        representation['competence'] = [item.name for item in instance.competence.all()]
+        representation['certificate'] = [item.name for item in instance.certificate.all()]
+        return representation
 
-class PartnerNetwork(ModelSerializer):
+
+class PartnerNetworkSerializer(ModelSerializer):
 
     class Meta:
+        model = main_models.PartnerNetwork
         fields = '__all__'
-    partner = PartnerSerializer(many=True)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['partners'] = [item.organization.name for item in instance.partners.all()]
+        representation['network_operator'] = instance.network_operator.name
+        return representation

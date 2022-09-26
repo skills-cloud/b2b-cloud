@@ -31,6 +31,8 @@ def user_save(instance: 'User', user: Optional['User'] = None) -> bool:
 
 def user_delete(instance: 'User', user: Optional['User'] = None) -> bool:
     user = _get_user(user)
+    if not user:
+        return True
     if user.is_superuser or user.is_staff:
         return True
     return False

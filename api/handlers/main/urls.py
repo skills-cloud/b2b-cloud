@@ -1,5 +1,7 @@
 from rest_framework import routers
 
+from django.urls import path, include
+
 from . import views
 
 
@@ -25,5 +27,15 @@ router.register('request', views.RequestViewSet)
 router.register('request-requirement', views.RequestRequirementViewSet)
 router.register('time-sheet-row', views.TimeSheetRowViewSet)
 
-urlpatterns = []
+urlpatterns = [
+    path('partners/', include([
+        path('<int:pk>/', views.PartnerDetailView.as_view()),
+        path('', views.PartnerDetailView.as_view())
+    ])),
+    path('partner-networks/', include([
+        path('<int:pk>/', views.PartnerNetworkDetailView.as_view()),
+        path('', views.GetOrCreatePartnerNetworkView.as_view()),
+    ]))
+
+]
 urlpatterns += router.urls

@@ -9,6 +9,7 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import get_object_or_404
+from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
@@ -30,7 +31,10 @@ __all__ = [
     'OrganizationProjectViewSet',
     'OrganizationProjectCardItemTemplateViewSet',
     'OrganizationProjectCardItemViewSet',
-    'PartnerViewSet'
+    'PartnerDetailView',
+    'PartnerNetworkDetailView',
+    'GetOrCreatePartnerView',
+    'GetOrCreatePartnerNetworkView'
 ]
 
 
@@ -390,6 +394,31 @@ class OrganizationProjectCardItemViewSet(
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
 
-class PartnerViewSet(MainBaseViewSet):
-    queryset = main_models.Partner.objects
+class GetOrCreatePartnerView(generics.ListCreateAPIView):
+
+    @swagger_auto_schema(
+        methods=['get', 'post']
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class PartnerDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = main_models.Partner.objects.all()
     serializer_class = main_serializers.PartnerSerializer
+
+
+class GetOrCreatePartnerNetworkView(generics.ListCreateAPIView):
+    queryset = main_models.PartnerNetwork.objects.all()
+    serializer_class = main_serializers.PartnerNetworkSerializer
+
+    @swagger_auto_schema(
+        methods=['get', 'post']
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class PartnerNetworkDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = main_models.PartnerNetwork.objects.all()
+    serializer_class = main_serializers.PartnerNetworkSerializer
